@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#10131b" />
+  <title>EVENTCLOCK — трекер событий</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-title">EVENT<span>CLOCK</span></div>
+        <div class="brand-subtitle"><span id="liveCount">0</span> активных · <span id="upcomingCount">0</span> предстоящих</div>
+      </div>
+      <div class="view-switch" role="tablist" aria-label="Режим отображения">
+        <button class="view-btn active" data-view="checklist">Чек-лист</button>
+        <button class="view-btn" data-view="timeline">Таймлайн</button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <aside class="sidebar">
+        <section class="focus-section">
+          <div class="section-head">
+            <span>Игры</span>
+            <span class="muted">Дальше: Никки →</span>
+          </div>
+          <div class="filter-chips" id="filters"></div>
+        </section>
+
+
+
+        <section class="patch-card patch-board">
+  <div class="patch-head">
+    <span>ПАТЧИ</span>
+    <span class="muted">до конца</span>
+  </div>
+  <div class="patch-list" id="patchList"></div>
+</section>
+
+
+      </aside>
+
+      <section class="content">
+        <div class="content-head">
+          <div>
+            <div class="eyebrow">ВРЕМЕННЫЕ СОБЫТИЯ · СКОРО ЗАКОНЧАТСЯ</div>
+            <div class="events-sync" id="eventsSyncStatus">Автообновление событий…</div>
+          <div class="legend">
+              <span class="legend-bars"><i></i><i></i><i></i><i></i><i></i><i></i></span>
+              <span>полосы = оставшееся время</span>
+              <span>цвет = срок окончания</span>
+              <span class="legend-dot week"></span><span>7+ дней</span>
+              <span class="legend-dot underweek"></span><span>&lt; 7 дней</span>
+              <span class="legend-dot under3"></span><span>3–5 дней</span>
+              <span class="legend-dot under1"></span><span>1–2 дня</span>
+            </div>
+          </div>
+          <div class="sort-tabs">
+            <button class="sort-btn active" data-sort="ending">Скорее закончится</button>
+            <button class="sort-btn" data-sort="doing">Сначала дела</button>
+          </div>
+        </div>
+        <section class="daily-card daily-dashboard">
+          <div class="daily-dashboard-head">
+            <div>
+              <div class="daily-eyebrow">ПРИОРИТЕТ · ЕЖЕДНЕВНЫЕ ПОРУЧЕНИЯ</div>
+              <div class="daily-title-row">
+                <h2>Сегодня</h2>
+                <span class="daily-count" id="dailyCount">0/7 выполнено</span>
+              </div>
+            </div>
+            <div class="daily-local">
+              <span>Твоё время</span>
+              <b>МСК +1</b>
+            </div>
+          </div>
+
+          <div class="daily-grid" id="dailyChips"></div>
+
+          <div class="daily-dashboard-footer">
+            <span id="waitingText">—</span>
+            <span class="daily-hint">Нажми на карточку после выполнения ежедневок</span>
+            <button id="catchUp">Отметить всё</button>
+          </div>
+        </section>
+
+
+        <div class="event-list" id="eventList"></div>
+        <div class="timeline" id="timeline" hidden></div>
+
+
+
+
+      </section>
+    </main>
+  </div>
+  <div class="modal-backdrop" id="eventModal" hidden>
+    <div class="event-modal" role="dialog" aria-modal="true">
+      <button class="modal-close" id="modalClose" aria-label="Закрыть">×</button>
+      <div class="modal-game" id="modalGame">—</div>
+      <h2 id="modalTitle">—</h2>
+      <p id="modalDesc">—</p>
+      <div class="modal-grid">
+        <div><span>Начало</span><b id="modalStart">—</b></div>
+        <div><span>Конец</span><b id="modalEnd">—</b></div>
+        <div><span>Осталось</span><b id="modalLeft">—</b></div>
+        <div><span>Статус</span><b id="modalStatus">—</b></div>
+      </div>
+      <button class="modal-done" id="modalDone">Отметить выполненным</button>
+    </div>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
