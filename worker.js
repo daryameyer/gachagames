@@ -94,30 +94,94 @@ function extractOfficialEvents(text,game,baseUrl){
   return out;
 }
 const ENDFIELD_OFFICIAL_SOURCES=['https://endfield.gryphline.com/en-us/news/5200','https://endfield.gryphline.com/en-us/news/4482','https://endfield.gryphline.com/en-us/news/1329','https://endfield.gryphline.com/en-us/news/3831'];
+
+function endfieldAllDateRanges(text){
+  const clean=text.replace(/\s+/g,' ').replace(/[–—]/g,' - ');
+  const out=[];
+  const re=/((?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)\.?\s+\d{1,2}(?:,\s*20\d{2})?(?:\s+at\s+\d{1,2}(?::\d{2})?)?)\s*(?:-|to)\s*((?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)\.?\s+\d{1,2}(?:,\s*20\d{2})?(?:\s+at\s+\d{1,2}(?::\d{2})?)?)/gi;
+  let m; const yearNow=new Date().getUTCFullYear();
+  while((m=re.exec(clean))){
+    const start=parseDatePart(m[1].replace(/\bat\b/gi,' '),yearNow,8);
+    const end=parseDatePart(m[2].replace(/\bat\b/gi,' '),yearNow,8);
+    if(start&&end){ if(end<start) end.setUTCFullYear(end.getUTCFullYear()+1); out.push({start,end}); }
+  }
+  return out;
+}
+
+function endfieldVersionUpdateStart(text){
+  const m=text.match(/Asia Server:\s*([A-Za-z]+\s+\d{1,2},\s*20\d{2}\s+at\s+\d{1,2}:\d{2})\s*-\s*([A-Za-z]+\s+\d{1,2},\s*20\d{2}\s+at\s+\d{1,2}:\d{2})/i);
+  return m?parseDatePart(m[1],new Date().getUTCFullYear(),8):null;
+}
 function endfieldDateRange(text){
-  const nowYear=new Date().getUTCFullYear(),tz=8,clean=text.replace(/\s+/g,' ').replace(/[–—]/g,'-');
-  let m=clean.match(/((?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)\.?\s+\d{1,2},\s*20\d{2}(?:\s+at\s+\d{1,2}(?::\d{2})?)?)[^0-9]{1,80}((?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)\.?\s+\d{1,2},\s*20\d{2}(?:\s+at\s+\d{1,2}(?::\d{2})?)?)/i);
-  if(m){const start=parseDatePart(m[1].replace(/\bat\b/gi,' '),nowYear,tz),end=parseDatePart(m[2].replace(/\bat\b/gi,' '),nowYear,tz);if(start&&end)return{start,end};}
-  m=clean.match(/((?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)\.?\s+\d{1,2},\s*20\d{2}(?:\s+at\s+\d{1,2}(?::\d{2})?)?)[^0-9]{1,80}((?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)\.?\s+\d{1,2}(?:,\s*20\d{2})?(?:\s+at\s+\d{1,2}(?::\d{2})?)?)/i);
-  if(m){const start=parseDatePart(m[1].replace(/\bat\b/gi,' '),nowYear,tz),end=parseDatePart(m[2].replace(/\bat\b/gi,' '),nowYear,tz);if(start&&end)return{start,end};} return null;
+  const ranges=endfieldAllDateRanges(text);
+  if(ranges.length){
+    const now=Date.now();
+    const future=ranges.filter(r=>r.end.getTime()>now).sort((a,b)=>a.start-b.start);
+    return future[0]||ranges[ranges.length-1];
+  }
+  return null;
 }
-function endfieldRelativeRange(raw){
-  const clean=raw.replace(/\s+/g,' ').replace(/[–—]/g,' - '); const patchStart=new Date(Date.UTC(2026,6,30,11,59)-8*3600000); const patchEnd=new Date(Date.UTC(2026,7,30,11,59)-8*3600000);
-  const endMatch=clean.match(/(?:-|to)\s*((?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)\.?\s+\d{1,2},\s*20\d{2}(?:\s+at\s+\d{1,2}(?::\d{2})?)?)/i); const beforeUpdate=/before version update and maintenance/i.test(clean); const start=patchStart;
-  if(beforeUpdate)return{start,end:patchEnd}; if(endMatch){const end=parseDatePart(endMatch[1].replace(/\bat\b/gi,' '),2026,8);if(end)return{start,end};}
-  const single=clean.match(/(?:after .*?version update\s*-\s*)?((?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)\.?\s+\d{1,2},\s*20\d{2}(?:\s+at\s+\d{1,2}(?::\d{2})?)?)/i); if(single){const end=parseDatePart(single[1].replace(/\bat\b/gi,' '),2026,8);if(end)return{start,end};} return null;
+
+function endfieldRelativeRange(raw, articleText=''){
+  const clean=raw.replace(/\s+/g,' ').replace(/[–—]/g,' - ');
+  const now=Date.now();
+  const explicit=endfieldAllDateRanges(clean);
+  if(explicit.length){
+    const future=explicit.filter(r=>r.end.getTime()>now).sort((a,b)=>a.start-b.start);
+    return future[0]||explicit[explicit.length-1];
+  }
+
+  // "After [version] version update - DATE". Use the actual update time
+  // from the same official article when it is present, instead of a hard-coded patch date.
+  if(/after \[[^\]]+\] version update/i.test(clean)){
+    const endMatch=clean.match(/(?:-|to)\s*((?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)\.?\s+\d{1,2},\s*20\d{2}(?:\s+at\s+\d{1,2}(?::\d{2})?)?)/i);
+    const end=endMatch?parseDatePart(endMatch[1].replace(/\bat\b/gi,' '),new Date().getUTCFullYear(),8):null;
+    const start=articleText?endfieldVersionUpdateStart(articleText):null;
+    if(start&&end&&end>start)return {start,end};
+  }
+  return null;
 }
+
 function extractEndfieldEvents(text,baseUrl){
-  const now=Date.now(),compact=text.replace(/\s+/g,' ').replace(/[–—]/g,' - '),out=[]; const sectionMatch=compact.match(/(?:New Events|New Event)[\s:]*([\s\S]*?)(?=Event & Gameplay Updates|Event & Gameplay Update|$)/i); const section=sectionMatch?sectionMatch[1]:compact;
-  const re=/(?:^|\s)(?:\d+\.\s*)?(?:\[([^\]]+)\]|["“]([^"”]+)["”])([^]{0,500}?)(?=\s+(?:\d+\.\s*)?(?:\[|["“])|$)/gi; let m;
-  while((m=re.exec(section))){const title=(m[1]||m[2]||'').trim(),body=m[3]||'';if(!title)continue;const tm=body.match(/Event Time\s*:\s*([^•]+?)(?=\s+·|\s+Event Details|\s+\d+\.|$)/i);if(!tm)continue;let range=endfieldDateRange(tm[1]);if(!range){const explicit=tm[1].match(/((?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)\.?\s+\d{1,2},?\s*20\d{2}?[^-]{0,40})\s*-\s*((?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)\.?\s+\d{1,2},?\s*20\d{2}?[^.]*)/i);if(explicit)range=endfieldDateRange(explicit[0]);}if(!range)range=endfieldRelativeRange(tm[1]);if(!range||range.end.getTime()<=now)continue;out.push({id:`official:endfield:${eventId(baseUrl,m.index)}`,game:'endfield',title,desc:body.replace(/Event Time\s*:[\s\S]*$/i,'').trim().slice(0,500),start:range.start,end:range.end,done:false,source:'official',url:baseUrl});}
+  const now=Date.now(),compact=text.replace(/\s+/g,' ').replace(/[–—]/g,' - '),out=[];
+  const sectionMatch=compact.match(/(?:New Events|New Event)[\s:]*([\s\S]*?)(?=Event & Gameplay Updates|Event & Gameplay Update|Acquisition Center Update|$)/i);
+  const section=sectionMatch?sectionMatch[1]:compact;
+  const re=/(?:^|\s)(?:\d+\.\s*)?(?:\[([^\]]+)\]|["“]([^"”]+)["”])([^]{0,900}?)(?=\s+(?:\d+\.\s*)?(?:\[|["“])|$)/gi;
+  let m;
+  while((m=re.exec(section))){
+    const title=(m[1]||m[2]||'').trim(),body=m[3]||'';
+    if(!title)continue;
+    const tm=body.match(/Event Time\s*:\s*([^•]+?)(?=\s+·|\s+Event Details|\s+\d+\.|$)/i);
+    if(!tm)continue;
+    let range=endfieldDateRange(tm[1]);
+    if(!range)range=endfieldRelativeRange(tm[1],text);
+    // Prefer the latest still-active interval for multi-window events such as Sanity Supply.
+    const all=endfieldAllDateRanges(tm[1]);
+    if(all.length){
+      const future=all.filter(r=>r.end.getTime()>now).sort((a,b)=>a.start-b.start);
+      if(future.length)range=future[0];
+    }
+    if(!range||range.end.getTime()<=now)continue;
+    out.push({
+      id:`official:endfield:${eventId(baseUrl,m.index)}`,
+      game:'endfield',
+      title,
+      desc:body.replace(/Event Time\s*:[\s\S]*$/i,'').trim().slice(0,500),
+      start:range.start,
+      end:range.end,
+      done:false,
+      source:'official',
+      url:baseUrl
+    });
+  }
   return out;
 }
 async function scrapeOfficial(game){
   const cfg={nte:{index:'https://nte.perfectworld.com/ru/article/news/gamenews/index.html',match:'/article/news/gamenews/',fallback:'https://nte.perfectworld.com/ru/article/news/gamenews/20260817/263612.html'},nikki:{index:'https://infinitynikki.infoldgames.com/en/news',match:'/en/news/',fallback:'https://infinitynikki.infoldgames.com/en/news/568'},endfield:{index:'https://endfield.gryphline.com/en-us/news',match:'/en-us/news/',fallback:ENDFIELD_OFFICIAL_SOURCES[0]}}[game];
   const now=Date.now();let links=[];try{const html=await requestText(cfg.index);links=linksFrom(html,cfg.index).filter(x=>x.url.includes(cfg.match));}catch(err){console.warn(game,'index unavailable:',err.message);}
   const unique=[...new Map(links.map(x=>[x.url,x])).values()]; if(game==='endfield'){for(const url of ENDFIELD_OFFICIAL_SOURCES){if(!unique.some(x=>x.url===url))unique.unshift({url,title:''});}}else if(cfg.fallback&&!unique.some(x=>x.url===cfg.fallback))unique.unshift({url:cfg.fallback,title:''});
-  const selected=unique.slice(0,10); const results=await Promise.all(selected.map(async link=>{try{const article=await requestText(link.url);const text=cleanText(article);const extracted=game==='endfield'?extractEndfieldEvents(text,link.url):extractOfficialEvents(text,game,link.url);if(extracted.length)return extracted;const duration=parseDuration(text,game);if(!duration||duration.end.getTime()<=now)return[];const title=firstTitle(article,link.title||'Событие');return[{id:`official:${game}:${eventId(link.url,0)}`,game,title,desc:'Официальное событие',start:duration.start,end:duration.end,done:false,source:'official',url:link.url}];}catch(err){console.warn(game,link.url,err.message);return[];}}));
+  // The official Endfield news index contains many posts; inspect more than the first few so new event notices are not missed.
+  const selected=unique.slice(0,20); const results=await Promise.all(selected.map(async link=>{try{const article=await requestText(link.url);const text=cleanText(article);const extracted=game==='endfield'?extractEndfieldEvents(text,link.url):extractOfficialEvents(text,game,link.url);if(extracted.length)return extracted;const duration=parseDuration(text,game);if(!duration||duration.end.getTime()<=now)return[];const title=firstTitle(article,link.title||'Событие');return[{id:`official:${game}:${eventId(link.url,0)}`,game,title,desc:'Официальное событие',start:duration.start,end:duration.end,done:false,source:'official',url:link.url}];}catch(err){console.warn(game,link.url,err.message);return[];}}));
   const events=results.flat();return[...new Map(events.map(e=>[`${e.title}|${e.end.toISOString()}`,e])).values()];
 }
 async function officialEvents(game){return scrapeOfficial(game);}
