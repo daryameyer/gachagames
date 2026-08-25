@@ -388,7 +388,7 @@ function renderPatch(){
   }).join('');
 }
 function openEvent(id){
-  const e=events.find(x=>x.id===id); if(!e)return;
+  const e=events.find(x=>String(x.id)===String(id)); if(!e)return;
   currentModalId=id;
   const g=games[e.game];
   document.querySelector('#modalGame').textContent=g.name;
