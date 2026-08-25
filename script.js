@@ -104,9 +104,22 @@ async function loadRemoteEvents(){
   eventsAutoSource=Object.fromEntries(gamesToLoad.map(x=>[x,false]));
   const loaded=await Promise.all(gamesToLoad.map(loadOneSource));
   const remote=loaded.flat();
-  const remoteGames=new Set(remote.map(e=>e.game));
-  const fallback=events.filter(e=>!remoteGames.has(e.game));
-  const merged=[...remote,...fallback].filter(e=>e.end>new Date());
+  const existing = events.slice();
+  const mergedMap = new Map();
+
+  // Не удаляем локальные события, если внешний источник вернул только часть.
+  existing.filter(e=>e.end>new Date()).forEach(e=>{
+    mergedMap.set(`${e.game}|${e.title}|${e.end.getTime()}`, e);
+  });
+
+  // Добавляем/обновляем автоматические события.
+  remote.forEach(e=>{
+    const key=`${e.game}|${e.title}|${e.end.getTime()}`;
+    const old=mergedMap.get(key);
+    mergedMap.set(key, {...e, done:old?.done ?? e.done});
+  });
+
+  const merged=[...mergedMap.values()].filter(e=>e.end>new Date());
   if(remote.length) applyRemoteEvents(merged);
   updateEventsSyncStatus();
 }
@@ -220,31 +233,27 @@ function visibleEvents(){
   const nowDate = new Date();
   const sevenDaysLater = new Date(nowDate.getTime() + 7*day);
 
-  // «Скорее закончится» — только активные события,
-  // которые завершатся в ближайшие 7 дней.
   let arr;
+
+  // «Скорее закончится» — только активные события,
+  // которые заканчиваются в ближайшие 7 дней.
   if(sortMode === 'ending'){
     arr = events.filter(e => e.end > nowDate && e.end <= sevenDaysLater);
   } else {
-    // «Сначала дела» — ВСЕ активные и будущие события,
-    // независимо от того, через сколько они заканчиваются.
+    // «Сначала дела» — все активные и будущие события.
     arr = events.filter(e => e.end > nowDate);
-  }
-
-  // Фильтр игры.
-  if(selected !== 'all' && selected !== 'ended'){
-    arr = arr.filter(e => e.game === selected);
   }
 
   // Отдельная вкладка завершённых.
   if(selected === 'ended'){
     arr = events.filter(e => e.end <= nowDate);
+  } else if(selected !== 'all'){
+    arr = arr.filter(e => e.game === selected);
   }
 
   if(sortMode === 'ending'){
     arr.sort((a,b) => a.end - b.end);
   } else {
-    // Сначала незавершённые, затем по ближайшему окончанию.
     arr.sort((a,b) => Number(a.done) - Number(b.done) || a.end - b.end);
   }
 
@@ -265,7 +274,13 @@ function progressParts(e){
 function renderEvents(){
   const arr=visibleEvents();
   const list=document.querySelector('#eventList');
-  if(!arr.length){list.innerHTML='<div class="empty">Нет событий, заканчивающихся в ближайшие 7 дней.</div>';return;}
+  if(!arr.length){
+    const message = sortMode === 'ending'
+      ? 'Нет событий, заканчивающихся в ближайшие 7 дней.'
+      : 'Нет активных или будущих событий.';
+    list.innerHTML=`<div class="empty">${message}</div>`;
+    return;
+  }
   list.innerHTML=arr.map(e=>{
     const g=games[e.game], left=e.end-new Date(), tc=timeClass(left);
     const timeColor=tc==='week'?'#7b8498':tc==='underweek'?'#efcf45':tc==='under3'?'#ef8f32':'#ef4f5f';
