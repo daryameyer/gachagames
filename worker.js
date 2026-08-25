@@ -65,7 +65,7 @@ function parseDatePart(s, yearHint, tzHours) {
   return null;
 }
 function parseDuration(text,kind){
-  const marker=kind==='nte'?'(?:Duration|Длительность|Расписание события|Доступно)':'(?:Event Duration|Event Time|Duration|Event Time|Длительность)';
+  const marker=kind==='nte'?'(?:Duration|Длительность|Расписание события|Доступно)':kind==='hsr'?'(?:Event Duration|Event Time|Duration|Длительность|Период события|Время события|Время проведения)':kind==='wuwa'?'(?:Duration|Event Duration|Event Time|Длительность|Время события)':'(?:Event Duration|Event Time|Duration|Длительность)';
   const idx=text.search(new RegExp(marker,'i')); if(idx<0)return null;
   const chunk=text.slice(idx,idx+1200).replace(/\s+/g,' '); const yearNow=new Date().getUTCFullYear();
   const tzMatch=chunk.match(/UTC\s*([+-]\d{1,2})(?::(\d{2}))?/i); const tz=tzMatch?+tzMatch[1]:(kind==='nikki'?-7:8);
@@ -89,11 +89,34 @@ async function calendarEvents(game){
 }
 function extractOfficialEvents(text,game,baseUrl){
   const out=[],now=Date.now(),compact=text.replace(/\s+/g,' ');
-  const patterns=game==='nikki' ? [/\[([^\]]+)\][^\[]{0,500}?(?:Event Duration|Duration):\s*([^\[]+?)(?=\[|$)/gi] : game==='nte' ? [/(?:[●•]\s*)?(?:"|«)([^"»]+)(?:"|»)[^●•]{0,300}?(?:Duration|Длительность|Доступно):\s*([^●•]+?)(?=●|•|$)/gi] : [/(?:\[([^\]]+)\]|(?:Limited-Time Event|Event)\s+["“]([^"”]+)["”])[^.]{0,350}?(?:Event Time|Event Duration|Duration):\s*([^●•]+?)(?=\b(?:Event Time|Event Duration|Duration)\b|$)/gi];
-  for(const re of patterns){let m;while((m=re.exec(compact))){const title=m[1]||m[2]||m[3]||'Событие';const durationText=m[2]||m[3]||m[4]||'';const duration=parseDuration(`Event Duration ${durationText}`,game);if(!duration||duration.end.getTime()<=now)continue;out.push({id:`official:${game}:${eventId(baseUrl,m.index)}`,game,title:title.trim(),desc:'Официальное событие',start:duration.start,end:duration.end,done:false,source:'official',url:baseUrl});}}
+  const patterns=game==='nikki'
+    ? [/\[([^\]]+)\][^\[]{0,500}?(?:Event Duration|Duration):\s*([^\[]+?)(?=\[|$)/gi]
+    : game==='nte'
+      ? [/(?:[●•]\s*)?(?:"|«)([^"»]+)(?:"|»)[^●•]{0,300}?(?:Duration|Длительность|Доступно):\s*([^●•]+?)(?=●|•|$)/gi]
+      : [/(?:\[([^\]]+)\]|(?:Limited-Time Event|Event)\s+["“]([^"”]+)["”])[^.]{0,500}?(?:Event Time|Event Duration|Duration|Период события|Время события|Время проведения):\s*([^●•]+?)(?=\b(?:Event Time|Event Duration|Duration|Период события|Время события|Время проведения)\b|$)/gi];
+  for(const re of patterns){
+    let m;
+    while((m=re.exec(compact))){
+      const title=(m[1]||m[2]||'Событие').trim();
+      const durationText=m[2]||m[3]||'';
+      const duration=parseDuration(`Event Duration ${durationText}`,game);
+      if(!duration||duration.end.getTime()<=now)continue;
+      out.push({id:`official:${game}:${eventId(baseUrl,m.index)}`,game,title,desc:'Официальное событие',start:duration.start,end:duration.end,done:false,source:'official',url:baseUrl});
+    }
+  }
   return out;
 }
+
 const ENDFIELD_OFFICIAL_SOURCES=['https://endfield.gryphline.com/en-us/news/5200','https://endfield.gryphline.com/en-us/news/4482','https://endfield.gryphline.com/en-us/news/1329','https://endfield.gryphline.com/en-us/news/3831'];
+const OFFICIAL_GAME_CONFIG={
+  genshin:{index:'https://genshin.hoyoverse.com/en/news',match:'/en/news/',fallback:'https://genshin.hoyoverse.com/en/news/398'},
+  hsr:{index:'https://hsr.hoyoverse.com/ru-ru/',match:'/ru-ru/news/',fallback:'https://hsr.hoyoverse.com/ru-ru/'},
+  zzz:{index:'https://zenless.hoyoverse.com/en-us/news',match:'/en-us/news/',fallback:'https://zenless.hoyoverse.com/en-us/news/165414'},
+  wuwa:{index:'https://wutheringwaves.kurogames.com/en/main/news',match:'/en/main/news/detail/',fallback:'https://wutheringwaves.kurogames.com/en/main/news/detail/5365'},
+  nte:{index:'https://nte.perfectworld.com/ru/article/news/gamenews/index.html',match:'/article/news/gamenews/',fallback:'https://nte.perfectworld.com/ru/article/news/gamenews/20260817/263612.html'},
+  nikki:{index:'https://infinitynikki.infoldgames.com/en/news',match:'/en/news/',fallback:'https://infinitynikki.infoldgames.com/en/news/568'},
+  endfield:{index:'https://endfield.gryphline.com/en-us/news',match:'/en-us/news/',fallback:ENDFIELD_OFFICIAL_SOURCES[0]}
+};
 
 function endfieldAllDateRanges(text){
   const clean=text.replace(/\s+/g,' ').replace(/[–—]/g,' - ');
@@ -177,14 +200,27 @@ function extractEndfieldEvents(text,baseUrl){
   return out;
 }
 async function scrapeOfficial(game){
-  const cfg={nte:{index:'https://nte.perfectworld.com/ru/article/news/gamenews/index.html',match:'/article/news/gamenews/',fallback:'https://nte.perfectworld.com/ru/article/news/gamenews/20260817/263612.html'},nikki:{index:'https://infinitynikki.infoldgames.com/en/news',match:'/en/news/',fallback:'https://infinitynikki.infoldgames.com/en/news/568'},endfield:{index:'https://endfield.gryphline.com/en-us/news',match:'/en-us/news/',fallback:ENDFIELD_OFFICIAL_SOURCES[0]}}[game];
+  const cfg=OFFICIAL_GAME_CONFIG[game];
   const now=Date.now();let links=[];try{const html=await requestText(cfg.index);links=linksFrom(html,cfg.index).filter(x=>x.url.includes(cfg.match));}catch(err){console.warn(game,'index unavailable:',err.message);}
   const unique=[...new Map(links.map(x=>[x.url,x])).values()]; if(game==='endfield'){for(const url of ENDFIELD_OFFICIAL_SOURCES){if(!unique.some(x=>x.url===url))unique.unshift({url,title:''});}}else if(cfg.fallback&&!unique.some(x=>x.url===cfg.fallback))unique.unshift({url:cfg.fallback,title:''});
   // The official Endfield news index contains many posts; inspect more than the first few so new event notices are not missed.
-  const selected=unique.slice(0,20); const results=await Promise.all(selected.map(async link=>{try{const article=await requestText(link.url);const text=cleanText(article);const extracted=game==='endfield'?extractEndfieldEvents(text,link.url):extractOfficialEvents(text,game,link.url);if(extracted.length)return extracted;const duration=parseDuration(text,game);if(!duration||duration.end.getTime()<=now)return[];const title=firstTitle(article,link.title||'Событие');return[{id:`official:${game}:${eventId(link.url,0)}`,game,title,desc:'Официальное событие',start:duration.start,end:duration.end,done:false,source:'official',url:link.url}];}catch(err){console.warn(game,link.url,err.message);return[];}}));
+  const selected=unique.slice(0,30); const results=await Promise.all(selected.map(async link=>{try{const article=await requestText(link.url);const text=cleanText(article);const extracted=game==='endfield'?extractEndfieldEvents(text,link.url):extractOfficialEvents(text,game,link.url);if(extracted.length)return extracted;const duration=parseDuration(text,game);if(!duration||duration.end.getTime()<=now)return[];const title=firstTitle(article,link.title||'Событие');return[{id:`official:${game}:${eventId(link.url,0)}`,game,title,desc:'Официальное событие',start:duration.start,end:duration.end,done:false,source:'official',url:link.url}];}catch(err){console.warn(game,link.url,err.message);return[];}}));
   const events=results.flat();return[...new Map(events.map(e=>[`${e.title}|${e.end.toISOString()}`,e])).values()];
 }
 async function officialEvents(game){return scrapeOfficial(game);}
+async function mergedGameEvents(game){
+  const calendar=await calendarEvents(game).catch(()=>[]);
+  const official=await scrapeOfficial(game).catch(()=>[]);
+  const merged=[...calendar,...official].filter(e=>e&&e.end&&e.end.getTime()>Date.now());
+  const byKey=new Map();
+  for(const e of merged){
+    const key=`${game}|${String(e.title).trim().toLowerCase()}|${new Date(e.end).toISOString()}`;
+    const prev=byKey.get(key);
+    if(!prev || (e.source==='official' && prev.source!=='official')) byKey.set(key,e);
+  }
+  return [...byKey.values()].sort((a,b)=>new Date(a.end)-new Date(b.end));
+}
+
 function json(data,status=200){return new Response(JSON.stringify(data),{status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','Access-Control-Allow-Origin':'*'}});}
 
 export default {
@@ -194,7 +230,7 @@ export default {
       if (u.pathname === '/api/events') {
         const game = u.searchParams.get('game');
         if (!calendarSources[game]) return json({ok:false,error:'unknown game'},400);
-        const events = await calendarEvents(game);
+        const events = ['genshin','hsr','zzz','wuwa'].includes(game) ? await mergedGameEvents(game) : await calendarEvents(game);
         return json({ok:true,game,source:calendarSources[game],updatedAt:new Date().toISOString(),events});
       }
       if (u.pathname === '/api/official-events') {
