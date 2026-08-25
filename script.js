@@ -220,8 +220,12 @@ function visibleEvents(){
   const nowDate = new Date();
   const sevenDaysLater = new Date(nowDate.getTime() + 7*day);
 
-  // Главная: активные временные события, заканчивающиеся в ближайшие 7 дней.
-  let arr = events.filter(e => e.end > nowDate && e.end <= sevenDaysLater);
+  // Вкладка «Скорее закончится»: только активные события,
+  // которые завершатся в ближайшие 7 дней.
+  // Вкладка «Сначала дела»: все текущие и будущие события без ограничения 7 днями.
+  let arr = sortMode === 'doing'
+    ? events.filter(e => e.end > nowDate)
+    : events.filter(e => e.end > nowDate && e.end <= sevenDaysLater);
 
   // Фильтр игры.
   if(selected !== 'all' && selected !== 'ended'){
@@ -388,7 +392,7 @@ function renderPatch(){
   }).join('');
 }
 function openEvent(id){
-  const e=events.find(x=>String(x.id)===String(id)); if(!e)return;
+  const e=events.find(x=>x.id===id); if(!e)return;
   currentModalId=id;
   const g=games[e.game];
   document.querySelector('#modalGame').textContent=g.name;
