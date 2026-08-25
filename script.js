@@ -104,22 +104,9 @@ async function loadRemoteEvents(){
   eventsAutoSource=Object.fromEntries(gamesToLoad.map(x=>[x,false]));
   const loaded=await Promise.all(gamesToLoad.map(loadOneSource));
   const remote=loaded.flat();
-  const existing = events.slice();
-  const mergedMap = new Map();
-
-  // Не удаляем локальные события, если внешний источник вернул только часть.
-  existing.filter(e=>e.end>new Date()).forEach(e=>{
-    mergedMap.set(`${e.game}|${e.title}|${e.end.getTime()}`, e);
-  });
-
-  // Добавляем/обновляем автоматические события.
-  remote.forEach(e=>{
-    const key=`${e.game}|${e.title}|${e.end.getTime()}`;
-    const old=mergedMap.get(key);
-    mergedMap.set(key, {...e, done:old?.done ?? e.done});
-  });
-
-  const merged=[...mergedMap.values()].filter(e=>e.end>new Date());
+  const remoteGames=new Set(remote.map(e=>e.game));
+  const fallback=events.filter(e=>!remoteGames.has(e.game));
+  const merged=[...remote,...fallback].filter(e=>e.end>new Date());
   if(remote.length) applyRemoteEvents(merged);
   updateEventsSyncStatus();
 }
@@ -240,15 +227,19 @@ function visibleEvents(){
   if(sortMode === 'ending'){
     arr = events.filter(e => e.end > nowDate && e.end <= sevenDaysLater);
   } else {
-    // «Сначала дела» — все активные и будущие события.
+    // «Сначала дела» — все активные и будущие события,
+    // независимо от даты их окончания.
     arr = events.filter(e => e.end > nowDate);
+  }
+
+  // Фильтр игры.
+  if(selected !== 'all' && selected !== 'ended'){
+    arr = arr.filter(e => e.game === selected);
   }
 
   // Отдельная вкладка завершённых.
   if(selected === 'ended'){
     arr = events.filter(e => e.end <= nowDate);
-  } else if(selected !== 'all'){
-    arr = arr.filter(e => e.game === selected);
   }
 
   if(sortMode === 'ending'){
