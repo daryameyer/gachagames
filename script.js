@@ -220,12 +220,16 @@ function visibleEvents(){
   const nowDate = new Date();
   const sevenDaysLater = new Date(nowDate.getTime() + 7*day);
 
-  // Вкладка «Скорее закончится»: только активные события,
+  // «Скорее закончится» — только активные события,
   // которые завершатся в ближайшие 7 дней.
-  // Вкладка «Сначала дела»: все текущие и будущие события без ограничения 7 днями.
-  let arr = sortMode === 'doing'
-    ? events.filter(e => e.end > nowDate)
-    : events.filter(e => e.end > nowDate && e.end <= sevenDaysLater);
+  let arr;
+  if(sortMode === 'ending'){
+    arr = events.filter(e => e.end > nowDate && e.end <= sevenDaysLater);
+  } else {
+    // «Сначала дела» — ВСЕ активные и будущие события,
+    // независимо от того, через сколько они заканчиваются.
+    arr = events.filter(e => e.end > nowDate);
+  }
 
   // Фильтр игры.
   if(selected !== 'all' && selected !== 'ended'){
@@ -240,6 +244,7 @@ function visibleEvents(){
   if(sortMode === 'ending'){
     arr.sort((a,b) => a.end - b.end);
   } else {
+    // Сначала незавершённые, затем по ближайшему окончанию.
     arr.sort((a,b) => Number(a.done) - Number(b.done) || a.end - b.end);
   }
 
