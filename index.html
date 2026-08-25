@@ -35,13 +35,15 @@
 
 
 
-        <section class="patch-card patch-board">
-  <div class="patch-head">
-    <span>ПАТЧИ</span>
-    <span class="muted">до конца</span>
-  </div>
-  <div class="patch-list" id="patchList"></div>
-</section>
+        <section class="patch-card">
+          <div class="patch-head"><span>ПАТЧ</span><span class="muted" id="patchGame">—</span></div>
+          <div class="patch-title" id="patchTitle">—</div>
+          <div class="patch-version" id="patchVersion">—</div>
+          <div class="patch-countdown" id="patchCountdown">—</div>
+          <div class="patch-label">до конца патча</div>
+          <div class="patch-progress" id="patchProgress"></div>
+          <div class="patch-dates" id="patchDates">—</div>
+        </section>
 
 
       </aside>
@@ -50,8 +52,7 @@
         <div class="content-head">
           <div>
             <div class="eyebrow">ВРЕМЕННЫЕ СОБЫТИЯ · СКОРО ЗАКОНЧАТСЯ</div>
-            <div class="events-sync" id="eventsSyncStatus">Автообновление событий…</div>
-          <div class="legend">
+            <div class="legend">
               <span class="legend-bars"><i></i><i></i><i></i><i></i><i></i><i></i></span>
               <span>полосы = оставшееся время</span>
               <span>цвет = срок окончания</span>
@@ -66,35 +67,21 @@
             <button class="sort-btn" data-sort="doing">Сначала дела</button>
           </div>
         </div>
-        <section class="daily-card daily-dashboard">
-          <div class="daily-dashboard-head">
-            <div>
-              <div class="daily-eyebrow">ПРИОРИТЕТ · ЕЖЕДНЕВНЫЕ ПОРУЧЕНИЯ</div>
-              <div class="daily-title-row">
-                <h2>Сегодня</h2>
-                <span class="daily-count" id="dailyCount">0/7 выполнено</span>
-              </div>
-            </div>
-            <div class="daily-local">
-              <span>Твоё время</span>
-              <b>МСК +1</b>
-            </div>
-          </div>
-
-          <div class="daily-grid" id="dailyChips"></div>
-
-          <div class="daily-dashboard-footer">
-            <span id="waitingText">—</span>
-            <span class="daily-hint">Нажми на карточку после выполнения ежедневок</span>
-            <button id="catchUp">Отметить всё</button>
-          </div>
-        </section>
-
 
         <div class="event-list" id="eventList"></div>
         <div class="timeline" id="timeline" hidden></div>
 
-
+        <section class="daily-card">
+          <div class="daily-head">
+            <span>ЕЖЕДНЕВНЫЕ · <b id="dailyCount">0/6</b></span>
+            <span class="muted">сброс через <b id="resetTimer">—</b></span>
+          </div>
+          <div class="daily-chips" id="dailyChips"></div>
+          <div class="daily-footer">
+            <span id="waitingText">—</span>
+            <button id="catchUp">Отметить всё</button>
+          </div>
+        </section>
 
 
       </section>

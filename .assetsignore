@@ -1,0 +1,12 @@
+worker.js
+wrangler.jsonc
+.assetsignore
+server(1).js
+server.js
+README.md
+README(1).md
+README(2).md
+README(3).md
+node_modules/
+.git/
+.gitignore
