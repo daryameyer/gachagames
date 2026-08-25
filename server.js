@@ -119,7 +119,7 @@ function normalizeCalendarEvent(raw,game,index,source){
   const start=typeof startRaw==='number'?new Date(startRaw*1000):new Date(startRaw);
   const end=typeof endRaw==='number'?new Date(endRaw*1000):new Date(endRaw);
   if(!title||Number.isNaN(start.getTime())||Number.isNaN(end.getTime())||end<=start)return null;
-  return {id:`${source}:${game}:${id}`,game,title:String(title),desc:String(desc),start,end,done:false,source};
+  return {id:`${source}:${game}:${id}`,game,title:String(title),desc:String(desc),start,end,done:false,source,url:raw.url||raw.link||''};
 }
 
 const calendarSources={
