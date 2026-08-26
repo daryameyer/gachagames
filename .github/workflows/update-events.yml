@@ -1,1 +1,41 @@
+name: Update EVENTCLOCK events
 
+on:
+  schedule:
+    - cron: '17 */6 * * *'
+  workflow_dispatch:
+  push:
+    paths:
+      - 'server.js'
+      - 'scripts/update-events.cjs'
+      - '.github/workflows/update-events.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Update events snapshot
+        run: node scripts/update-events.cjs
+
+      - name: Commit snapshot
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add events.json
+          if git diff --cached --quiet; then
+            echo "No event changes"
+            exit 0
+          fi
+          git commit -m "chore: update events snapshot"
+          git push
