@@ -53,7 +53,9 @@ let events = [
 // Автоматическая загрузка событий через локальный Node-сервер.
 // Сервер забирает данные с внешних источников и тем самым обходит CORS.
 let eventsLastUpdated = null;
+let eventsSnapshotUpdatedAt = null;
 let eventsAutoSource = Object.fromEntries(['genshin','hsr','zzz','wuwa','endfield','nte','nikki'].map(x=>[x,false]));
+let eventsSnapshotSource = Object.fromEntries(['genshin','hsr','zzz','wuwa','endfield','nte','nikki'].map(x=>[x,false]));
 
 function preserveDone(oldEvents, remote){
   const map=new Map(oldEvents.map(e=>[`${e.game}|${e.title}`,!!e.done]));
@@ -99,23 +101,56 @@ async function loadOneSource(game){
   return [];
 }
 
+async function loadEventsSnapshot(){
+  try{
+    const data=await fetchJson('/events.json');
+    const list=Array.isArray(data?.events)?data.events:[];
+    const normalized=list.map((x,i)=>normalizeRemoteEvent(x,x.game,i,'snapshot')).filter(Boolean).filter(e=>e.end>new Date());
+    if(normalized.length){
+      eventsSnapshotUpdatedAt=data.updatedAt?new Date(data.updatedAt):null;
+      const gamesToLoad=['genshin','hsr','zzz','wuwa','endfield','nte','nikki'];
+      eventsSnapshotSource=Object.fromEntries(gamesToLoad.map(game=>[game,normalized.some(e=>e.game===game)]));
+      return normalized;
+    }
+  }catch(err){
+    console.warn('EVENTCLOCK: резервный снимок событий недоступен',err);
+  }
+  return [];
+}
+
 async function loadRemoteEvents(){
   const gamesToLoad=['genshin','hsr','zzz','wuwa','endfield','nte','nikki'];
   eventsAutoSource=Object.fromEntries(gamesToLoad.map(x=>[x,false]));
+  eventsSnapshotSource=Object.fromEntries(gamesToLoad.map(x=>[x,false]));
+
+  // Сначала загружаем последний снимок из GitHub. Он нужен как страховка,
+  // если внешний API временно недоступен или Cloudflare не может достучаться до него.
+  const snapshot=await loadEventsSnapshot();
   const loaded=await Promise.all(gamesToLoad.map(loadOneSource));
-  const remote=loaded.flat();
-  const remoteGames=new Set(remote.map(e=>e.game));
-  const fallback=events.filter(e=>!remoteGames.has(e.game));
-  const merged=[...remote,...fallback].filter(e=>e.end>new Date());
-  if(remote.length) applyRemoteEvents(merged);
+  const liveByGame=Object.fromEntries(gamesToLoad.map((game,i)=>[game,loaded[i]]));
+
+  const merged=[];
+  for(const game of gamesToLoad){
+    const live=liveByGame[game]||[];
+    const backup=snapshot.filter(e=>e.game===game);
+    const legacy=events.filter(e=>e.game===game && e.end>new Date());
+    if(live.length) merged.push(...live);
+    else if(backup.length) merged.push(...backup);
+    else merged.push(...legacy);
+  }
+
+  if(merged.length) applyRemoteEvents(merged);
   updateEventsSyncStatus();
 }
 function updateEventsSyncStatus(){
   const el=document.querySelector('#eventsSyncStatus');if(!el)return;
-  const total=7,ok=Object.values(eventsAutoSource).filter(Boolean).length;
-  el.textContent=eventsLastUpdated
-    ? `Автообновление · ${ok}/${total} источников · ${eventsLastUpdated.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})}`
-    : `Автообновление · проверяю ${total} источников…`;
+  const total=7,live=Object.values(eventsAutoSource).filter(Boolean).length,backup=Object.values(eventsSnapshotSource).filter(Boolean).length;
+  if(eventsLastUpdated){
+    const backupText=backup?` · резерв ${backup}/${total}`:'';
+    el.textContent=`Автообновление · онлайн ${live}/${total}${backupText} · ${eventsLastUpdated.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})}`;
+  }else{
+    el.textContent=`Автообновление · проверяю ${total} источников…`;
+  }
 }
 
 loadRemoteEvents();
@@ -470,7 +505,5 @@ const savedEvents = JSON.parse(localStorage.getItem('eventclock-events')||'null'
 if(savedEvents) events.forEach(e=>{if(savedEvents[e.id]!==undefined)e.done=!!savedEvents[e.id];});
 renderAll();
 updateEventsSyncStatus();
-loadRemoteEvents();
 setInterval(()=>{renderEvents();renderNext();renderCounts();renderTimeline();renderPatch();renderDailies()},1000);
 updateReset();
-setInterval(loadRemoteEvents,30*60*1000);

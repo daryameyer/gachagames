@@ -1,0 +1,201 @@
+{
+  "ok": true,
+  "updatedAt": "2026-08-26T18:52:00Z",
+  "games": {
+    "genshin": {
+      "ok": false,
+      "count": 7
+    },
+    "hsr": {
+      "ok": false,
+      "count": 3
+    },
+    "zzz": {
+      "ok": false,
+      "count": 2
+    },
+    "wuwa": {
+      "ok": false,
+      "count": 1
+    },
+    "endfield": {
+      "ok": false,
+      "count": 0
+    },
+    "nte": {
+      "ok": false,
+      "count": 1
+    },
+    "nikki": {
+      "ok": false,
+      "count": 1
+    }
+  },
+  "events": [
+    {
+      "id": "seed:1",
+      "game": "nikki",
+      "title": "Вдохновение в мгновение",
+      "desc": "Получите двойные награды в царстве Эврики!",
+      "start": "2026-08-24T18:52:00Z",
+      "end": "2026-08-28T08:04:00Z",
+      "done": false,
+      "source": "seed",
+      "url": ""
+    },
+    {
+      "id": "seed:2",
+      "game": "zzz",
+      "title": "Фокусный разбор: столкновение",
+      "desc": "Пройдите боевые испытания и заберите временные награды.",
+      "start": "2026-08-24T23:40:00Z",
+      "end": "2026-08-30T08:04:00Z",
+      "done": false,
+      "source": "seed",
+      "url": ""
+    },
+    {
+      "id": "seed:3",
+      "game": "genshin",
+      "title": "Взаимопомощь в цвету: Фронтиры",
+      "desc": "Делайте снимки и выполняйте цели исследовательского события.",
+      "start": "2026-08-25T09:16:00Z",
+      "end": "2026-08-30T11:40:00Z",
+      "done": false,
+      "source": "seed",
+      "url": ""
+    },
+    {
+      "id": "seed:4",
+      "game": "hsr",
+      "title": "Сад изобилия 4.4",
+      "desc": "Получайте двойные награды за прохождение Золотых и Багровых чашелистиков.",
+      "start": "2026-08-25T16:28:00Z",
+      "end": "2026-09-01T08:04:00Z",
+      "done": false,
+      "source": "seed",
+      "url": ""
+    },
+    {
+      "id": "seed:5",
+      "game": "genshin",
+      "title": "Веб-событие «Путеводитель по Снежной»",
+      "desc": "Зарабатывайте награды за выполнение заданий и изучение новых механик.",
+      "start": "2026-08-26T02:04:00Z",
+      "end": "2026-09-03T04:28:00Z",
+      "done": false,
+      "source": "seed",
+      "url": ""
+    },
+    {
+      "id": "seed:6",
+      "game": "hsr",
+      "title": "Антигравитационный разрушитель",
+      "desc": "Помогите Авантюрину исследовать заражённый информационный блок.",
+      "start": "2026-08-21T18:52:00Z",
+      "end": "2026-09-06T08:04:00Z",
+      "done": false,
+      "source": "seed",
+      "url": ""
+    },
+    {
+      "id": "seed:7",
+      "game": "wuwa",
+      "title": "Эхо прошлого: испытание",
+      "desc": "Пройдите серию боевых этапов и получите материалы для развития.",
+      "start": "2026-08-23T18:52:00Z",
+      "end": "2026-09-07T18:52:00Z",
+      "done": false,
+      "source": "seed",
+      "url": ""
+    },
+    {
+      "id": "seed:8",
+      "game": "nte",
+      "title": "Полевые исследования Эвернесс",
+      "desc": "Исследуйте районы города и завершите временные поручения.",
+      "start": "2026-08-25T18:52:00Z",
+      "end": "2026-09-03T18:52:00Z",
+      "done": false,
+      "source": "seed",
+      "url": ""
+    },
+    {
+      "id": "seed:9",
+      "game": "zzz",
+      "title": "Улица, где живут истории",
+      "desc": "Соберите события дня и откройте дополнительные награды.",
+      "start": "2026-08-24T18:52:00Z",
+      "end": "2026-09-01T18:52:00Z",
+      "done": false,
+      "source": "seed",
+      "url": ""
+    },
+    {
+      "id": "seed:web:100",
+      "game": "genshin",
+      "title": "Stygian Onslaught",
+      "desc": "Резервное событие до первого автообновления.",
+      "start": "2026-08-19T00:00:00Z",
+      "end": "2026-09-22T00:00:00Z",
+      "done": false,
+      "source": "seed-web",
+      "url": ""
+    },
+    {
+      "id": "seed:web:101",
+      "game": "genshin",
+      "title": "Spooky Summer Adventures",
+      "desc": "Резервное событие до первого автообновления.",
+      "start": "2026-08-17T00:00:00Z",
+      "end": "2026-09-04T00:00:00Z",
+      "done": false,
+      "source": "seed-web",
+      "url": ""
+    },
+    {
+      "id": "seed:web:102",
+      "game": "genshin",
+      "title": "Everwinter Without Mercy",
+      "desc": "Резервное событие до первого автообновления.",
+      "start": "2026-08-12T00:00:00Z",
+      "end": "2026-09-22T00:00:00Z",
+      "done": false,
+      "source": "seed-web",
+      "url": ""
+    },
+    {
+      "id": "seed:web:103",
+      "game": "genshin",
+      "title": "Frostfarer",
+      "desc": "Резервное событие до первого автообновления.",
+      "start": "2026-08-12T00:00:00Z",
+      "end": "2026-09-21T00:00:00Z",
+      "done": false,
+      "source": "seed-web",
+      "url": ""
+    },
+    {
+      "id": "seed:web:104",
+      "game": "genshin",
+      "title": "Phantasmagoric Chronicle",
+      "desc": "Резервное событие до первого автообновления.",
+      "start": "2026-08-12T00:00:00Z",
+      "end": "2026-09-21T00:00:00Z",
+      "done": false,
+      "source": "seed-web",
+      "url": ""
+    },
+    {
+      "id": "seed:web:105",
+      "game": "hsr",
+      "title": "Fate Contract: Renewal",
+      "desc": "Резервное событие до первого автообновления.",
+      "start": "2026-07-24T00:00:00Z",
+      "end": "2026-11-11T00:00:00Z",
+      "done": false,
+      "source": "seed-web",
+      "url": ""
+    }
+  ]
+}

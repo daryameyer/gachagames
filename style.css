@@ -540,3 +540,5 @@ html, body{
 
 .event-row{cursor:pointer}
 .event-row:hover{filter:brightness(1.04)}
+
+.events-sync-status{margin-top:6px;color:#59647b;font-size:10px}
