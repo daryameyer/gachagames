@@ -201,6 +201,9 @@ let selected='all';
 let sortMode='ending';
 let viewMode='checklist';
 
+const focusGameOrder=['all','endfield','genshin','hsr','nikki','nte','wuwa','zzz'];
+const focusGameLabels={all:'All',endfield:'Endfield',genshin:'Genshin',hsr:'Star Rail',nikki:'Nikki',nte:'NTE',wuwa:'WuWa',zzz:'ZZZ'};
+
 
 function formatLeft(ms){
   if(ms<=0) return 'завершено';
@@ -251,10 +254,37 @@ function visibleEvents(){
 }
 
 function renderFilters(){
-  const counts={}; Object.keys(games).forEach(k=>counts[k]=k==='all'?events.filter(e=>e.end>now).length:events.filter(e=>e.game===k&&e.end>now).length);
+  const nowDate=new Date();
+  const counts={};
+  Object.keys(games).forEach(k=>counts[k]=k==='all'?events.filter(e=>e.end>nowDate).length:events.filter(e=>e.game===k&&e.end>nowDate).length);
   const order=['all','ended','genshin','hsr','nikki','nte','endfield','wuwa','zzz'];
-  document.querySelector('#filters').innerHTML=order.map(k=>`<button class="chip ${selected===k?'active':''} game-${k}" data-game="${k}">${games[k].short||games[k].name} <span>${k==='ended'?events.filter(e=>e.end<=now).length:counts[k]}</span></button>`).join('');
-  document.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{selected=b.dataset.game;renderAll()});
+  const root=document.querySelector('#filters');
+  if(root){
+    root.innerHTML=order.map(k=>`<button class="chip ${selected===k?'active':''} game-${k}" data-game="${k}">${games[k].short||games[k].name} <span>${k==='ended'?events.filter(e=>e.end<=nowDate).length:counts[k]}</span></button>`).join('');
+    root.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{selected=b.dataset.game;renderAll()});
+  }
+  renderDoingFocus(counts,nowDate);
+}
+
+function renderDoingFocus(counts,nowDate=new Date()){
+  const section=document.querySelector('#doingFocus');
+  const root=document.querySelector('#doingFocusChips');
+  if(!section||!root)return;
+  const visible=sortMode==='doing' && viewMode==='checklist';
+  section.hidden=!visible;
+  if(!visible)return;
+  root.innerHTML=focusGameOrder.map(k=>{
+    const count=k==='all'
+      ? events.filter(e=>e.end>nowDate).length
+      : events.filter(e=>e.game===k&&e.end>nowDate).length;
+    return `<button class="focus-chip ${selected===k?'active':''} focus-${k}" data-focus-game="${k}">${focusGameLabels[k]} <span>${count}</span></button>`;
+  }).join('');
+  root.querySelectorAll('[data-focus-game]').forEach(button=>{
+    button.onclick=()=>{
+      selected=button.dataset.focusGame;
+      renderAll();
+    };
+  });
 }
 
 function progressParts(e){
@@ -429,8 +459,8 @@ document.querySelector('#modalDone').onclick=()=>{
 
 function renderAll(){renderFilters();renderEvents();renderNext();renderDailies();renderCounts();renderTimeline();renderPatch();}
 
-document.querySelectorAll('.sort-btn').forEach(b=>b.onclick=()=>{sortMode=b.dataset.sort;document.querySelectorAll('.sort-btn').forEach(x=>x.classList.toggle('active',x===b));renderAll()});
-document.querySelectorAll('.view-btn').forEach(b=>b.onclick=()=>{viewMode=b.dataset.view;document.querySelectorAll('.view-btn').forEach(x=>x.classList.toggle('active',x===b));document.querySelector('#eventList').hidden=viewMode==='timeline';document.querySelector('#timeline').hidden=viewMode!=='timeline'});
+document.querySelectorAll('.sort-btn').forEach(b=>b.onclick=()=>{sortMode=b.dataset.sort;if(sortMode==='doing'&&selected==='ended')selected='all';document.querySelectorAll('.sort-btn').forEach(x=>x.classList.toggle('active',x===b));renderAll()});
+document.querySelectorAll('.view-btn').forEach(b=>b.onclick=()=>{viewMode=b.dataset.view;document.querySelectorAll('.view-btn').forEach(x=>x.classList.toggle('active',x===b));document.querySelector('#eventList').hidden=viewMode==='timeline';document.querySelector('#timeline').hidden=viewMode!=='timeline';renderDoingFocus();});
 document.querySelector('#catchUp').onclick=()=>{
   dailyConfig.forEach(x=>setDailyDone(x.id,true));
   renderDailies();
