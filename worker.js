@@ -83,6 +83,59 @@ function normalizeCalendarEvent(raw,game,index,source){
   return {id:`${source}:${game}:${id}`,game,title:String(title),desc:String(desc),start,end,done:false,source};
 }
 const calendarSources={genshin:'https://api.ennead.cc/mihoyo/genshin/calendar?lang=ru-ru',hsr:'https://api.ennead.cc/mihoyo/starrail/calendar?lang=ru-ru',zzz:'https://api.ennead.cc/mihoyo/zenless/calendar?lang=ru-ru',wuwa:'https://gamecal.nv5.me/api/events?game=ww',endfield:'https://gamecal.nv5.me/api/events?game=endfield'};
+
+const EVENTS_SNAPSHOT_URL = 'https://raw.githubusercontent.com/daryameyer/gachagames/main/events.json';
+
+async function snapshotEvents(game) {
+  return cached(`snapshot:${game}`, async () => {
+    try {
+      const data = await fetchJson(EVENTS_SNAPSHOT_URL);
+      const now = Date.now();
+      const list = Array.isArray(data?.events) ? data.events : [];
+      return list
+        .filter(e => e && e.game === game)
+        .map((e, i) => {
+          const start = new Date(e.start);
+          const end = new Date(e.end);
+          if (!e.title || Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || end <= start) return null;
+          if (end.getTime() <= now) return null;
+          return {
+            id: e.id ? `snapshot:${e.id}` : `snapshot:${game}:${i}`,
+            game,
+            title: String(e.title),
+            desc: String(e.desc || ''),
+            start,
+            end,
+            done: Boolean(e.done),
+            source: 'snapshot',
+            url: e.url || ''
+          };
+        })
+        .filter(Boolean);
+    } catch (err) {
+      console.warn('events.json unavailable:', err.message);
+      return [];
+    }
+  });
+}
+
+function mergeEvents(...groups) {
+  const byKey = new Map();
+  for (const group of groups) {
+    for (const e of group || []) {
+      if (!e || !e.title || !e.end) continue;
+      const end = new Date(e.end);
+      if (Number.isNaN(end.getTime()) || end.getTime() <= Date.now()) continue;
+      const key = `${e.game}|${String(e.title).trim().toLowerCase()}|${end.toISOString()}`;
+      const prev = byKey.get(key);
+      if (!prev || (e.source === 'official' && prev.source !== 'official') || (e.source === 'calendar' && prev.source === 'snapshot')) {
+        byKey.set(key, e);
+      }
+    }
+  }
+  return [...byKey.values()].sort((a, b) => new Date(a.end) - new Date(b.end));
+}
+
 async function calendarEvents(game){
   const url=calendarSources[game]; if(!url)throw new Error('unknown game');
   return cached(`calendar:${game}`,async()=>{ const data=await fetchJson(url); const list=Array.isArray(data)?data:(data?.events||data?.data?.events||[]); const now=Date.now(); return list.map((x,i)=>normalizeCalendarEvent(x,game,i,'calendar')).filter(Boolean).filter(e=>e.end.getTime()>now); });
@@ -207,18 +260,16 @@ async function scrapeOfficial(game){
   const selected=unique.slice(0,30); const results=await Promise.all(selected.map(async link=>{try{const article=await requestText(link.url);const text=cleanText(article);const extracted=game==='endfield'?extractEndfieldEvents(text,link.url):extractOfficialEvents(text,game,link.url);if(extracted.length)return extracted;const duration=parseDuration(text,game);if(!duration||duration.end.getTime()<=now)return[];const title=firstTitle(article,link.title||'Событие');return[{id:`official:${game}:${eventId(link.url,0)}`,game,title,desc:'Официальное событие',start:duration.start,end:duration.end,done:false,source:'official',url:link.url}];}catch(err){console.warn(game,link.url,err.message);return[];}}));
   const events=results.flat();return[...new Map(events.map(e=>[`${e.title}|${e.end.toISOString()}`,e])).values()];
 }
-async function officialEvents(game){return scrapeOfficial(game);}
+async function officialEvents(game){
+  const official = await scrapeOfficial(game).catch(() => []);
+  const snapshot = await snapshotEvents(game);
+  return mergeEvents(official, snapshot);
+}
 async function mergedGameEvents(game){
-  const calendar=await calendarEvents(game).catch(()=>[]);
-  const official=await scrapeOfficial(game).catch(()=>[]);
-  const merged=[...calendar,...official].filter(e=>e&&e.end&&e.end.getTime()>Date.now());
-  const byKey=new Map();
-  for(const e of merged){
-    const key=`${game}|${String(e.title).trim().toLowerCase()}|${new Date(e.end).toISOString()}`;
-    const prev=byKey.get(key);
-    if(!prev || (e.source==='official' && prev.source!=='official')) byKey.set(key,e);
-  }
-  return [...byKey.values()].sort((a,b)=>new Date(a.end)-new Date(b.end));
+  const calendar = await calendarEvents(game).catch(() => []);
+  const official = await scrapeOfficial(game).catch(() => []);
+  const snapshot = await snapshotEvents(game);
+  return mergeEvents(calendar, official, snapshot);
 }
 
 function json(data,status=200){return new Response(JSON.stringify(data),{status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','Access-Control-Allow-Origin':'*'}});}
@@ -229,9 +280,13 @@ export default {
     try {
       if (u.pathname === '/api/events') {
         const game = u.searchParams.get('game');
-        if (!calendarSources[game]) return json({ok:false,error:'unknown game'},400);
-        const events = ['genshin','hsr','zzz','wuwa'].includes(game) ? await mergedGameEvents(game) : await calendarEvents(game);
-        return json({ok:true,game,source:calendarSources[game],updatedAt:new Date().toISOString(),events});
+        if (!['genshin','hsr','zzz','wuwa','endfield','nte','nikki'].includes(game)) {
+          return json({ok:false,error:'unknown game'},400);
+        }
+        const events = ['genshin','hsr','zzz','wuwa'].includes(game)
+          ? await mergedGameEvents(game)
+          : await officialEvents(game);
+        return json({ok:true,game,source:calendarSources[game] || 'events.json',updatedAt:new Date().toISOString(),events});
       }
       if (u.pathname === '/api/official-events') {
         const game = u.searchParams.get('game');
