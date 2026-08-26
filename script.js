@@ -247,9 +247,9 @@ function visibleEvents(){
     arr.sort((a,b) => Number(a.done) - Number(b.done) || a.end - b.end);
   }
 
-  return arr;
+    return arr;
 }
-}
+
 function renderFilters(){
   const counts={}; Object.keys(games).forEach(k=>counts[k]=k==='all'?events.filter(e=>e.end>now).length:events.filter(e=>e.game===k&&e.end>now).length);
   const order=['all','ended','genshin','hsr','nikki','nte','endfield','wuwa','zzz'];
