@@ -5,9 +5,9 @@ async function requestText(url) {
   const res = await fetch(url, {
     redirect: 'follow',
     headers: {
-      'User-Agent': 'Mozilla/5.0 EVENTCLOCK/1.2',
+      'User-Agent': 'Mozilla/5.0 EVENTCLOCK/2.0',
       'Accept': 'text/html,application/json;q=0.9,*/*;q=0.8',
-      'Accept-Language': 'en-US,en;q=0.9,ru;q=0.8'
+      'Accept-Language': 'ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7'
     }
   });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -40,106 +40,142 @@ function linksFrom(html, base) {
   while ((m = re.exec(html))) { const url = absUrl(m[1], base); const title = decode(m[2]); if (url) out.push({ url, title }); }
   return out;
 }
-function cleanText(html) { return decode(html.replace(/<script[\s\S]*?<\/script>/gi, ' ').replace(/<style[\s\S]*?<\/style>/gi, ' ')); }
+function cleanText(html) {
+  return decode(html.replace(/<script[\s\S]*?<\/script>/gi, ' ').replace(/<style[\s\S]*?<\/style>/gi, ' '));
+}
 function firstTitle(html, fallback) {
   const m = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i) || html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
   return m ? decode(m[1]).replace(/\s*[|-]\s*(NTE|Infinity Nikki|Arknights:? Endfield).*$/i, '').trim() : fallback;
 }
 function eventId(base, index) { return encodeURIComponent(`${base}#${index}`); }
 
-const enMonths = { january:0,february:1,march:2,april:3,may:4,june:5,july:6,august:7,september:8,october:9,november:10,december:11,jan:0,feb:1,mar:2,apr:3,jun:5,jul:6,aug:7,sep:8,sept:8,oct:9,nov:10,dec:11 };
-const ruMonths = { января:0,февраля:1,марта:2,апреля:3,мая:4,июня:5,июля:6,августа:7,сентября:8,октября:9,ноября:10,декабря:11 };
+const enMonths = {
+  january:0,february:1,march:2,april:3,may:4,june:5,july:6,august:7,september:8,
+  october:9,november:10,december:11,jan:0,feb:1,mar:2,apr:3,jun:5,jul:6,aug:7,
+  sep:8,sept:8,oct:9,nov:10,dec:11
+};
+const ruMonths = {
+  января:0,февраля:1,марта:2,апреля:3,мая:4,июня:5,июля:6,августа:7,
+  сентября:8,октября:9,ноября:10,декабря:11
+};
+
 function parseDatePart(s, yearHint, tzHours) {
-  s = s.trim().replace(/[–—]/g,'-').replace(/\b(Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)\./gi,'$1').replace(/\s+/g,' ');
+  s = s.trim().replace(/[–—]/g,'-')
+    .replace(/\b(Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)\./gi,'$1')
+    .replace(/\s+/g,' ');
   let m = s.match(/([A-Za-z]+)\s+(\d{1,2})(?:,\s*(\d{4}))?(?:[^0-9]{0,20}(\d{1,2})(?::(\d{2}))?\s*(AM|PM)?)?/i);
   if (m) {
     const month=enMonths[m[1].toLowerCase()];
-    if(month!==undefined){ const day=+m[2],year=m[3]?+m[3]:yearHint; let hour=m[4]!==undefined?+m[4]:0,minute=m[5]?+m[5]:0;
+    if(month!==undefined){
+      const day=+m[2], year=m[3]?+m[3]:yearHint;
+      let hour=m[4]!==undefined?+m[4]:0, minute=m[5]?+m[5]:0;
       if(m[6]){const ap=m[6].toUpperCase();if(ap==='PM'&&hour<12)hour+=12;if(ap==='AM'&&hour===12)hour=0;}
-      return new Date(Date.UTC(year,month,day,hour,minute)-tzHours*3600000); }
+      return new Date(Date.UTC(year,month,day,hour,minute)-tzHours*3600000);
+    }
   }
   m=s.match(/(\d{1,2})\s+([А-Яа-яёЁ]+)(?:\s+(\d{4}))?(?:[^0-9]{0,20}(\d{1,2})(?::(\d{2}))?)?/u);
-  if(m){ const month=ruMonths[m[2].toLowerCase()]; if(month!==undefined){ const day=+m[1],year=m[3]?+m[3]:yearHint,hour=m[4]?+m[4]:0,minute=m[5]?+m[5]:0; return new Date(Date.UTC(year,month,day,hour,minute)-tzHours*3600000); } }
+  if(m){
+    const month=ruMonths[m[2].toLowerCase()];
+    if(month!==undefined){
+      const day=+m[1],year=m[3]?+m[3]:yearHint,hour=m[4]?+m[4]:0,minute=m[5]?+m[5]:0;
+      return new Date(Date.UTC(year,month,day,hour,minute)-tzHours*3600000);
+    }
+  }
   m=s.match(/(\d{4})\/(\d{1,2})\/(\d{1,2})(?:\s+(\d{1,2}):(\d{2}))?/);
   if(m)return new Date(Date.UTC(+m[1],+m[2]-1,+m[3],+(m[4]||0),+(m[5]||0))-tzHours*3600000);
   return null;
 }
+
 function parseDuration(text,kind){
-  const marker=kind==='nte'?'(?:Duration|Длительность|Расписание события|Доступно)':kind==='hsr'?'(?:Event Duration|Event Time|Duration|Длительность|Период события|Время события|Время проведения)':kind==='wuwa'?'(?:Duration|Event Duration|Event Time|Длительность|Время события)':'(?:Event Duration|Event Time|Duration|Длительность)';
+  const marker=kind==='nte'
+    ? '(?:Duration|Длительность|Расписание события|Доступно)'
+    : kind==='hsr'
+      ? '(?:Event Duration|Event Time|Duration|Длительность|Период события|Время события|Время проведения)'
+      : kind==='wuwa'
+        ? '(?:Duration|Event Duration|Event Time|Длительность|Время события)'
+        : '(?:Event Duration|Event Time|Duration|Длительность)';
   const idx=text.search(new RegExp(marker,'i')); if(idx<0)return null;
-  const chunk=text.slice(idx,idx+1200).replace(/\s+/g,' '); const yearNow=new Date().getUTCFullYear();
-  const tzMatch=chunk.match(/UTC\s*([+-]\d{1,2})(?::(\d{2}))?/i); const tz=tzMatch?+tzMatch[1]:(kind==='nikki'?-7:8);
+  const chunk=text.slice(idx,idx+1200).replace(/\s+/g,' ');
+  const yearNow=new Date().getUTCFullYear();
+  const tzMatch=chunk.match(/UTC\s*([+-]\d{1,2})(?::(\d{2}))?/i);
+  const tz=tzMatch?+tzMatch[1]:(kind==='nikki'?-7:8);
   let range=chunk.match(/([A-Za-z]+\s+\d{1,2}(?:,\s*\d{4})?(?:[^–—-]{0,80}))\s+[–—-]\s+([A-Za-z]+\s+\d{1,2}(?:,\s*\d{4})?(?:[^.]{0,100}))/i);
   if(!range)range=chunk.match(/(?:с\s+)?(\d{1,2}\s+[А-Яа-яёЁ]+(?:\s+\d{4})?(?:[^–—-]{0,100}))\s+(?:до|—|-)\s+(\d{1,2}\s+[А-Яа-яёЁ]+(?:\s+\d{4})?(?:[^.]{0,100}))/u);
   if(!range)range=chunk.match(/(\d{4}\/\d{1,2}\/\d{1,2}(?:\s+\d{1,2}:\d{2})?)\s*(?:-|–|—)\s*(\d{4}\/\d{1,2}\/\d{1,2}(?:\s+\d{1,2}:\d{2})?)/);
-  if(!range)return null; const years=(range[0].match(/\b20\d{2}\b/g)||[]); const year=years.length?+years[0]:yearNow;
-  const start=parseDatePart(range[1],year,tz),end=parseDatePart(range[2],year,tz); if(!start||!end)return null; if(end<start)end.setUTCFullYear(end.getUTCFullYear()+1); return {start,end};
+  if(!range)return null;
+  const years=(range[0].match(/\b20\d{2}\b/g)||[]);
+  const year=years.length?+years[0]:yearNow;
+  const start=parseDatePart(range[1],year,tz),end=parseDatePart(range[2],year,tz);
+  if(!start||!end)return null;
+  if(end<start)end.setUTCFullYear(end.getUTCFullYear()+1);
+  return {start,end};
 }
+
 function normalizeCalendarEvent(raw,game,index,source){
-  const id=raw.id??raw.activity_id??raw.event_id??raw.ann_id??`${game}-${index}`; const title=raw.name??raw.title??raw.eventName??raw.activity_name;
-  const desc=raw.description??raw.desc??raw.summary??''; const startRaw=raw.start_time??raw.startTime??raw.start_at??raw.start; const endRaw=raw.end_time??raw.endTime??raw.end_at??raw.end;
-  const start=typeof startRaw==='number'?new Date(startRaw*1000):new Date(startRaw); const end=typeof endRaw==='number'?new Date(endRaw*1000):new Date(endRaw);
+  const id=raw.id??raw.activity_id??raw.event_id??raw.ann_id??`${game}-${index}`;
+  const title=raw.name??raw.title??raw.eventName??raw.activity_name;
+  const desc=raw.description??raw.desc??raw.summary??'';
+  const startRaw=raw.start_time??raw.startTime??raw.start_at??raw.start;
+  const endRaw=raw.end_time??raw.endTime??raw.end_at??raw.end;
+  const start=typeof startRaw==='number'?new Date(startRaw*1000):new Date(startRaw);
+  const end=typeof endRaw==='number'?new Date(endRaw*1000):new Date(endRaw);
   if(!title||Number.isNaN(start.getTime())||Number.isNaN(end.getTime())||end<=start)return null;
   return {id:`${source}:${game}:${id}`,game,title:String(title),desc:String(desc),start,end,done:false,source};
 }
-const calendarSources={genshin:'https://api.ennead.cc/mihoyo/genshin/calendar?lang=ru-ru',hsr:'https://api.ennead.cc/mihoyo/starrail/calendar?lang=ru-ru',zzz:'https://api.ennead.cc/mihoyo/zenless/calendar?lang=ru-ru',wuwa:'https://gamecal.nv5.me/api/events?game=ww',endfield:'https://gamecal.nv5.me/api/events?game=endfield'};
 
-const EVENTS_SNAPSHOT_URL = 'https://raw.githubusercontent.com/daryameyer/gachagames/main/events.json';
+const calendarSources={
+  genshin:'https://api.ennead.cc/mihoyo/genshin/calendar?lang=ru-ru',
+  hsr:'https://api.ennead.cc/mihoyo/starrail/calendar?lang=ru-ru',
+  zzz:'https://api.ennead.cc/mihoyo/zenless/calendar?lang=ru-ru',
+  wuwa:'https://gamecal.nv5.me/api/events?game=ww',
+  endfield:'https://gamecal.nv5.me/api/events?game=endfield'
+};
 
-async function snapshotEvents(game) {
-  return cached(`snapshot:${game}`, async () => {
-    try {
-      const data = await fetchJson(EVENTS_SNAPSHOT_URL);
-      const now = Date.now();
-      const list = Array.isArray(data?.events) ? data.events : [];
-      return list
-        .filter(e => e && e.game === game)
-        .map((e, i) => {
-          const start = new Date(e.start);
-          const end = new Date(e.end);
-          if (!e.title || Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || end <= start) return null;
-          if (end.getTime() <= now) return null;
-          return {
-            id: e.id ? `snapshot:${e.id}` : `snapshot:${game}:${i}`,
-            game,
-            title: String(e.title),
-            desc: String(e.desc || ''),
-            start,
-            end,
-            done: Boolean(e.done),
-            source: 'snapshot',
-            url: e.url || ''
-          };
-        })
-        .filter(Boolean);
-    } catch (err) {
-      console.warn('events.json unavailable:', err.message);
-      return [];
-    }
+// Второй независимый источник. Он отдаёт именно activities, а не баннеры.
+const activitySources={
+  genshin:'https://starrailassistant.top/api/v1/activity/ys.json',
+  hsr:'https://starrailassistant.top/api/v1/activity/sr.json',
+  zzz:'https://starrailassistant.top/api/v1/activity/zzz.json',
+  wuwa:'https://starrailassistant.top/api/v1/activity/ww.json',
+  nte:'https://starrailassistant.top/api/v1/activity/nte.json'
+};
+
+async function calendarEvents(game){
+  const url=calendarSources[game]; if(!url) return [];
+  return cached(`calendar:${game}`,async()=>{
+    try{
+      const data=await fetchJson(url);
+      const list=Array.isArray(data)?data:(data?.events||data?.data?.events||[]);
+      const now=Date.now();
+      return list.map((x,i)=>normalizeCalendarEvent(x,game,i,'calendar'))
+        .filter(Boolean).filter(e=>e.end.getTime()>now);
+    }catch(err){ console.warn('calendar',game,err.message); return []; }
   });
 }
 
-function mergeEvents(...groups) {
-  const byKey = new Map();
-  for (const group of groups) {
-    for (const e of group || []) {
-      if (!e || !e.title || !e.end) continue;
-      const end = new Date(e.end);
-      if (Number.isNaN(end.getTime()) || end.getTime() <= Date.now()) continue;
-      const key = `${e.game}|${String(e.title).trim().toLowerCase()}|${end.toISOString()}`;
-      const prev = byKey.get(key);
-      if (!prev || (e.source === 'official' && prev.source !== 'official') || (e.source === 'calendar' && prev.source === 'snapshot')) {
-        byKey.set(key, e);
-      }
-    }
-  }
-  return [...byKey.values()].sort((a, b) => new Date(a.end) - new Date(b.end));
+async function activityEvents(game){
+  const url=activitySources[game]; if(!url) return [];
+  return cached(`activity:${game}`,async()=>{
+    try{
+      const data=await fetchJson(url);
+      const list=Array.isArray(data?.activities)?data.activities:(Array.isArray(data)?data:[]);
+      const now=Date.now();
+      return list.map((x,i)=>{
+        const title=x.name??x.title;
+        const desc=x.description??x.desc??'';
+        const start=new Date(x.startTime??x.start_time??x.start);
+        const end=new Date(x.endTime??x.end_time??x.end);
+        if(!title||Number.isNaN(start.getTime())||Number.isNaN(end.getTime())||end<=start||end.getTime()<=now)return null;
+        return {
+          id:`activity:${game}:${i}:${encodeURIComponent(String(title))}`,
+          game,title:String(title),desc:String(desc),
+          start,end,done:false,source:'activity',url:x.url||''
+        };
+      }).filter(Boolean);
+    }catch(err){ console.warn('activity',game,err.message); return []; }
+  });
 }
 
-async function calendarEvents(game){
-  const url=calendarSources[game]; if(!url)throw new Error('unknown game');
-  return cached(`calendar:${game}`,async()=>{ const data=await fetchJson(url); const list=Array.isArray(data)?data:(data?.events||data?.data?.events||[]); const now=Date.now(); return list.map((x,i)=>normalizeCalendarEvent(x,game,i,'calendar')).filter(Boolean).filter(e=>e.end.getTime()>now); });
-}
 function extractOfficialEvents(text,game,baseUrl){
   const out=[],now=Date.now(),compact=text.replace(/\s+/g,' ');
   const patterns=game==='nikki'
@@ -160,7 +196,12 @@ function extractOfficialEvents(text,game,baseUrl){
   return out;
 }
 
-const ENDFIELD_OFFICIAL_SOURCES=['https://endfield.gryphline.com/en-us/news/5200','https://endfield.gryphline.com/en-us/news/4482','https://endfield.gryphline.com/en-us/news/1329','https://endfield.gryphline.com/en-us/news/3831'];
+const ENDFIELD_OFFICIAL_SOURCES=[
+  'https://endfield.gryphline.com/en-us/news/5200',
+  'https://endfield.gryphline.com/en-us/news/4482',
+  'https://endfield.gryphline.com/en-us/news/1329',
+  'https://endfield.gryphline.com/en-us/news/3831'
+];
 const OFFICIAL_GAME_CONFIG={
   genshin:{index:'https://genshin.hoyoverse.com/en/news',match:'/en/news/',fallback:'https://genshin.hoyoverse.com/en/news/398'},
   hsr:{index:'https://hsr.hoyoverse.com/ru-ru/',match:'/ru-ru/news/',fallback:'https://hsr.hoyoverse.com/ru-ru/'},
@@ -179,11 +220,10 @@ function endfieldAllDateRanges(text){
   while((m=re.exec(clean))){
     const start=parseDatePart(m[1].replace(/\bat\b/gi,' '),yearNow,8);
     const end=parseDatePart(m[2].replace(/\bat\b/gi,' '),yearNow,8);
-    if(start&&end){ if(end<start) end.setUTCFullYear(end.getUTCFullYear()+1); out.push({start,end}); }
+    if(start&&end){if(end<start)end.setUTCFullYear(end.getUTCFullYear()+1);out.push({start,end});}
   }
   return out;
 }
-
 function endfieldVersionUpdateStart(text){
   const m=text.match(/Asia Server:\s*([A-Za-z]+\s+\d{1,2},\s*20\d{2}\s+at\s+\d{1,2}:\d{2})\s*-\s*([A-Za-z]+\s+\d{1,2},\s*20\d{2}\s+at\s+\d{1,2}:\d{2})/i);
   return m?parseDatePart(m[1],new Date().getUTCFullYear(),8):null;
@@ -191,24 +231,18 @@ function endfieldVersionUpdateStart(text){
 function endfieldDateRange(text){
   const ranges=endfieldAllDateRanges(text);
   if(ranges.length){
-    const now=Date.now();
-    const future=ranges.filter(r=>r.end.getTime()>now).sort((a,b)=>a.start-b.start);
+    const now=Date.now(),future=ranges.filter(r=>r.end.getTime()>now).sort((a,b)=>a.start-b.start);
     return future[0]||ranges[ranges.length-1];
   }
   return null;
 }
-
-function endfieldRelativeRange(raw, articleText=''){
+function endfieldRelativeRange(raw,articleText=''){
   const clean=raw.replace(/\s+/g,' ').replace(/[–—]/g,' - ');
-  const now=Date.now();
   const explicit=endfieldAllDateRanges(clean);
   if(explicit.length){
-    const future=explicit.filter(r=>r.end.getTime()>now).sort((a,b)=>a.start-b.start);
+    const future=explicit.filter(r=>r.end.getTime()>Date.now()).sort((a,b)=>a.start-b.start);
     return future[0]||explicit[explicit.length-1];
   }
-
-  // "After [version] version update - DATE". Use the actual update time
-  // from the same official article when it is present, instead of a hard-coded patch date.
   if(/after \[[^\]]+\] version update/i.test(clean)){
     const endMatch=clean.match(/(?:-|to)\s*((?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)\.?\s+\d{1,2},\s*20\d{2}(?:\s+at\s+\d{1,2}(?::\d{2})?)?)/i);
     const end=endMatch?parseDatePart(endMatch[1].replace(/\bat\b/gi,' '),new Date().getUTCFullYear(),8):null;
@@ -217,7 +251,6 @@ function endfieldRelativeRange(raw, articleText=''){
   }
   return null;
 }
-
 function extractEndfieldEvents(text,baseUrl){
   const now=Date.now(),compact=text.replace(/\s+/g,' ').replace(/[–—]/g,' - '),out=[];
   const sectionMatch=compact.match(/(?:New Events|New Event)[\s:]*([\s\S]*?)(?=Event & Gameplay Updates|Event & Gameplay Update|Acquisition Center Update|$)/i);
@@ -229,74 +262,148 @@ function extractEndfieldEvents(text,baseUrl){
     if(!title)continue;
     const tm=body.match(/Event Time\s*:\s*([^•]+?)(?=\s+·|\s+Event Details|\s+\d+\.|$)/i);
     if(!tm)continue;
-    let range=endfieldDateRange(tm[1]);
-    if(!range)range=endfieldRelativeRange(tm[1],text);
-    // Prefer the latest still-active interval for multi-window events such as Sanity Supply.
+    let range=endfieldDateRange(tm[1])||endfieldRelativeRange(tm[1],text);
     const all=endfieldAllDateRanges(tm[1]);
     if(all.length){
       const future=all.filter(r=>r.end.getTime()>now).sort((a,b)=>a.start-b.start);
       if(future.length)range=future[0];
     }
     if(!range||range.end.getTime()<=now)continue;
-    out.push({
-      id:`official:endfield:${eventId(baseUrl,m.index)}`,
-      game:'endfield',
-      title,
-      desc:body.replace(/Event Time\s*:[\s\S]*$/i,'').trim().slice(0,500),
-      start:range.start,
-      end:range.end,
-      done:false,
-      source:'official',
-      url:baseUrl
-    });
+    out.push({id:`official:endfield:${eventId(baseUrl,m.index)}`,game:'endfield',title,desc:body.replace(/Event Time\s*:[\s\S]*$/i,'').trim().slice(0,500),start:range.start,end:range.end,done:false,source:'official',url:baseUrl});
   }
   return out;
 }
 async function scrapeOfficial(game){
   const cfg=OFFICIAL_GAME_CONFIG[game];
-  const now=Date.now();let links=[];try{const html=await requestText(cfg.index);links=linksFrom(html,cfg.index).filter(x=>x.url.includes(cfg.match));}catch(err){console.warn(game,'index unavailable:',err.message);}
-  const unique=[...new Map(links.map(x=>[x.url,x])).values()]; if(game==='endfield'){for(const url of ENDFIELD_OFFICIAL_SOURCES){if(!unique.some(x=>x.url===url))unique.unshift({url,title:''});}}else if(cfg.fallback&&!unique.some(x=>x.url===cfg.fallback))unique.unshift({url:cfg.fallback,title:''});
-  // The official Endfield news index contains many posts; inspect more than the first few so new event notices are not missed.
-  const selected=unique.slice(0,30); const results=await Promise.all(selected.map(async link=>{try{const article=await requestText(link.url);const text=cleanText(article);const extracted=game==='endfield'?extractEndfieldEvents(text,link.url):extractOfficialEvents(text,game,link.url);if(extracted.length)return extracted;const duration=parseDuration(text,game);if(!duration||duration.end.getTime()<=now)return[];const title=firstTitle(article,link.title||'Событие');return[{id:`official:${game}:${eventId(link.url,0)}`,game,title,desc:'Официальное событие',start:duration.start,end:duration.end,done:false,source:'official',url:link.url}];}catch(err){console.warn(game,link.url,err.message);return[];}}));
-  const events=results.flat();return[...new Map(events.map(e=>[`${e.title}|${e.end.toISOString()}`,e])).values()];
-}
-async function officialEvents(game){
-  const official = await scrapeOfficial(game).catch(() => []);
-  const snapshot = await snapshotEvents(game);
-  return mergeEvents(official, snapshot);
-}
-async function mergedGameEvents(game){
-  const calendar = await calendarEvents(game).catch(() => []);
-  const official = await scrapeOfficial(game).catch(() => []);
-  const snapshot = await snapshotEvents(game);
-  return mergeEvents(calendar, official, snapshot);
+  const now=Date.now(); let links=[];
+  try{
+    const html=await requestText(cfg.index);
+    links=linksFrom(html,cfg.index).filter(x=>x.url.includes(cfg.match));
+  }catch(err){console.warn(game,'index unavailable:',err.message);}
+  const unique=[...new Map(links.map(x=>[x.url,x])).values()];
+  if(game==='endfield'){
+    for(const url of ENDFIELD_OFFICIAL_SOURCES) if(!unique.some(x=>x.url===url)) unique.unshift({url,title:''});
+  }else if(cfg.fallback&&!unique.some(x=>x.url===cfg.fallback)) unique.unshift({url:cfg.fallback,title:''});
+  const selected=unique.slice(0,30);
+  const results=await Promise.all(selected.map(async link=>{
+    try{
+      const article=await requestText(link.url);
+      const text=cleanText(article);
+      const extracted=game==='endfield'?extractEndfieldEvents(text,link.url):extractOfficialEvents(text,game,link.url);
+      if(extracted.length)return extracted;
+      const duration=parseDuration(text,game);
+      if(!duration||duration.end.getTime()<=now)return[];
+      const title=firstTitle(article,link.title||'Событие');
+      return [{id:`official:${game}:${eventId(link.url,0)}`,game,title,desc:'Официальное событие',start:duration.start,end:duration.end,done:false,source:'official',url:link.url}];
+    }catch(err){console.warn(game,link.url,err.message);return[];}
+  }));
+  const events=results.flat();
+  return [...new Map(events.map(e=>[`${e.title}|${e.end.toISOString()}`,e])).values()];
 }
 
-function json(data,status=200){return new Response(JSON.stringify(data),{status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','Access-Control-Allow-Origin':'*'}});}
+async function officialEvents(game){
+  return scrapeOfficial(game).catch(()=>[]);
+}
+
+async function snapshotEvents(game){
+  return cached(`snapshot:${game}`,async()=>{
+    try{
+      const data=await fetchJson('https://raw.githubusercontent.com/daryameyer/gachagames/main/events.json');
+      const list=Array.isArray(data?.events)?data.events:[];
+      return list.filter(e=>e&&e.game===game).map((e,i)=>{
+        const start=new Date(e.start),end=new Date(e.end);
+        if(!e.title||Number.isNaN(start.getTime())||Number.isNaN(end.getTime())||end<=start||end.getTime()<=Date.now())return null;
+        return {id:`snapshot:${e.id||`${game}:${i}`}`,game,title:String(e.title),desc:String(e.desc||''),start,end,done:false,source:'snapshot',url:e.url||''};
+      }).filter(Boolean);
+    }catch(err){console.warn('snapshot unavailable:',err.message);return[];}
+  });
+}
+
+function dedupeEvents(...groups){
+  const byKey=new Map();
+  for(const group of groups){
+    for(const e of group||[]){
+      if(!e||!e.title||!e.end)continue;
+      const end=new Date(e.end);
+      if(Number.isNaN(end.getTime())||end.getTime()<=Date.now())continue;
+      const key=`${e.game}|${String(e.title).trim().toLowerCase()}|${end.toISOString()}`;
+      const prev=byKey.get(key);
+      if(!prev||priority(e.source)>priority(prev.source))byKey.set(key,e);
+    }
+  }
+  return [...byKey.values()].sort((a,b)=>new Date(a.end)-new Date(b.end));
+}
+function priority(source){
+  return source==='official'?4:source==='activity'?3:source==='calendar'?2:source==='snapshot'?1:0;
+}
+
+async function liveEvents(game){
+  const [calendar,activity,official]=await Promise.all([
+    calendarEvents(game),
+    activityEvents(game),
+    officialEvents(game)
+  ]);
+  return dedupeEvents(calendar,activity,official);
+}
+
+async function getEvents(game){
+  const live=await liveEvents(game);
+  if(live.length)return {events:live,usedSnapshot:false};
+  const backup=await snapshotEvents(game);
+  return {events:backup,usedSnapshot:true};
+}
+
+function json(data,status=200){
+  return new Response(JSON.stringify(data),{
+    status,
+    headers:{
+      'Content-Type':'application/json; charset=utf-8',
+      'Cache-Control':'no-store',
+      'Access-Control-Allow-Origin':'*'
+    }
+  });
+}
 
 export default {
   async fetch(request, env) {
-    const u = new URL(request.url);
-    try {
-      if (u.pathname === '/api/events') {
-        const game = u.searchParams.get('game');
-        if (!['genshin','hsr','zzz','wuwa','endfield','nte','nikki'].includes(game)) {
-          return json({ok:false,error:'unknown game'},400);
-        }
-        const events = ['genshin','hsr','zzz','wuwa'].includes(game)
-          ? await mergedGameEvents(game)
-          : await officialEvents(game);
-        return json({ok:true,game,source:calendarSources[game] || 'events.json',updatedAt:new Date().toISOString(),events});
+    const u=new URL(request.url);
+    try{
+      if(u.pathname==='/api/events'){
+        const game=u.searchParams.get('game');
+        const allowed=['genshin','hsr','zzz','wuwa','endfield','nte','nikki'];
+        if(!allowed.includes(game))return json({ok:false,error:'unknown game'},400);
+        const result=await getEvents(game);
+        return json({
+          ok:true,
+          game,
+          source:result.usedSnapshot?'events.json':'live',
+          updatedAt:new Date().toISOString(),
+          usedSnapshot:result.usedSnapshot,
+          events:result.events
+        });
       }
-      if (u.pathname === '/api/official-events') {
-        const game = u.searchParams.get('game');
-        if (!['nte','nikki','endfield'].includes(game)) return json({ok:false,error:'unknown official game'},400);
-        const events = await officialEvents(game);
-        return json({ok:true,game,updatedAt:new Date().toISOString(),events});
+      if(u.pathname==='/api/official-events'){
+        const game=u.searchParams.get('game');
+        if(!['nte','nikki','endfield'].includes(game))return json({ok:false,error:'unknown game'},400);
+        const result=await getEvents(game);
+        return json({
+          ok:true,
+          game,
+          source:result.usedSnapshot?'events.json':'live',
+          updatedAt:new Date().toISOString(),
+          usedSnapshot:result.usedSnapshot,
+          events:result.events
+        });
       }
-      if (u.pathname === '/api/health') return json({ok:true,time:new Date().toISOString(),sources:['genshin','hsr','zzz','wuwa','endfield','nte','nikki']});
+      if(u.pathname==='/api/health'){
+        return json({
+          ok:true,
+          time:new Date().toISOString(),
+          sources:['activity-api','calendar-api','official','events.json']
+        });
+      }
       return env.ASSETS.fetch(request);
-    } catch (e) {
+    }catch(e){
       console.error(e);
       return json({ok:false,error:e?.message||String(e)},500);
     }
