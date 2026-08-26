@@ -223,15 +223,20 @@ function visibleEvents(){
   let arr;
 
   if(sortMode === 'ending'){
+    // «Скорее закончится» — только активные события,
+    // которые закончатся в ближайшие 7 дней.
     arr = events.filter(e => e.end > nowDate && e.end <= sevenDaysLater);
   } else {
+    // «Сначала дела» — ВСЕ активные события.
     arr = events.filter(e => e.end > nowDate);
   }
 
+  // Фильтр игры.
   if(selected !== 'all' && selected !== 'ended'){
     arr = arr.filter(e => e.game === selected);
   }
 
+  // Отдельная вкладка завершённых.
   if(selected === 'ended'){
     arr = events.filter(e => e.end <= nowDate);
   }
@@ -243,6 +248,7 @@ function visibleEvents(){
   }
 
   return arr;
+}
 }
 function renderFilters(){
   const counts={}; Object.keys(games).forEach(k=>counts[k]=k==='all'?events.filter(e=>e.end>now).length:events.filter(e=>e.game===k&&e.end>now).length);
