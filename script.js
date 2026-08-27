@@ -310,9 +310,16 @@ function visibleEvents(){
       arr = arr.filter(e => (e.category || 'event') === 'event');
     }
   } else {
-    // «Сначала дела» — обычные события. Временные режимы доступны
-    // через отдельную вкладку «Временные режимы».
-    arr = events.filter(e => e.end > nowDate && (e.category || 'event') === 'event');
+    // «Сначала дела» — показываем все активные элементы.
+    // В режиме «Все» сюда входят и обычные события, и временные режимы.
+    // Отдельные фильтры «События» / «Временные режимы» дополнительно
+    // ограничивают список по категории.
+    arr = events.filter(e => e.end > nowDate);
+    if(categoryMode === 'event'){
+      arr = arr.filter(e => (e.category || 'event') === 'event');
+    } else if(categoryMode === 'mode'){
+      arr = arr.filter(e => (e.category || 'event') === 'mode');
+    }
   }
 
   // Фильтр игры.
