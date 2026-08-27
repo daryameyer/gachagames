@@ -140,7 +140,10 @@ function manualModes(){
   return [
     {id:'manual:genshin:abyss-2026-08',game:'genshin',title:'Бездна',desc:'Текущий сезон Витой Бездны. Сброс цикла — 16 сентября.',start:new Date('2026-08-16T04:00:00+04:00'),end:new Date('2026-09-16T04:00:00+04:00'),done:false,source:'manual',category:'mode'},
     {id:'manual:genshin:theater-2026-08',game:'genshin',title:'Театр Воображариум',desc:'Августовский сезон. Новый сезон откроется 1 сентября.',start:new Date('2026-08-01T04:00:00+04:00'),end:new Date('2026-09-01T04:00:00+04:00'),done:false,source:'manual',category:'mode'},
-    {id:'manual:genshin:stygian-2026-08',game:'genshin',title:'Мрачный натиск',desc:'Текущий цикл Мрачного натиска версии 7.0.',start:new Date('2026-08-19T10:00:00+04:00'),end:new Date('2026-09-22T03:59:00+04:00'),done:false,source:'manual',category:'mode'}
+    {id:'manual:genshin:stygian-2026-08',game:'genshin',title:'Мрачный натиск',desc:'Текущий цикл Мрачного натиска версии 7.0.',start:new Date('2026-08-19T10:00:00+04:00'),end:new Date('2026-09-22T03:59:00+04:00'),done:false,source:'manual',category:'mode'},
+    {id:'manual:zzz:zero-cavern-2026-08',game:'zzz',title:'Нулевая каверна',desc:'Постоянный боевой режим. Еженедельные награды и задания Нулевой каверны.',start:new Date('2026-08-24T04:00:00+04:00'),end:new Date('2026-08-31T04:00:00+04:00'),done:false,source:'manual',category:'mode'},
+    {id:'manual:zzz:shiyu-2026-08',game:'zzz',title:'Оборона Шиюй',desc:'Текущий цикл Обороны Шиюй. Критический узел версии 3.1.',start:new Date('2026-08-14T04:00:00+04:00'),end:new Date('2026-08-28T04:00:00+04:00'),done:false,source:'manual',category:'mode'},
+    {id:'manual:zzz:deadly-assault-2026-08',game:'zzz',title:'Смертельное нападение',desc:'Текущий цикл Смертельного нападения.',start:new Date('2026-08-14T04:00:00+04:00'),end:new Date('2026-08-28T04:00:00+04:00'),done:false,source:'manual',category:'mode'}
   ];
 }
 
