@@ -542,3 +542,9 @@ html, body{
 .event-row:hover{filter:brightness(1.04)}
 
 .events-sync-status{margin-top:6px;color:#59647b;font-size:10px}
+
+
+.category-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 16px}
+.category-btn{border:1px solid rgba(255,255,255,.08);background:#151922;color:#8f97aa;border-radius:10px;padding:9px 13px;font:600 12px/1 Inter,sans-serif;cursor:pointer;transition:.18s ease}
+.category-btn:hover{border-color:rgba(255,255,255,.18);color:#dce1eb}
+.category-btn.active{background:#222938;color:#fff;border-color:rgba(255,255,255,.18)}

@@ -38,15 +38,15 @@ const patches = [
 let currentModalId=null;
 
 let events = [
-  {id:1,game:'nikki',title:'Вдохновение в мгновение',desc:'Получите двойные награды в царстве Эврики!',start:d(-2),end:d(1.55),done:false},
-  {id:2,game:'zzz',title:'Фокусный разбор: столкновение',desc:'Пройдите боевые испытания и заберите временные награды.',start:d(-1.8),end:d(3.55),done:false},
-  {id:3,game:'genshin',title:'Взаимопомощь в цвету: Фронтиры',desc:'Делайте снимки и выполняйте цели исследовательского события.',start:d(-1.4),end:d(3.7),done:false},
-  {id:4,game:'hsr',title:'Сад изобилия 4.4',desc:'Получайте двойные награды за прохождение Золотых и Багровых чашелистиков.',start:d(-1.1),end:d(5.55),done:false},
-  {id:5,game:'genshin',title:'Веб-событие «Путеводитель по Снежной»',desc:'Зарабатывайте награды за выполнение заданий и изучение новых механик.',start:d(-.7),end:d(7.4),done:false},
-  {id:6,game:'hsr',title:'Антигравитационный разрушитель',desc:'Помогите Авантюрину исследовать заражённый информационный блок.',start:d(-5),end:d(10.55),done:false},
-  {id:7,game:'wuwa',title:'Эхо прошлого: испытание',desc:'Пройдите серию боевых этапов и получите материалы для развития.',start:d(-3),end:d(12),done:false},
-  {id:8,game:'nte',title:'Полевые исследования Эвернесс',desc:'Исследуйте районы города и завершите временные поручения.',start:d(-1),end:d(8),done:false},
-  {id:9,game:'zzz',title:'Улица, где живут истории',desc:'Соберите события дня и откройте дополнительные награды.',start:d(-2),end:d(6),done:false}
+  {id:1,game:'nikki',title:'Вдохновение в мгновение',desc:'Получите двойные награды в царстве Эврики!',start:d(-2),end:d(1.55),done:false,category:'event'},
+  {id:2,game:'zzz',title:'Фокусный разбор: столкновение',desc:'Пройдите боевые испытания и заберите временные награды.',start:d(-1.8),end:d(3.55),done:false,category:'event'},
+  {id:3,game:'genshin',title:'Взаимопомощь в цвету: Фронтиры',desc:'Делайте снимки и выполняйте цели исследовательского события.',start:d(-1.4),end:d(3.7),done:false,category:'event'},
+  {id:4,game:'hsr',title:'Сад изобилия 4.4',desc:'Получайте двойные награды за прохождение Золотых и Багровых чашелистиков.',start:d(-1.1),end:d(5.55),done:false,category:'event'},
+  {id:5,game:'genshin',title:'Веб-событие «Путеводитель по Снежной»',desc:'Зарабатывайте награды за выполнение заданий и изучение новых механик.',start:d(-.7),end:d(7.4),done:false,category:'event'},
+  {id:6,game:'hsr',title:'Антигравитационный разрушитель',desc:'Помогите Авантюрину исследовать заражённый информационный блок.',start:d(-5),end:d(10.55),done:false,category:'event'},
+  {id:7,game:'wuwa',title:'Эхо прошлого: испытание',desc:'Пройдите серию боевых этапов и получите материалы для развития.',start:d(-3),end:d(12),done:false,category:'event'},
+  {id:8,game:'nte',title:'Полевые исследования Эвернесс',desc:'Исследуйте районы города и завершите временные поручения.',start:d(-1),end:d(8),done:false,category:'event'},
+  {id:9,game:'zzz',title:'Улица, где живут истории',desc:'Соберите события дня и откройте дополнительные награды.',start:d(-2),end:d(6),done:false,category:'event'}
 ];
 
 
@@ -66,6 +66,22 @@ function applyRemoteEvents(remoteEvents){
   eventsLastUpdated=new Date();
   renderAll();
 }
+function classifyEvent(raw,game,title=''){
+  const text=String(title||raw?.name||raw?.title||'').toLowerCase();
+  const id=String(raw?.id ?? raw?.activity_id ?? raw?.event_id ?? '');
+  // Повторяющиеся боевые/игровые режимы отделяем от обычных событий.
+  const modePatterns = [
+    'бездна','мрачный натиск','нулевая каверна','зона нулевой каверны','задани[ея] легенд',
+    '幽境危战','盛材移涌','混沌回忆','虚构叙事','末日幻影','位面分裂','异器盈界','声弦涤荡',
+    '群声共振模拟域','сверхсложн','испытани[ея] бездн','stygian onslaught','spiral abyss',
+    'zero cavern','legend quest','memory of chaos','pure fiction','apocalyptic shadow'
+  ];
+  if(modePatterns.some(p=>new RegExp(p,'i').test(text))) return 'mode';
+  // Некоторые источники помечают режимы только ID-активности. Оставляем обычные activity
+  // события событиями, чтобы временные ивенты не исчезали в разделе режимов.
+  return 'event';
+}
+
 function normalizeRemoteEvent(raw,game,index,source){
   const id=raw.id ?? raw.activity_id ?? raw.event_id ?? raw.ann_id ?? `${game}-${index}`;
   const title=raw.name ?? raw.title ?? raw.eventName ?? raw.activity_name;
@@ -75,7 +91,7 @@ function normalizeRemoteEvent(raw,game,index,source){
   const start=typeof startRaw==='number' ? new Date(startRaw*1000) : new Date(startRaw);
   const end=typeof endRaw==='number' ? new Date(endRaw*1000) : new Date(endRaw);
   if(!title || Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || end<=start) return null;
-  return {id:`${source}:${game}:${id}`,game,title:String(title),desc:String(desc),start,end,done:false,source,url:raw.url||raw.link||''};
+  return {id:`${source}:${game}:${id}`,game,title:String(title),desc:String(desc),start,end,done:false,source,url:raw.url||raw.link||'',category:classifyEvent(raw,game,title)};
 }
 async function fetchJson(url){
   const controller=new AbortController();
@@ -118,6 +134,16 @@ async function loadEventsSnapshot(){
   return [];
 }
 
+function manualModes(){
+  // Режимы, которые не всегда приходят из календарного API как обычные события.
+  // Даты актуальны для версии 7.0 на 27.08.2026.
+  return [
+    {id:'manual:genshin:abyss-2026-08',game:'genshin',title:'Бездна',desc:'Текущий сезон Витой Бездны. Сброс цикла — 16 сентября.',start:new Date('2026-08-16T04:00:00+04:00'),end:new Date('2026-09-16T04:00:00+04:00'),done:false,source:'manual',category:'mode'},
+    {id:'manual:genshin:theater-2026-08',game:'genshin',title:'Театр Воображариум',desc:'Августовский сезон. Новый сезон откроется 1 сентября.',start:new Date('2026-08-01T04:00:00+04:00'),end:new Date('2026-09-01T04:00:00+04:00'),done:false,source:'manual',category:'mode'},
+    {id:'manual:genshin:stygian-2026-08',game:'genshin',title:'Мрачный натиск',desc:'Текущий цикл Мрачного натиска версии 7.0.',start:new Date('2026-08-19T10:00:00+04:00'),end:new Date('2026-09-22T03:59:00+04:00'),done:false,source:'manual',category:'mode'}
+  ];
+}
+
 async function loadRemoteEvents(){
   const gamesToLoad=['genshin','hsr','zzz','wuwa','endfield','nte','nikki'];
   eventsAutoSource=Object.fromEntries(gamesToLoad.map(x=>[x,false]));
@@ -139,7 +165,9 @@ async function loadRemoteEvents(){
     else merged.push(...legacy);
   }
 
-  if(merged.length) applyRemoteEvents(merged);
+  const manual=manualModes();
+  const mergedWithModes=[...merged.filter(e=>!manual.some(m=>m.id===e.id)),...manual];
+  if(mergedWithModes.length) applyRemoteEvents(mergedWithModes);
   updateEventsSyncStatus();
 }
 function updateEventsSyncStatus(){
@@ -234,6 +262,7 @@ function formatDailyLeft(ms){
 }
 
 let selected='all';
+let categoryMode='all';
 let sortMode='ending';
 let viewMode='checklist';
 
@@ -279,6 +308,8 @@ function visibleEvents(){
   if(selected === 'ended'){
     arr = events.filter(e => e.end <= nowDate);
   }
+
+  if(categoryMode !== 'all') arr = arr.filter(e => (e.category || 'event') === categoryMode);
 
   if(sortMode === 'ending'){
     arr.sort((a,b) => a.end - b.end);
@@ -339,11 +370,12 @@ function renderEvents(){
   }
   list.innerHTML=arr.map(e=>{
     const g=games[e.game], left=e.end-new Date(), tc=timeClass(left);
+    const categoryLabel=e.category==='mode'?'ВРЕМЕННЫЙ РЕЖИМ':'СОБЫТИЕ';
     const timeColor=tc==='week'?'#7b8498':tc==='underweek'?'#efcf45':tc==='under3'?'#ef8f32':'#ef4f5f';
     return `<article class="event-row ${e.done?'event-done':''}" data-event-id="${e.id}" style="--game-color:${g.color};--time-color:${timeColor}">
       <div class="event-top">
         <div class="event-main-info">
-          <div class="game-name">${g.name}</div>
+          <div class="game-name">${g.name} · ${categoryLabel}</div>
           <div class="event-title">${e.title}</div>
           <div class="event-desc">${e.desc}</div>
         </div>
@@ -501,6 +533,12 @@ document.querySelector('#catchUp').onclick=()=>{
   dailyConfig.forEach(x=>setDailyDone(x.id,true));
   renderDailies();
 };
+
+document.querySelectorAll('.category-btn').forEach(b=>b.onclick=()=>{
+  categoryMode=b.dataset.category;
+  document.querySelectorAll('.category-btn').forEach(x=>x.classList.toggle('active',x===b));
+  renderAll();
+});
 
 const savedEvents = JSON.parse(localStorage.getItem('eventclock-events')||'null');
 if(savedEvents) events.forEach(e=>{if(savedEvents[e.id]!==undefined)e.done=!!savedEvents[e.id];});
