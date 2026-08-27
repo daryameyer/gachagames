@@ -66,15 +66,32 @@ function applyRemoteEvents(remoteEvents){
   eventsLastUpdated=new Date();
   renderAll();
 }
+
+const wuwaEnglishTitles = {
+  '回音盈域': 'Bountiful Crescendo',
+  '第二索拉・诡影迷踪': 'Second Coming of Solaris: Coded Deception',
+  '第二索拉·诡影迷踪': 'Second Coming of Solaris: Coded Deception',
+  '清弦纪流年': 'The Strings Remember',
+  '若梦仍有回声': 'If Dreams Still Reverberate',
+  '潮汐觅闻': 'Wuthering Exploration: Fogveil Pagoda',
+  '烟云赠礼': 'Gifts of Drifting Mist',
+  '声弦涤荡': 'Chord Cleansing',
+  '群声共振模拟域': 'Resonance Sim Realm'
+};
+function localizeGameTitle(game,title){
+  if(game==='wuwa') return wuwaEnglishTitles[String(title).trim()] || String(title);
+  return String(title);
+}
+
 function classifyEvent(raw,game,title=''){
   const text=String(title||raw?.name||raw?.title||'').toLowerCase();
   const id=String(raw?.id ?? raw?.activity_id ?? raw?.event_id ?? '');
   // Повторяющиеся боевые/игровые режимы отделяем от обычных событий.
   const modePatterns = [
-    'бездна','мрачный натиск','нулевая каверна','зона нулевой каверны','задани[ея] легенд',
+    'бездна','мрачный натиск','нулевая каверна','зона нулевой каверны','задани[ея] легенд','башня невзгод','шепчущие пустоши','конечная матрица','фантазии тысячи врат',
     '幽境危战','盛材移涌','混沌回忆','虚构叙事','末日幻影','位面分裂','异器盈界','声弦涤荡',
     '群声共振模拟域','сверхсложн','испытани[ея] бездн','stygian onslaught','spiral abyss',
-    'zero cavern','legend quest','memory of chaos','pure fiction','apocalyptic shadow'
+    'zero cavern','legend quest','memory of chaos','pure fiction','apocalyptic shadow','tower of adversity','whimpering wastes','endstate matrix','fantasies of the thousand gateways'
   ];
   if(modePatterns.some(p=>new RegExp(p,'i').test(text))) return 'mode';
   // Некоторые источники помечают режимы только ID-активности. Оставляем обычные activity
@@ -84,7 +101,7 @@ function classifyEvent(raw,game,title=''){
 
 function normalizeRemoteEvent(raw,game,index,source){
   const id=raw.id ?? raw.activity_id ?? raw.event_id ?? raw.ann_id ?? `${game}-${index}`;
-  const title=raw.name ?? raw.title ?? raw.eventName ?? raw.activity_name;
+  const title=localizeGameTitle(game, raw.name ?? raw.title ?? raw.eventName ?? raw.activity_name);
   const desc=raw.description ?? raw.desc ?? raw.summary ?? '';
   const startRaw=raw.start_time ?? raw.startTime ?? raw.start_at ?? raw.start;
   const endRaw=raw.end_time ?? raw.endTime ?? raw.end_at ?? raw.end;
@@ -146,7 +163,11 @@ function manualModes(){
     {id:'manual:zzz:deadly-assault-2026-08',game:'zzz',title:'Смертельное нападение',desc:'Текущий цикл Смертельного нападения.',start:new Date('2026-08-14T04:00:00+04:00'),end:new Date('2026-08-28T04:00:00+04:00'),done:false,source:'manual',category:'mode'},
     {id:'manual:hsr:apocalyptic-shadow-2026-08',game:'hsr',title:'Апокалиптическая тень',desc:'Текущий цикл Апокалиптической тени. Завершение цикла — 31 августа.',start:new Date('2026-07-20T05:00:00+04:00'),end:new Date('2026-08-31T05:00:00+04:00'),done:false,source:'manual',category:'mode'},
     {id:'manual:hsr:pure-fiction-2026-08',game:'hsr',title:'Чистый вымысел',desc:'Текущий цикл Чистого вымысла. Завершение цикла — 14 сентября.',start:new Date('2026-08-03T05:00:00+04:00'),end:new Date('2026-09-14T05:00:00+04:00'),done:false,source:'manual',category:'mode'},
-    {id:'manual:hsr:memory-of-chaos-2026-08',game:'hsr',title:'Зал Забвения',desc:'Текущий цикл Зала Забвения: Память Хаоса. Завершение цикла — 28 сентября.',start:new Date('2026-08-17T05:00:00+04:00'),end:new Date('2026-09-28T05:00:00+04:00'),done:false,source:'manual',category:'mode'}
+    {id:'manual:hsr:memory-of-chaos-2026-08',game:'hsr',title:'Зал Забвения',desc:'Текущий цикл Зала Забвения: Память Хаоса. Завершение цикла — 28 сентября.',start:new Date('2026-08-17T05:00:00+04:00'),end:new Date('2026-09-28T05:00:00+04:00'),done:false,source:'manual',category:'mode'},
+    {id:'manual:wuwa:tower-of-adversity-2026-08',game:'wuwa',title:'Tower of Adversity',desc:'Current Tower of Adversity cycle. Current cycle ends September 14.',start:new Date('2026-08-17T04:00:00+04:00'),end:new Date('2026-09-14T04:00:00+04:00'),done:false,source:'manual',category:'mode'},
+    {id:'manual:wuwa:whimpering-wastes-2026-08',game:'wuwa',title:'Whispering Wastes',desc:'Current Whispering Wastes cycle. Reset — August 31.',start:new Date('2026-08-03T04:00:00+04:00'),end:new Date('2026-08-31T04:00:00+04:00'),done:false,source:'manual',category:'mode'},
+    {id:'manual:wuwa:endstate-matrix-2026-08',game:'wuwa',title:'Endstate Matrix',desc:'Current Endstate Matrix phase. Phase ends September 30.',start:new Date('2026-08-27T04:00:00+04:00'),end:new Date('2026-09-30T04:00:00+04:00'),done:false,source:'manual',category:'mode'},
+    {id:'manual:wuwa:fantasies-thousand-gateways-2026-08',game:'wuwa',title:'Fantasies of the Thousand Gateways',desc:'Current weekly rotation. Refreshes August 31.',start:new Date('2026-08-24T04:00:00+04:00'),end:new Date('2026-08-31T04:00:00+04:00'),done:false,source:'manual',category:'mode'}
   ];
 }
 
