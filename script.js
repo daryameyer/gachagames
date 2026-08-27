@@ -143,7 +143,10 @@ function manualModes(){
     {id:'manual:genshin:stygian-2026-08',game:'genshin',title:'Мрачный натиск',desc:'Текущий цикл Мрачного натиска версии 7.0.',start:new Date('2026-08-19T10:00:00+04:00'),end:new Date('2026-09-22T03:59:00+04:00'),done:false,source:'manual',category:'mode'},
     {id:'manual:zzz:zero-cavern-2026-08',game:'zzz',title:'Нулевая каверна',desc:'Постоянный боевой режим. Еженедельные награды и задания Нулевой каверны.',start:new Date('2026-08-24T04:00:00+04:00'),end:new Date('2026-08-31T04:00:00+04:00'),done:false,source:'manual',category:'mode'},
     {id:'manual:zzz:shiyu-2026-08',game:'zzz',title:'Оборона Шиюй',desc:'Текущий цикл Обороны Шиюй. Критический узел версии 3.1.',start:new Date('2026-08-14T04:00:00+04:00'),end:new Date('2026-08-28T04:00:00+04:00'),done:false,source:'manual',category:'mode'},
-    {id:'manual:zzz:deadly-assault-2026-08',game:'zzz',title:'Смертельное нападение',desc:'Текущий цикл Смертельного нападения.',start:new Date('2026-08-14T04:00:00+04:00'),end:new Date('2026-08-28T04:00:00+04:00'),done:false,source:'manual',category:'mode'}
+    {id:'manual:zzz:deadly-assault-2026-08',game:'zzz',title:'Смертельное нападение',desc:'Текущий цикл Смертельного нападения.',start:new Date('2026-08-14T04:00:00+04:00'),end:new Date('2026-08-28T04:00:00+04:00'),done:false,source:'manual',category:'mode'},
+    {id:'manual:hsr:apocalyptic-shadow-2026-08',game:'hsr',title:'Апокалиптическая тень',desc:'Текущий цикл Апокалиптической тени. Завершение цикла — 31 августа.',start:new Date('2026-07-20T05:00:00+04:00'),end:new Date('2026-08-31T05:00:00+04:00'),done:false,source:'manual',category:'mode'},
+    {id:'manual:hsr:pure-fiction-2026-08',game:'hsr',title:'Чистый вымысел',desc:'Текущий цикл Чистого вымысла. Завершение цикла — 14 сентября.',start:new Date('2026-08-03T05:00:00+04:00'),end:new Date('2026-09-14T05:00:00+04:00'),done:false,source:'manual',category:'mode'},
+    {id:'manual:hsr:memory-of-chaos-2026-08',game:'hsr',title:'Зал Забвения',desc:'Текущий цикл Зала Забвения: Память Хаоса. Завершение цикла — 28 сентября.',start:new Date('2026-08-17T05:00:00+04:00'),end:new Date('2026-09-28T05:00:00+04:00'),done:false,source:'manual',category:'mode'}
   ];
 }
 
