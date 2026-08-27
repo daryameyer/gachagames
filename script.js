@@ -293,13 +293,18 @@ function visibleEvents(){
 
   let arr;
 
-  if(sortMode === 'ending'){
-    // «Скорее закончится» — только активные события,
+  // Вкладка «Временные режимы» должна показывать все активные режимы,
+  // даже если их окончание не попадает в ближайшие 7 дней.
+  // Иначе постоянные/длинные режимы вроде Нулевой каверны пропадают.
+  if(categoryMode === 'mode'){
+    arr = events.filter(e => e.end > nowDate && (e.category || 'event') === 'mode');
+  } else if(sortMode === 'ending'){
+    // «Скорее закончится» — только обычные активные события,
     // которые закончатся в ближайшие 7 дней.
-    arr = events.filter(e => e.end > nowDate && e.end <= sevenDaysLater);
+    arr = events.filter(e => e.end > nowDate && e.end <= sevenDaysLater && (e.category || 'event') === 'event');
   } else {
     // «Сначала дела» — ВСЕ активные события.
-    arr = events.filter(e => e.end > nowDate);
+    arr = events.filter(e => e.end > nowDate && (e.category || 'event') === 'event');
   }
 
   // Фильтр игры.
@@ -312,7 +317,7 @@ function visibleEvents(){
     arr = events.filter(e => e.end <= nowDate);
   }
 
-  if(categoryMode !== 'all') arr = arr.filter(e => (e.category || 'event') === categoryMode);
+  if(categoryMode !== 'all' && selected === 'ended') arr = arr.filter(e => (e.category || 'event') === categoryMode);
 
   if(sortMode === 'ending'){
     arr.sort((a,b) => a.end - b.end);
@@ -365,9 +370,11 @@ function renderEvents(){
   const arr=visibleEvents();
   const list=document.querySelector('#eventList');
   if(!arr.length){
-    const message = sortMode === 'ending'
-      ? 'Нет событий, заканчивающихся в ближайшие 7 дней.'
-      : 'Нет активных или будущих событий.';
+    const message = categoryMode === 'mode'
+      ? 'Сейчас нет активных временных режимов.'
+      : sortMode === 'ending'
+        ? 'Нет событий, заканчивающихся в ближайшие 7 дней.'
+        : 'Нет активных или будущих событий.';
     list.innerHTML=`<div class="empty">${message}</div>`;
     return;
   }
