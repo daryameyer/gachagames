@@ -32,8 +32,25 @@ async function fetchJson(url) {
   return res.json();
 }
 
+
+const wuwaEnglishTitles = {
+  '回音盈域': 'Bountiful Crescendo',
+  '第二索拉・诡影迷踪': 'Second Coming of Solaris: Coded Deception',
+  '第二索拉·诡影迷踪': 'Second Coming of Solaris: Coded Deception',
+  '清弦纪流年': 'The Strings Remember',
+  '若梦仍有回声': 'If Dreams Still Reverberate',
+  '潮汐觅闻': 'Wuthering Exploration: Fogveil Pagoda',
+  '烟云赠礼': 'Gifts of Drifting Mist',
+  '声弦涤荡': 'Chord Cleansing',
+  '群声共振模拟域': 'Resonance Sim Realm'
+};
+function localizeGameTitle(game,title){
+  if(game==='wuwa') return wuwaEnglishTitles[String(title).trim()] || String(title);
+  return String(title);
+}
+
 function toEvent(x, game, i, source) {
-  const title = x?.name ?? x?.title ?? x?.eventName ?? x?.activity_name;
+  const title = localizeGameTitle(game, x?.name ?? x?.title ?? x?.eventName ?? x?.activity_name);
   const desc = x?.description ?? x?.desc ?? x?.summary ?? '';
   const startRaw = x?.start_time ?? x?.startTime ?? x?.start_at ?? x?.start;
   const endRaw = x?.end_time ?? x?.endTime ?? x?.end_at ?? x?.end;
