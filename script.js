@@ -156,6 +156,7 @@ function updateEventsSyncStatus(){
 loadRemoteEvents();
 setInterval(loadRemoteEvents,30*60*1000);
 
+// Ежедневные поручения — отдельный трекер, не смешиваем их с временными событиями.
 const dailyConfig = [
   {id:'genshin', name:'Геншин', color:'#3ca9e5', resetMsk:6},
   {id:'hsr', name:'ХСР', color:'#6a2ab4', resetMsk:6},
@@ -391,7 +392,7 @@ function renderDailies(){
       <span class="daily-game-accent"></span>
       <span class="daily-game-main">
         <span class="daily-game-name">${cfg.name}</span>
-        <span class="daily-game-status">${done?'Выполнено':'Ежедневки не отмечены'}</span>
+        <span class="daily-game-status">${done?'Выполнено':'Поручение не выполнено'}</span>
       </span>
       <span class="daily-game-right">
         <span class="daily-game-countdown">${done?'✓':formatDailyLeft(left)}</span>
