@@ -299,11 +299,16 @@ function visibleEvents(){
   if(categoryMode === 'mode'){
     arr = events.filter(e => e.end > nowDate && (e.category || 'event') === 'mode');
   } else if(sortMode === 'ending'){
-    // «Скорее закончится» — только обычные активные события,
-    // которые закончатся в ближайшие 7 дней.
-    arr = events.filter(e => e.end > nowDate && e.end <= sevenDaysLater && (e.category || 'event') === 'event');
+    // «Скорее закончится» — показываем ВСЕ активные элементы,
+    // включая временные режимы, если они заканчиваются в ближайшие 7 дней.
+    // Категория фильтруется отдельно через «Все / События / Временные режимы».
+    arr = events.filter(e => e.end > nowDate && e.end <= sevenDaysLater);
+    if(categoryMode === 'event'){
+      arr = arr.filter(e => (e.category || 'event') === 'event');
+    }
   } else {
-    // «Сначала дела» — ВСЕ активные события.
+    // «Сначала дела» — обычные события. Временные режимы доступны
+    // через отдельную вкладку «Временные режимы».
     arr = events.filter(e => e.end > nowDate && (e.category || 'event') === 'event');
   }
 
