@@ -5,10 +5,10 @@ const games = {
   ended:{name:'Завершённые', color:'#6e7890'},
   genshin:{name:'Геншин', color:'#3ca9e5'},
   hsr:{name:'ХСР', color:'#6a2ab4'},
-  nikki:{name:'Инфинити Никки', short:'Никки', color:'#dc5a98'},
-  nte:{name:'НТЕ', color:'#62d6e6'},
-  endfield:{name:'Arknights: Endfield', short:'Эндфилд', color:'#d8a84e'},
-  wuwa:{name:'Вува', color:'#00040a'},
+  nikki:{name:'Infinity Nikki', short:'Nikki', color:'#dc5a98'},
+  nte:{name:'Neverness to Everness', short:'NTE', color:'#62d6e6'},
+  endfield:{name:'Arknights: Endfield', short:'Endfield', color:'#d8a84e'},
+  wuwa:{name:'Wuthering Waves', short:'Wuthering Waves', color:'#00040a'},
   zzz:{name:'ZZZ', color:'#e39a26'}
 };
 
@@ -164,10 +164,10 @@ function manualModes(){
     {id:'manual:hsr:apocalyptic-shadow-2026-08',game:'hsr',title:'Апокалиптическая тень',desc:'Текущий цикл Апокалиптической тени. Завершение цикла — 31 августа.',start:new Date('2026-07-20T05:00:00+04:00'),end:new Date('2026-08-31T05:00:00+04:00'),done:false,source:'manual',category:'mode'},
     {id:'manual:hsr:pure-fiction-2026-08',game:'hsr',title:'Чистый вымысел',desc:'Текущий цикл Чистого вымысла. Завершение цикла — 14 сентября.',start:new Date('2026-08-03T05:00:00+04:00'),end:new Date('2026-09-14T05:00:00+04:00'),done:false,source:'manual',category:'mode'},
     {id:'manual:hsr:memory-of-chaos-2026-08',game:'hsr',title:'Зал Забвения',desc:'Текущий цикл Зала Забвения: Память Хаоса. Завершение цикла — 28 сентября.',start:new Date('2026-08-17T05:00:00+04:00'),end:new Date('2026-09-28T05:00:00+04:00'),done:false,source:'manual',category:'mode'},
-    {id:'manual:wuwa:tower-of-adversity-2026-08',game:'wuwa',title:'Tower of Adversity',desc:'Current Tower of Adversity cycle. Current cycle ends September 14.',start:new Date('2026-08-17T04:00:00+04:00'),end:new Date('2026-09-14T04:00:00+04:00'),done:false,source:'manual',category:'mode'},
-    {id:'manual:wuwa:whimpering-wastes-2026-08',game:'wuwa',title:'Whispering Wastes',desc:'Current Whispering Wastes cycle. Reset — August 31.',start:new Date('2026-08-03T04:00:00+04:00'),end:new Date('2026-08-31T04:00:00+04:00'),done:false,source:'manual',category:'mode'},
-    {id:'manual:wuwa:endstate-matrix-2026-08',game:'wuwa',title:'Endstate Matrix',desc:'Current Endstate Matrix phase. Phase ends September 30.',start:new Date('2026-08-27T04:00:00+04:00'),end:new Date('2026-09-30T04:00:00+04:00'),done:false,source:'manual',category:'mode'},
-    {id:'manual:wuwa:fantasies-thousand-gateways-2026-08',game:'wuwa',title:'Fantasies of the Thousand Gateways',desc:'Current weekly rotation. Refreshes August 31.',start:new Date('2026-08-24T04:00:00+04:00'),end:new Date('2026-08-31T04:00:00+04:00'),done:false,source:'manual',category:'mode'}
+    {id:'manual:wuwa:tower-of-adversity-2026-08',game:'wuwa',title:'Башня невзгод',desc:'Текущий цикл Башни невзгод. Завершение цикла — 14 сентября.',start:new Date('2026-08-17T04:00:00+04:00'),end:new Date('2026-09-14T04:00:00+04:00'),done:false,source:'manual',category:'mode'},
+    {id:'manual:wuwa:whimpering-wastes-2026-08',game:'wuwa',title:'Шепчущие пустоши',desc:'Текущий цикл Шепчущих пустошей. Сброс — 31 августа.',start:new Date('2026-08-03T04:00:00+04:00'),end:new Date('2026-08-31T04:00:00+04:00'),done:false,source:'manual',category:'mode'},
+    {id:'manual:wuwa:endstate-matrix-2026-08',game:'wuwa',title:'Конечная матрица',desc:'Текущая фаза Конечной матрицы. Завершение — 30 сентября.',start:new Date('2026-08-27T04:00:00+04:00'),end:new Date('2026-09-30T04:00:00+04:00'),done:false,source:'manual',category:'mode'},
+    {id:'manual:wuwa:fantasies-thousand-gateways-2026-08',game:'wuwa',title:'Фантазии тысячи врат',desc:'Текущая еженедельная ротация. Обновление — 31 августа.',start:new Date('2026-08-24T04:00:00+04:00'),end:new Date('2026-08-31T04:00:00+04:00'),done:false,source:'manual',category:'mode'}
   ];
 }
 
@@ -294,7 +294,7 @@ let sortMode='ending';
 let viewMode='checklist';
 
 const focusGameOrder=['all','endfield','genshin','hsr','nikki','nte','wuwa','zzz'];
-const focusGameLabels={all:'All',endfield:'Endfield',genshin:'Genshin',hsr:'Star Rail',nikki:'Nikki',nte:'NTE',wuwa:'WuWa',zzz:'ZZZ'};
+const focusGameLabels={all:'Все',endfield:'Endfield',genshin:'Геншин',hsr:'ХСР',nikki:'Никки',nte:'NTE',wuwa:'Wuthering Waves',zzz:'ZZZ'};
 
 
 function formatLeft(ms){

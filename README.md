@@ -30,7 +30,7 @@ node server.js
 http://localhost:3000
 ```
 
-## Автоматические источники
+## Игры и автоматические источники
 
 - Genshin — календарь HoYoverse API;
 - Honkai: Star Rail — календарь HoYoverse API;
