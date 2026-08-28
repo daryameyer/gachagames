@@ -109,20 +109,16 @@ const zzzRussianDescriptions = {
   "末日幻影•兵锋骑士": "Пройдите испытания Апокалиптической тени и получите награды за боевые достижения.",
   "末日幻影·兵锋骑士": "Пройдите испытания Апокалиптической тени и получите награды за боевые достижения."
 };
-
-function localizeZZZText(value){
-  const text=String(value??'').trim();
-  return zzzRussianTitles[text] || text;
-}
-function localizeZZZDescription(title,desc){
-  const key=String(title??'').trim();
-  return zzzRussianDescriptions[key] || String(desc??'');
-}
+const zzzChallengeTypes = new Set(['deadly_assault','shiyu_defense','threshold_simulation','annihilation_simulacrum']);
 function localizeGameTitle(game,title){
   const value=String(title??'').trim();
   if(game==='wuwa') return wuwaEnglishTitles[value] || value;
-  if(game==='zzz') return localizeZZZText(value);
+  if(game==='zzz') return zzzRussianTitles[value] || value;
   return value;
+}
+function localizeGameDesc(game,title,desc){
+  if(game==='zzz') return zzzRussianDescriptions[String(title??'').trim()] || String(desc??'');
+  return String(desc??'');
 }
 
 function classifyEvent(raw,game,title=''){
@@ -146,9 +142,9 @@ function classifyEvent(raw,game,title=''){
 
 function normalizeRemoteEvent(raw,game,index,source){
   const id=raw.id ?? raw.activity_id ?? raw.event_id ?? raw.ann_id ?? `${game}-${index}`;
-  const title=localizeGameTitle(game, raw.name ?? raw.title ?? raw.eventName ?? raw.activity_name);
-  const descRaw=raw.description ?? raw.desc ?? raw.summary ?? '';
-  const desc=game==='zzz' ? localizeZZZDescription(raw.name ?? raw.title ?? raw.eventName ?? raw.activity_name, descRaw) : descRaw;
+  const rawTitle=raw.name ?? raw.title ?? raw.eventName ?? raw.activity_name;
+  const title=localizeGameTitle(game, rawTitle);
+  const desc=localizeGameDesc(game, rawTitle, raw.description ?? raw.desc ?? raw.summary ?? '');
   const startRaw=raw.start_time ?? raw.startTime ?? raw.start_at ?? raw.start;
   const endRaw=raw.end_time ?? raw.endTime ?? raw.end_at ?? raw.end;
   const start=typeof startRaw==='number' ? new Date(startRaw*1000) : new Date(startRaw);
@@ -172,14 +168,7 @@ async function loadOneSource(game){
       ? `/api/official-events?game=${game}`
       : `/api/events?game=${game}`;
     const data=await fetchJson(endpoint);
-    let list=Array.isArray(data?.events)?[...data.events]:[];
-    if(game==='zzz' && Array.isArray(data?.challenges)){
-      for(const challenge of data.challenges){
-        if(['deadly_assault','shiyu_defense'].includes(String(challenge.type_name||challenge.challenge_type))){
-          list.push({...challenge,title:challenge.name,challenge_type:challenge.type_name,category:'mode'});
-        }
-      }
-    }
+    const list=Array.isArray(data?.events)?data.events:[];
     const normalized=list.map((x,i)=>normalizeRemoteEvent(x,game,i,data.source?'calendar':'official')).filter(Boolean).filter(e=>e.end>new Date());
     if(normalized.length){eventsAutoSource[game]=true;return normalized;}
   }catch(err){console.warn(`EVENTCLOCK: источник ${game} недоступен`,err)}

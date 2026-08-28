@@ -140,17 +140,16 @@ const zzzRussianDescriptions = {
 };
 const zzzChallengeTypes = new Set(['deadly_assault','shiyu_defense','threshold_simulation','annihilation_simulacrum']);
 function localizeZZZTitle(title){ const value=String(title??'').trim(); return zzzRussianTitles[value] || value; }
-function localizeZZZDescription(title,desc){ const value=String(title??'').trim(); return zzzRussianDescriptions[value] || String(desc??''); }
+function localizeZZZDesc(title,desc){ const value=String(title??'').trim(); return zzzRussianDescriptions[value] || String(desc??''); }
 
 function normalizeCalendarEvent(raw,game,index,source){
   const id=raw.id??raw.activity_id??raw.event_id??raw.ann_id??`${game}-${index}`;
   const rawTitle=raw.name??raw.title??raw.eventName??raw.activity_name;
   const title=game==='zzz'?localizeZZZTitle(rawTitle):rawTitle;
-  const descRaw=raw.description??raw.desc??raw.summary??'';
-  const desc=game==='zzz'?localizeZZZDescription(rawTitle,descRaw):descRaw;
+  const desc=raw.description??raw.desc??raw.summary??'';
   const startRaw=raw.start_time??raw.startTime??raw.start_at??raw.start;
   const endRaw=raw.end_time??raw.endTime??raw.end_at??raw.end;
-  const start=typeof startRaw==='number'?new Date(startRaw*1000):new Date(startRaw);
+  let start=typeof startRaw==='number'?new Date(startRaw*1000):new Date(startRaw);
   let end=typeof endRaw==='number'?new Date(endRaw*1000):new Date(endRaw);
   const challengeType=String(raw.challenge_type||raw.type_name||'').toLowerCase();
   const isZZZChallenge=game==='zzz' && zzzChallengeTypes.has(challengeType);

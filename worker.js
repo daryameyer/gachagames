@@ -141,17 +141,16 @@ const zzzRussianDescriptions = {
 };
 const zzzChallengeTypes = new Set(['deadly_assault','shiyu_defense','threshold_simulation','annihilation_simulacrum']);
 function localizeZZZTitle(title){ const value=String(title??'').trim(); return zzzRussianTitles[value] || value; }
-function localizeZZZDescription(title,desc){ const value=String(title??'').trim(); return zzzRussianDescriptions[value] || String(desc??''); }
+function localizeZZZDesc(title,desc){ const value=String(title??'').trim(); return zzzRussianDescriptions[value] || String(desc??''); }
 
 function normalizeCalendarEvent(raw,game,index,source){
   const id=raw.id??raw.activity_id??raw.event_id??raw.ann_id??`${game}-${index}`;
   const rawTitle=raw.name??raw.title??raw.eventName??raw.activity_name;
   const title=game==='zzz'?localizeZZZTitle(rawTitle):rawTitle;
-  const descRaw=raw.description??raw.desc??raw.summary??'';
-  const desc=game==='zzz'?localizeZZZDescription(rawTitle,descRaw):descRaw;
+  const desc=game==='zzz'?localizeZZZDesc(rawTitle,raw.description??raw.desc??raw.summary??''):(raw.description??raw.desc??raw.summary??'');
   const startRaw=raw.start_time??raw.startTime??raw.start_at??raw.start;
   const endRaw=raw.end_time??raw.endTime??raw.end_at??raw.end;
-  const start=typeof startRaw==='number'?new Date(startRaw*1000):new Date(startRaw);
+  let start=typeof startRaw==='number'?new Date(startRaw*1000):new Date(startRaw);
   let end=typeof endRaw==='number'?new Date(endRaw*1000):new Date(endRaw);
   const challengeType=String(raw.challenge_type||raw.type_name||'').toLowerCase();
   const isZZZChallenge=game==='zzz' && zzzChallengeTypes.has(challengeType);
@@ -207,8 +206,7 @@ async function activityEvents(game){
       return list.map((x,i)=>{
         const rawTitle=x.name??x.title;
         const title=game==='zzz'?localizeZZZTitle(rawTitle):rawTitle;
-        const descRaw=x.description??x.desc??'';
-        const desc=game==='zzz'?localizeZZZDescription(rawTitle,descRaw):descRaw;
+        const desc=game==='zzz'?localizeZZZDesc(rawTitle,x.description??x.desc??''):(x.description??x.desc??'');
         const start=new Date(x.startTime??x.start_time??x.start);
         const end=new Date(x.endTime??x.end_time??x.end);
         if(!title||Number.isNaN(start.getTime())||Number.isNaN(end.getTime())||end<=start||end.getTime()<=now)return null;
@@ -339,8 +337,7 @@ async function scrapeOfficial(game){
       if(extracted.length)return extracted;
       const duration=parseDuration(text,game);
       if(!duration||duration.end.getTime()<=now)return[];
-      let title=firstTitle(article,link.title||'Событие');
-      if(game==='zzz') title=localizeZZZTitle(title);
+      const title=firstTitle(article,link.title||'Событие');
       return [{id:`official:${game}:${eventId(link.url,0)}`,game,title,desc:'Официальное событие',start:duration.start,end:duration.end,done:false,source:'official',url:link.url}];
     }catch(err){console.warn(game,link.url,err.message);return[];}
   }));
@@ -360,9 +357,7 @@ async function snapshotEvents(game){
       return list.filter(e=>e&&e.game===game).map((e,i)=>{
         const start=new Date(e.start),end=new Date(e.end);
         if(!e.title||Number.isNaN(start.getTime())||Number.isNaN(end.getTime())||end<=start||end.getTime()<=Date.now())return null;
-        const title=game==='zzz'?localizeZZZTitle(e.title):String(e.title);
-        const desc=game==='zzz'?localizeZZZDescription(e.title,e.desc||''):String(e.desc||'');
-        return {id:`snapshot:${e.id||`${game}:${i}`}`,game,title,desc,start,end,done:false,source:'snapshot',url:e.url||'',category:e.category||'event'};
+        return {id:`snapshot:${e.id||`${game}:${i}`}`,game,title:String(e.title),desc:String(e.desc||''),start,end,done:false,source:'snapshot',url:e.url||''};
       }).filter(Boolean);
     }catch(err){console.warn('snapshot unavailable:',err.message);return[];}
   });
