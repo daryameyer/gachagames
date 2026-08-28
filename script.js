@@ -81,17 +81,34 @@ const wuwaEnglishTitles = {
   '声弦涤荡': 'Chord Cleansing',
   '群声共振模拟域': 'Resonance Sim Realm'
 };
+const zzzRussianTitles = {
+  '恰浪花逐夏而至': 'Дары прибоя',
+  '咔滋酥脆出餐计划': 'Прожарка с корочкой',
+  '极危通缉与悠游假期': 'Отпуск в розыске',
+  '实战特训-三倍悬赏': 'Практическая тренировка — тройная награда',
+  '云端礼赠': 'Подарки из облаков',
+  '「嗯呢」大派送！': 'Большая раздача «Эн-эн»!',
+  '玛瑟尔周年馈礼': 'Подарки к годовщине Марселя',
+  '法厄同年度大揭秘': 'Годовой итог Фаэтона',
+  '潛能预演·狩猎游戏': 'Прелюдия потенциала · Охотничья игра',
+  '叮咚！见习邮差派件中': 'Динь-дон! Стажёр-почтальон доставляет посылки'
+};
 function localizeGameTitle(game,title){
-  if(game==='wuwa') return wuwaEnglishTitles[String(title).trim()] || String(title);
-  return String(title);
+  const value=String(title??'').trim();
+  if(game==='wuwa') return wuwaEnglishTitles[value] || value;
+  if(game==='zzz') return zzzRussianTitles[value] || value;
+  return value;
 }
 
 function classifyEvent(raw,game,title=''){
   const text=String(title||raw?.name||raw?.title||'').toLowerCase();
   const id=String(raw?.id ?? raw?.activity_id ?? raw?.event_id ?? '');
   // Повторяющиеся боевые/игровые режимы отделяем от обычных событий.
+  const challengeType=String(raw?.challenge_type || raw?.type_name || '').toLowerCase();
+  if(game==='zzz' && ['deadly_assault','shiyu_defense','threshold_simulation','annihilation_simulacrum'].includes(challengeType)) return 'mode';
+
   const modePatterns = [
-    'бездна','мрачный натиск','нулевая каверна','зона нулевой каверны','задани[ея] легенд','башня невзгод','шепчущие пустоши','конечная матрица','фантазии тысячи врат',
+    'опасный штурм','оборона шиюй','бездна','мрачный натиск','нулевая каверна','зона нулевой каверны','задани[ея] легенд','башня невзгод','шепчущие пустоши','конечная матрица','фантазии тысячи врат',
     '幽境危战','盛材移涌','混沌回忆','虚构叙事','末日幻影','位面分裂','异器盈界','声弦涤荡',
     '群声共振模拟域','сверхсложн','испытани[ея] бездн','stygian onslaught','spiral abyss',
     'zero cavern','legend quest','memory of chaos','pure fiction','apocalyptic shadow','tower of adversity','whimpering wastes','endstate matrix','fantasies of the thousand gateways'

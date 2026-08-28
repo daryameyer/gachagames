@@ -111,16 +111,41 @@ function parseDuration(text,kind){
   return {start,end};
 }
 
+const zzzRussianTitles = {
+  '恰浪花逐夏而至': 'Дары прибоя',
+  '咔滋酥脆出餐计划': 'Прожарка с корочкой',
+  '极危通缉与悠游假期': 'Отпуск в розыске',
+  '实战特训-三倍悬赏': 'Практическая тренировка — тройная награда',
+  '云端礼赠': 'Подарки из облаков',
+  '「嗯呢」大派送！': 'Большая раздача «Эн-эн»!',
+  '玛瑟尔周年馈礼': 'Подарки к годовщине Марселя',
+  '法厄同年度大揭秘': 'Годовой итог Фаэтона',
+  '潛能预演·狩猎游戏': 'Прелюдия потенциала · Охотничья игра',
+  '叮咚！见习邮差派件中': 'Динь-дон! Стажёр-почтальон доставляет посылки'
+};
+const zzzChallengeTypes = new Set(['deadly_assault','shiyu_defense','threshold_simulation','annihilation_simulacrum']);
+function localizeZZZTitle(title){
+  const value=String(title??'').trim();
+  return zzzRussianTitles[value] || value;
+}
+
 function normalizeCalendarEvent(raw,game,index,source){
   const id=raw.id??raw.activity_id??raw.event_id??raw.ann_id??`${game}-${index}`;
-  const title=raw.name??raw.title??raw.eventName??raw.activity_name;
+  const rawTitle=raw.name??raw.title??raw.eventName??raw.activity_name;
+  const title=game==='zzz'?localizeZZZTitle(rawTitle):rawTitle;
   const desc=raw.description??raw.desc??raw.summary??'';
   const startRaw=raw.start_time??raw.startTime??raw.start_at??raw.start;
   const endRaw=raw.end_time??raw.endTime??raw.end_at??raw.end;
   const start=typeof startRaw==='number'?new Date(startRaw*1000):new Date(startRaw);
-  const end=typeof endRaw==='number'?new Date(endRaw*1000):new Date(endRaw);
+  let end=typeof endRaw==='number'?new Date(endRaw*1000):new Date(endRaw);
+  const challengeType=String(raw.challenge_type||raw.type_name||'').toLowerCase();
+  const isZZZChallenge=game==='zzz' && zzzChallengeTypes.has(challengeType);
+  if(isZZZChallenge){
+    if(!Number.isNaN(start.getTime())) start=new Date(start.getTime()+7*60*60*1000);
+    if(!Number.isNaN(end.getTime())) end=new Date(end.getTime()+7*60*60*1000);
+  }
   if(!title||Number.isNaN(start.getTime())||Number.isNaN(end.getTime())||end<=start)return null;
-  return {id:`${source}:${game}:${id}`,game,title:String(title),desc:String(desc),start,end,done:false,source};
+  return {id:`${source}:${game}:${id}`,game,title:String(title),desc:String(desc),start,end,done:false,source,category:isZZZChallenge?'mode':(raw.category||'event'),challenge_type:isZZZChallenge?challengeType:undefined};
 }
 
 const calendarSources={
@@ -145,7 +170,11 @@ async function calendarEvents(game){
   return cached(`calendar:${game}`,async()=>{
     try{
       const data=await fetchJson(url);
-      const list=Array.isArray(data)?data:(data?.events||data?.data?.events||[]);
+      const events=Array.isArray(data)?data:(data?.events||data?.data?.events||[]);
+      const challenges=game==='zzz' && Array.isArray(data?.challenges)
+        ? data.challenges.map(x=>({...x,title:x.name,challenge_type:x.type_name,category:'mode'}))
+        : [];
+      const list=[...events,...challenges];
       const now=Date.now();
       return list.map((x,i)=>normalizeCalendarEvent(x,game,i,'calendar'))
         .filter(Boolean).filter(e=>e.end.getTime()>now);
@@ -161,7 +190,8 @@ async function activityEvents(game){
       const list=Array.isArray(data?.activities)?data.activities:(Array.isArray(data)?data:[]);
       const now=Date.now();
       return list.map((x,i)=>{
-        const title=x.name??x.title;
+        const rawTitle=x.name??x.title;
+        const title=game==='zzz'?localizeZZZTitle(rawTitle):rawTitle;
         const desc=x.description??x.desc??'';
         const start=new Date(x.startTime??x.start_time??x.start);
         const end=new Date(x.endTime??x.end_time??x.end);
