@@ -130,11 +130,36 @@ const calendarSources={
   endfield:'https://gamecal.nv5.me/api/events?game=endfield'
 };
 
+// ZZZ Europe: в этом трекере пользователь живёт в UTC+4.
+// Ennead отдаёт ZZZ challenges с границами календарного дня,
+// а фактический сброс этих режимов у пользователя происходит в 07:00.
+const ZZZ_USER_RESET_OFFSET_MS=7*60*60*1000;
+
+function normalizeZZZChallenge(raw){
+  const type=String(raw?.type_name||'');
+  if(type!=='deadly_assault' && type!=='shiyu_defense') return null;
+  return {
+    ...raw,
+    title:raw.name,
+    category:'mode',
+    challenge_type:type,
+    // API задаёт начало/конец календарного дня.
+    // Сдвигаем обе границы на 7 часов, чтобы получить фактическое
+    // время сброса ZZZ Europe в часовом поясе пользователя (UTC+4).
+    start_time:typeof raw.start_time==='number' ? raw.start_time + 7*60*60 : raw.start_time,
+    end_time:typeof raw.end_time==='number' ? raw.end_time + 7*60*60 : raw.end_time
+  };
+}
+
 async function calendarEvents(game){
   const url=calendarSources[game];if(!url)throw new Error('unknown calendar source');
   return cached(`calendar:${game}`,async()=>{
     const data=await fetchJson(url);
-    const list=Array.isArray(data)?data:(data?.events||data?.data?.events||[]);
+    const events=Array.isArray(data)?data:(data?.events||data?.data?.events||[]);
+    const challenges=game==='zzz' && Array.isArray(data?.challenges)
+      ? data.challenges.map(normalizeZZZChallenge).filter(Boolean)
+      : [];
+    const list=[...events,...challenges];
     const now=Date.now();
     return list.map((x,i)=>normalizeCalendarEvent(x,game,i,'calendar')).filter(Boolean).filter(e=>e.end.getTime()>now);
   });
