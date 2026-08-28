@@ -5,14 +5,17 @@ const games = {
   ended:{name:'Завершённые', color:'#6e7890'},
   genshin:{name:'Геншин', color:'#3ca9e5'},
   hsr:{name:'ХСР', color:'#6a2ab4'},
-  nikki:{name:'Infinity Nikki', short:'Nikki', color:'#dc5a98'},
-  nte:{name:'Neverness to Everness', short:'NTE', color:'#62d6e6'},
-  endfield:{name:'Arknights: Endfield', short:'Endfield', color:'#d8a84e'},
-  wuwa:{name:'Wuthering Waves', short:'Wuthering Waves', color:'#00040a'},
+  nikki:{name:'Инфинити Никки', short:'Никки', color:'#dc5a98'},
+  nte:{name:'НТЕ', color:'#62d6e6'},
+  endfield:{name:'Arknights: Endfield', short:'Эндфилд', color:'#d8a84e'},
+  wuwa:{name:'Вува', color:'#00040a'},
   zzz:{name:'ZZZ', color:'#e39a26'}
 };
 
 const day = 24*60*60*1000;
+
+// Часовой пояс пользователя: МСК+1 = UTC+4.
+const USER_UTC_OFFSET = 4;
 
 function d(offsetDays, hour=12){
   const x=new Date(now.getTime()+offsetDays*day);
@@ -108,7 +111,7 @@ function normalizeRemoteEvent(raw,game,index,source){
   const start=typeof startRaw==='number' ? new Date(startRaw*1000) : new Date(startRaw);
   const end=typeof endRaw==='number' ? new Date(endRaw*1000) : new Date(endRaw);
   if(!title || Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || end<=start) return null;
-  return {id:`${source}:${game}:${id}`,game,title:String(title),desc:String(desc),start,end,done:false,source,url:raw.url||raw.link||'',category:classifyEvent(raw,game,title)};
+  return {id:`${source}:${game}:${id}`,game,title:String(title),desc:String(desc),start,end,done:false,source,url:raw.url||raw.link||'',category:raw.category==='mode'?'mode':classifyEvent(raw,game,title)};
 }
 async function fetchJson(url){
   const controller=new AbortController();
@@ -151,6 +154,36 @@ async function loadEventsSnapshot(){
   return [];
 }
 
+function zzzZeroCavernMode(){
+  // Нулевая каверна не приходит в Ennead /challenges.
+  // Поэтому рассчитываем текущую недельную границу автоматически.
+  // Для пользователя UTC+4 сброс — каждый понедельник в 07:00.
+  const nowUtc=new Date();
+  const local=new Date(nowUtc.getTime()+USER_UTC_OFFSET*60*60*1000);
+  const dayOfWeek=local.getUTCDay(); // 0=вс, 1=пн, ...
+  const daysSinceMonday=(dayOfWeek+6)%7;
+
+  const endLocal=new Date(local);
+  endLocal.setUTCDate(local.getUTCDate() + (7-daysSinceMonday));
+  endLocal.setUTCHours(7,0,0,0);
+
+  const startLocal=new Date(endLocal.getTime()-7*day);
+  const start=new Date(startLocal.getTime()-USER_UTC_OFFSET*60*60*1000);
+  const end=new Date(endLocal.getTime()-USER_UTC_OFFSET*60*60*1000);
+
+  return {
+    id:`manual:zzz:zero-cavern:${end.toISOString().slice(0,10)}`,
+    game:'zzz',
+    title:'Нулевая каверна',
+    desc:'Постоянный боевой режим. Еженедельные награды и задания Нулевой каверны.',
+    start,
+    end,
+    done:false,
+    source:'manual',
+    category:'mode'
+  };
+}
+
 function manualModes(){
   // Режимы, которые не всегда приходят из календарного API как обычные события.
   // Даты актуальны для версии 7.0 на 27.08.2026.
@@ -158,18 +191,14 @@ function manualModes(){
     {id:'manual:genshin:abyss-2026-08',game:'genshin',title:'Бездна',desc:'Текущий сезон Витой Бездны. Сброс цикла — 16 сентября.',start:new Date('2026-08-16T04:00:00+04:00'),end:new Date('2026-09-16T04:00:00+04:00'),done:false,source:'manual',category:'mode'},
     {id:'manual:genshin:theater-2026-08',game:'genshin',title:'Театр Воображариум',desc:'Августовский сезон. Новый сезон откроется 1 сентября.',start:new Date('2026-08-01T04:00:00+04:00'),end:new Date('2026-09-01T04:00:00+04:00'),done:false,source:'manual',category:'mode'},
     {id:'manual:genshin:stygian-2026-08',game:'genshin',title:'Мрачный натиск',desc:'Текущий цикл Мрачного натиска версии 7.0.',start:new Date('2026-08-19T10:00:00+04:00'),end:new Date('2026-09-22T03:59:00+04:00'),done:false,source:'manual',category:'mode'},
-    {id:'manual:zzz:zero-cavern-2026-08',game:'zzz',title:'Нулевая каверна',desc:'Постоянный боевой режим. Еженедельные награды и задания Нулевой каверны.',start:new Date('2026-08-24T04:00:00+04:00'),end:new Date('2026-08-31T07:00:00+04:00'),done:false,source:'manual',category:'mode'},
-
-{id:'manual:zzz:shiyu-2026-08',game:'zzz',title:'Оборона Шиюй',desc:'Текущий цикл Обороны Шиюй. Критический узел версии 3.1.',start:new Date('2026-08-21T04:00:00+04:00'),end:new Date('2026-09-04T07:00:00+04:00'),done:false,source:'manual',category:'mode'},
-
-{id:'manual:zzz:deadly-assault-2026-08',game:'zzz',title:'Опасный штурм',desc:'Текущий цикл Опасного штурма.',start:new Date('2026-08-14T04:00:00+04:00'),end:new Date('2026-08-28T07:00:00+04:00'),done:false,source:'manual',category:'mode'},
+    zzzZeroCavernMode(),
     {id:'manual:hsr:apocalyptic-shadow-2026-08',game:'hsr',title:'Апокалиптическая тень',desc:'Текущий цикл Апокалиптической тени. Завершение цикла — 31 августа.',start:new Date('2026-07-20T05:00:00+04:00'),end:new Date('2026-08-31T05:00:00+04:00'),done:false,source:'manual',category:'mode'},
     {id:'manual:hsr:pure-fiction-2026-08',game:'hsr',title:'Чистый вымысел',desc:'Текущий цикл Чистого вымысла. Завершение цикла — 14 сентября.',start:new Date('2026-08-03T05:00:00+04:00'),end:new Date('2026-09-14T05:00:00+04:00'),done:false,source:'manual',category:'mode'},
     {id:'manual:hsr:memory-of-chaos-2026-08',game:'hsr',title:'Зал Забвения',desc:'Текущий цикл Зала Забвения: Память Хаоса. Завершение цикла — 28 сентября.',start:new Date('2026-08-17T05:00:00+04:00'),end:new Date('2026-09-28T05:00:00+04:00'),done:false,source:'manual',category:'mode'},
-    {id:'manual:wuwa:tower-of-adversity-2026-08',game:'wuwa',title:'Башня невзгод',desc:'Текущий цикл Башни невзгод. Завершение цикла — 14 сентября.',start:new Date('2026-08-17T04:00:00+04:00'),end:new Date('2026-09-14T04:00:00+04:00'),done:false,source:'manual',category:'mode'},
-    {id:'manual:wuwa:whimpering-wastes-2026-08',game:'wuwa',title:'Шепчущие пустоши',desc:'Текущий цикл Шепчущих пустошей. Сброс — 31 августа.',start:new Date('2026-08-03T04:00:00+04:00'),end:new Date('2026-08-31T04:00:00+04:00'),done:false,source:'manual',category:'mode'},
-    {id:'manual:wuwa:endstate-matrix-2026-08',game:'wuwa',title:'Конечная матрица',desc:'Текущая фаза Конечной матрицы. Завершение — 30 сентября.',start:new Date('2026-08-27T04:00:00+04:00'),end:new Date('2026-09-30T04:00:00+04:00'),done:false,source:'manual',category:'mode'},
-    {id:'manual:wuwa:fantasies-thousand-gateways-2026-08',game:'wuwa',title:'Фантазии тысячи врат',desc:'Текущая еженедельная ротация. Обновление — 31 августа.',start:new Date('2026-08-24T04:00:00+04:00'),end:new Date('2026-08-31T04:00:00+04:00'),done:false,source:'manual',category:'mode'}
+    {id:'manual:wuwa:tower-of-adversity-2026-08',game:'wuwa',title:'Tower of Adversity',desc:'Current Tower of Adversity cycle. Current cycle ends September 14.',start:new Date('2026-08-17T04:00:00+04:00'),end:new Date('2026-09-14T04:00:00+04:00'),done:false,source:'manual',category:'mode'},
+    {id:'manual:wuwa:whimpering-wastes-2026-08',game:'wuwa',title:'Whispering Wastes',desc:'Current Whispering Wastes cycle. Reset — August 31.',start:new Date('2026-08-03T04:00:00+04:00'),end:new Date('2026-08-31T04:00:00+04:00'),done:false,source:'manual',category:'mode'},
+    {id:'manual:wuwa:endstate-matrix-2026-08',game:'wuwa',title:'Endstate Matrix',desc:'Current Endstate Matrix phase. Phase ends September 30.',start:new Date('2026-08-27T04:00:00+04:00'),end:new Date('2026-09-30T04:00:00+04:00'),done:false,source:'manual',category:'mode'},
+    {id:'manual:wuwa:fantasies-thousand-gateways-2026-08',game:'wuwa',title:'Fantasies of the Thousand Gateways',desc:'Current weekly rotation. Refreshes August 31.',start:new Date('2026-08-24T04:00:00+04:00'),end:new Date('2026-08-31T04:00:00+04:00'),done:false,source:'manual',category:'mode'}
   ];
 }
 
@@ -195,7 +224,11 @@ async function loadRemoteEvents(){
   }
 
   const manual=manualModes();
-  const mergedWithModes=[...merged.filter(e=>!manual.some(m=>m.id===e.id)),...manual];
+  const manualKeys=new Set(manual.map(m=>`${m.game}|${String(m.title).trim().toLowerCase()}`));
+  const mergedWithModes=[
+    ...merged.filter(e=>!manualKeys.has(`${e.game}|${String(e.title).trim().toLowerCase()}`)),
+    ...manual
+  ];
   if(mergedWithModes.length) applyRemoteEvents(mergedWithModes);
   updateEventsSyncStatus();
 }
@@ -223,11 +256,6 @@ const dailyConfig = [
   {id:'endfield', name:'Эндфилд', color:'#d8a84e', resetMsk:11},
   {id:'nikki', name:'Инфинити Никки', color:'#dc5a98', resetMsk:5}
 ];
-
-// Время сброса задано по МСК.
-// У пользователя МСК+1, поэтому локальные времена: 07:00 / 12:00 / 06:00.
-// Расчёт идёт через UTC, чтобы браузерный часовой пояс компьютера не ломал таймер.
-const USER_UTC_OFFSET = 4; // МСК+1 = UTC+4
 
 function dailyPeriodKey(id){
   const cfg=dailyConfig.find(x=>x.id===id);
@@ -296,7 +324,7 @@ let sortMode='ending';
 let viewMode='checklist';
 
 const focusGameOrder=['all','endfield','genshin','hsr','nikki','nte','wuwa','zzz'];
-const focusGameLabels={all:'Все',endfield:'Endfield',genshin:'Геншин',hsr:'ХСР',nikki:'Никки',nte:'NTE',wuwa:'Wuthering Waves',zzz:'ZZZ'};
+const focusGameLabels={all:'All',endfield:'Endfield',genshin:'Genshin',hsr:'Star Rail',nikki:'Nikki',nte:'NTE',wuwa:'WuWa',zzz:'ZZZ'};
 
 
 function formatLeft(ms){
