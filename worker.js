@@ -112,28 +112,43 @@ function parseDuration(text,kind){
 }
 
 const zzzRussianTitles = {
-  '恰浪花逐夏而至': 'Дары прибоя',
-  '咔滋酥脆出餐计划': 'Прожарка с корочкой',
-  '极危通缉与悠游假期': 'Отпуск в розыске',
-  '实战特训-三倍悬赏': 'Практическая тренировка — тройная награда',
-  '云端礼赠': 'Подарки из облаков',
-  '「嗯呢」大派送！': 'Большая раздача «Эн-эн»!',
-  '玛瑟尔周年馈礼': 'Подарки к годовщине Марселя',
-  '法厄同年度大揭秘': 'Годовой итог Фаэтона',
-  '潛能预演·狩猎游戏': 'Прелюдия потенциала · Охотничья игра',
-  '叮咚！见习邮差派件中': 'Динь-дон! Стажёр-почтальон доставляет посылки'
+  "恰浪花逐夏而至": "Дары прибоя",
+  "咔滋酥脆出餐计划": "Прожарка с корочкой",
+  "极危通缉与悠游假期": "Отпуск в розыске",
+  "实战特训-三倍悬赏": "Практическая тренировка — тройная награда",
+  "云端礼赠": "Подарки из облаков",
+  "「嗯呢」大派送！": "Большая раздача «Эн-эн»!",
+  "玛瑟尔周年馈礼": "Подарки к годовщине Марселя",
+  "法厄同年度大揭秘": "Годовой итог Фаэтона",
+  "潛能预演·狩猎游戏": "Прелюдия потенциала · Охотничья игра",
+  "叮咚！见习邮差派件中": "Динь-дон! Стажёр-почтальон доставляет посылки",
+  "末日幻影•兵锋骑士": "Апокалиптическая тень: Рыцарь клинка",
+  "末日幻影·兵锋骑士": "Апокалиптическая тень: Рыцарь клинка"
+};
+const zzzRussianDescriptions = {
+  "恰浪花逐夏而至": "Тот, кто отправился из небес к океану, получит подарок от волн — незабываемое приключение в сиянии огня и целое незабываемое лето.",
+  "咔滋酥脆出餐计划": "Всё самое вкусное — к вашему столу! Особое кулинарное мероприятие уже началось. Встречаемся на площади Люмин.",
+  "极危通缉与悠游假期": "Даже во время каникул разыскиваемый преступник должен выглядеть идеально для камеры. Делайте снимки и получайте награды.",
+  "实战特训-三倍悬赏": "В период события награды за испытания в Зале боевой симуляции увеличены втрое.",
+  "云端礼赠": "Войдите в игру 7 дней во время события и получите 10 зашифрованных мастер-лент.",
+  "「嗯呢」大派送！": "Войдите в игру 7 дней во время события и получите 10 зашифрованных мастер-лент и 10 купонов банбу.",
+  "玛瑟尔周年馈礼": "Получите ограниченного S-агента, S-двигатель, много полихромов и другие награды.",
+  "法厄同年度大揭秘": "Специальная программа с годовыми итогами Фаэтона и важными событиями прошедшего года.",
+  "潛能预演·狩猎游戏": "Новая охотничья игра начинается. Испытайте себя в новом раунде охоты.",
+  "叮咚！见习邮差派件中": "Почтовая служба «Почта желаний» доставляет мечты. Количество наград ограничено.",
+  "末日幻影•兵锋骑士": "Пройдите испытания Апокалиптической тени и получите награды за боевые достижения.",
+  "末日幻影·兵锋骑士": "Пройдите испытания Апокалиптической тени и получите награды за боевые достижения."
 };
 const zzzChallengeTypes = new Set(['deadly_assault','shiyu_defense','threshold_simulation','annihilation_simulacrum']);
-function localizeZZZTitle(title){
-  const value=String(title??'').trim();
-  return zzzRussianTitles[value] || value;
-}
+function localizeZZZTitle(title){ const value=String(title??'').trim(); return zzzRussianTitles[value] || value; }
+function localizeZZZDescription(title,desc){ const value=String(title??'').trim(); return zzzRussianDescriptions[value] || String(desc??''); }
 
 function normalizeCalendarEvent(raw,game,index,source){
   const id=raw.id??raw.activity_id??raw.event_id??raw.ann_id??`${game}-${index}`;
   const rawTitle=raw.name??raw.title??raw.eventName??raw.activity_name;
   const title=game==='zzz'?localizeZZZTitle(rawTitle):rawTitle;
-  const desc=raw.description??raw.desc??raw.summary??'';
+  const descRaw=raw.description??raw.desc??raw.summary??'';
+  const desc=game==='zzz'?localizeZZZDescription(rawTitle,descRaw):descRaw;
   const startRaw=raw.start_time??raw.startTime??raw.start_at??raw.start;
   const endRaw=raw.end_time??raw.endTime??raw.end_at??raw.end;
   const start=typeof startRaw==='number'?new Date(startRaw*1000):new Date(startRaw);
@@ -192,7 +207,8 @@ async function activityEvents(game){
       return list.map((x,i)=>{
         const rawTitle=x.name??x.title;
         const title=game==='zzz'?localizeZZZTitle(rawTitle):rawTitle;
-        const desc=x.description??x.desc??'';
+        const descRaw=x.description??x.desc??'';
+        const desc=game==='zzz'?localizeZZZDescription(rawTitle,descRaw):descRaw;
         const start=new Date(x.startTime??x.start_time??x.start);
         const end=new Date(x.endTime??x.end_time??x.end);
         if(!title||Number.isNaN(start.getTime())||Number.isNaN(end.getTime())||end<=start||end.getTime()<=now)return null;
@@ -323,7 +339,8 @@ async function scrapeOfficial(game){
       if(extracted.length)return extracted;
       const duration=parseDuration(text,game);
       if(!duration||duration.end.getTime()<=now)return[];
-      const title=firstTitle(article,link.title||'Событие');
+      let title=firstTitle(article,link.title||'Событие');
+      if(game==='zzz') title=localizeZZZTitle(title);
       return [{id:`official:${game}:${eventId(link.url,0)}`,game,title,desc:'Официальное событие',start:duration.start,end:duration.end,done:false,source:'official',url:link.url}];
     }catch(err){console.warn(game,link.url,err.message);return[];}
   }));
@@ -343,7 +360,9 @@ async function snapshotEvents(game){
       return list.filter(e=>e&&e.game===game).map((e,i)=>{
         const start=new Date(e.start),end=new Date(e.end);
         if(!e.title||Number.isNaN(start.getTime())||Number.isNaN(end.getTime())||end<=start||end.getTime()<=Date.now())return null;
-        return {id:`snapshot:${e.id||`${game}:${i}`}`,game,title:String(e.title),desc:String(e.desc||''),start,end,done:false,source:'snapshot',url:e.url||''};
+        const title=game==='zzz'?localizeZZZTitle(e.title):String(e.title);
+        const desc=game==='zzz'?localizeZZZDescription(e.title,e.desc||''):String(e.desc||'');
+        return {id:`snapshot:${e.id||`${game}:${i}`}`,game,title,desc,start,end,done:false,source:'snapshot',url:e.url||'',category:e.category||'event'};
       }).filter(Boolean);
     }catch(err){console.warn('snapshot unavailable:',err.message);return[];}
   });

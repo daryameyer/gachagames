@@ -82,21 +82,46 @@ const wuwaEnglishTitles = {
   '群声共振模拟域': 'Resonance Sim Realm'
 };
 const zzzRussianTitles = {
-  '恰浪花逐夏而至': 'Дары прибоя',
-  '咔滋酥脆出餐计划': 'Прожарка с корочкой',
-  '极危通缉与悠游假期': 'Отпуск в розыске',
-  '实战特训-三倍悬赏': 'Практическая тренировка — тройная награда',
-  '云端礼赠': 'Подарки из облаков',
-  '「嗯呢」大派送！': 'Большая раздача «Эн-эн»!',
-  '玛瑟尔周年馈礼': 'Подарки к годовщине Марселя',
-  '法厄同年度大揭秘': 'Годовой итог Фаэтона',
-  '潛能预演·狩猎游戏': 'Прелюдия потенциала · Охотничья игра',
-  '叮咚！见习邮差派件中': 'Динь-дон! Стажёр-почтальон доставляет посылки'
+  "恰浪花逐夏而至": "Дары прибоя",
+  "咔滋酥脆出餐计划": "Прожарка с корочкой",
+  "极危通缉与悠游假期": "Отпуск в розыске",
+  "实战特训-三倍悬赏": "Практическая тренировка — тройная награда",
+  "云端礼赠": "Подарки из облаков",
+  "「嗯呢」大派送！": "Большая раздача «Эн-эн»!",
+  "玛瑟尔周年馈礼": "Подарки к годовщине Марселя",
+  "法厄同年度大揭秘": "Годовой итог Фаэтона",
+  "潛能预演·狩猎游戏": "Прелюдия потенциала · Охотничья игра",
+  "叮咚！见习邮差派件中": "Динь-дон! Стажёр-почтальон доставляет посылки",
+  "末日幻影•兵锋骑士": "Апокалиптическая тень: Рыцарь клинка",
+  "末日幻影·兵锋骑士": "Апокалиптическая тень: Рыцарь клинка"
 };
+const zzzRussianDescriptions = {
+  "恰浪花逐夏而至": "Тот, кто отправился из небес к океану, получит подарок от волн — незабываемое приключение в сиянии огня и целое незабываемое лето.",
+  "咔滋酥脆出餐计划": "Всё самое вкусное — к вашему столу! Особое кулинарное мероприятие уже началось. Встречаемся на площади Люмин.",
+  "极危通缉与悠游假期": "Даже во время каникул разыскиваемый преступник должен выглядеть идеально для камеры. Делайте снимки и получайте награды.",
+  "实战特训-三倍悬赏": "В период события награды за испытания в Зале боевой симуляции увеличены втрое.",
+  "云端礼赠": "Войдите в игру 7 дней во время события и получите 10 зашифрованных мастер-лент.",
+  "「嗯呢」大派送！": "Войдите в игру 7 дней во время события и получите 10 зашифрованных мастер-лент и 10 купонов банбу.",
+  "玛瑟尔周年馈礼": "Получите ограниченного S-агента, S-двигатель, много полихромов и другие награды.",
+  "法厄同年度大揭秘": "Специальная программа с годовыми итогами Фаэтона и важными событиями прошедшего года.",
+  "潛能预演·狩猎游戏": "Новая охотничья игра начинается. Испытайте себя в новом раунде охоты.",
+  "叮咚！见习邮差派件中": "Почтовая служба «Почта желаний» доставляет мечты. Количество наград ограничено.",
+  "末日幻影•兵锋骑士": "Пройдите испытания Апокалиптической тени и получите награды за боевые достижения.",
+  "末日幻影·兵锋骑士": "Пройдите испытания Апокалиптической тени и получите награды за боевые достижения."
+};
+
+function localizeZZZText(value){
+  const text=String(value??'').trim();
+  return zzzRussianTitles[text] || text;
+}
+function localizeZZZDescription(title,desc){
+  const key=String(title??'').trim();
+  return zzzRussianDescriptions[key] || String(desc??'');
+}
 function localizeGameTitle(game,title){
   const value=String(title??'').trim();
   if(game==='wuwa') return wuwaEnglishTitles[value] || value;
-  if(game==='zzz') return zzzRussianTitles[value] || value;
+  if(game==='zzz') return localizeZZZText(value);
   return value;
 }
 
@@ -122,7 +147,8 @@ function classifyEvent(raw,game,title=''){
 function normalizeRemoteEvent(raw,game,index,source){
   const id=raw.id ?? raw.activity_id ?? raw.event_id ?? raw.ann_id ?? `${game}-${index}`;
   const title=localizeGameTitle(game, raw.name ?? raw.title ?? raw.eventName ?? raw.activity_name);
-  const desc=raw.description ?? raw.desc ?? raw.summary ?? '';
+  const descRaw=raw.description ?? raw.desc ?? raw.summary ?? '';
+  const desc=game==='zzz' ? localizeZZZDescription(raw.name ?? raw.title ?? raw.eventName ?? raw.activity_name, descRaw) : descRaw;
   const startRaw=raw.start_time ?? raw.startTime ?? raw.start_at ?? raw.start;
   const endRaw=raw.end_time ?? raw.endTime ?? raw.end_at ?? raw.end;
   const start=typeof startRaw==='number' ? new Date(startRaw*1000) : new Date(startRaw);
@@ -146,7 +172,14 @@ async function loadOneSource(game){
       ? `/api/official-events?game=${game}`
       : `/api/events?game=${game}`;
     const data=await fetchJson(endpoint);
-    const list=Array.isArray(data?.events)?data.events:[];
+    let list=Array.isArray(data?.events)?[...data.events]:[];
+    if(game==='zzz' && Array.isArray(data?.challenges)){
+      for(const challenge of data.challenges){
+        if(['deadly_assault','shiyu_defense'].includes(String(challenge.type_name||challenge.challenge_type))){
+          list.push({...challenge,title:challenge.name,challenge_type:challenge.type_name,category:'mode'});
+        }
+      }
+    }
     const normalized=list.map((x,i)=>normalizeRemoteEvent(x,game,i,data.source?'calendar':'official')).filter(Boolean).filter(e=>e.end>new Date());
     if(normalized.length){eventsAutoSource[game]=true;return normalized;}
   }catch(err){console.warn(`EVENTCLOCK: источник ${game} недоступен`,err)}
