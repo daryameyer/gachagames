@@ -111,6 +111,36 @@ function parseDuration(text,kind){
   return {start,end};
 }
 
+const wuwaEnglishTitles = {
+  "回音盈域": "Bountiful Crescendo",
+  "第二索拉・诡影迷踪": "Second Coming of Solaris: Coded Deception",
+  "第二索拉·诡影迷踪": "Second Coming of Solaris: Coded Deception",
+  "清弦纪流年": "The Strings Remember",
+  "若梦仍有回声": "If Dreams Still Reverberate",
+  "潮汐觅闻": "Wuthering Exploration: Fogveil Pagoda",
+  "烟云赠礼": "Gifts of Drifting Mist",
+  "声弦涤荡": "Chord Cleansing",
+  "群声共振模拟域": "Resonance Sim Realm",
+};
+const wuwaEnglishDescriptions = {
+  "Bountiful Crescendo": "Complete Simulated Realm and Tacet Field challenges and spend Crystal Waveplates to receive double rewards.",
+  "Second Coming of Solaris: Coded Deception": "A brand-new version of Second Coming of Solaris like you have never seen before is coming soon. What are you waiting for? Come and give it a try!",
+  "The Strings Remember": "With peace restored to the Land of Xuanfang, you once again return to the peak where Qingxiao lives. She gave you a seven-string qin some time ago. This time, she intends to formally teach you how to play it.",
+  "If Dreams Still Reverberate": "The Ivory Gatekeeper has sent you an SOS over WavesLine. The gate in the depths of the Somnoire—the one that should never be opened, the one you once shut—has somehow opened again. Now terrifying Nightmares are once again running rampant in the Somnoire.",
+  "Wuthering Exploration: Fogveil Pagoda": "Pioneer Association picked the Fogveil Pagoda as the new theme for Wutherium Geographic magazine.",
+  "Gifts of Drifting Mist": "During the event, log in each day and claim the corresponding login reward from the event page.",
+  "Chord Cleansing": "Complete Tacet Discord challenges and spend Crystal Waveplates to receive double rewards.",
+  "Resonance Sim Realm": "A combat event and an open test of diverse abilities. The Threnodian system continuously provides different interference sources for participants to connect, combine, and explore richer ability structures.",
+  "回音盈域": "Complete Simulated Realm and Tacet Field challenges and spend Crystal Waveplates to receive double rewards.",
+  "第二索拉・诡影迷踪": "A brand-new version of Second Coming of Solaris like you have never seen before is coming soon. What are you waiting for? Come and give it a try!",
+  "第二索拉·诡影迷踪": "A brand-new version of Second Coming of Solaris like you have never seen before is coming soon. What are you waiting for? Come and give it a try!",
+  "清弦纪流年": "With peace restored to the Land of Xuanfang, you once again return to the peak where Qingxiao lives. She gave you a seven-string qin some time ago. This time, she intends to formally teach you how to play it.",
+  "若梦仍有回声": "The Ivory Gatekeeper has sent you an SOS over WavesLine. The gate in the depths of the Somnoire—the one that should never be opened, the one you once shut—has somehow opened again. Now terrifying Nightmares are once again running rampant in the Somnoire.",
+  "潮汐觅闻": "Pioneer Association picked the Fogveil Pagoda as the new theme for Wutherium Geographic magazine.",
+  "烟云赠礼": "During the event, log in each day and claim the corresponding login reward from the event page.",
+  "声弦涤荡": "Complete Tacet Discord challenges and spend Crystal Waveplates to receive double rewards.",
+  "群声共振模拟域": "A combat event and an open test of diverse abilities. The Threnodian system continuously provides different interference sources for participants to connect, combine, and explore richer ability structures.",
+}
 const zzzRussianTitles = {
   "恰浪花逐夏而至": "Дары прибоя",
   "咔滋酥脆出餐计划": "Прожарка с корочкой",
@@ -124,48 +154,6 @@ const zzzRussianTitles = {
   "叮咚！见习邮差派件中": "Динь-дон! Стажёр-почтальон доставляет посылки",
   "末日幻影•兵锋骑士": "Апокалиптическая тень: Рыцарь клинка",
   "末日幻影·兵锋骑士": "Апокалиптическая тень: Рыцарь клинка"
-};
-const hsrRussianTitles = {
-  "末日幻影•兵锋骑士": "Апокалиптическая тень • Рыцарь клинка",
-  "末日幻影·兵锋骑士": "Апокалиптическая тень • Рыцарь клинка",
-  "虚构叙事•构事生意": "Чистый вымысел • Дело созидания",
-  "虚构叙事·构事生意": "Чистый вымысел • Дело созидания",
-  "位面分裂": "Планарный раскол",
-  "超限：狂飙大奖赛": "Превосходство: Межзвёздный гран-при",
-  "方寸大冒险": "Крошечное великое приключение",
-  "巡星之礼": "Подарок звёздного путешествия",
-  "异相仲裁•军团再临": "Аномальный арбитраж • Возвращение легиона",
-  "异相仲裁·军团再临": "Аномальный арбитраж • Возвращение легиона",
-  "异器盈界": "Реликтовый всплеск",
-  "混沌回忆•扫除风暴": "Память Хаоса • Ураганная зачистка",
-  "混沌回忆·扫除风暴": "Память Хаоса • Ураганная зачистка",
-  "末日幻影•仙客天狼": "Апокалиптическая тень • Небесный волк",
-  "末日幻影·仙客天狼": "Апокалиптическая тень • Небесный волк",
-  "虚构叙事•立界开篇": "Чистый вымысел • Начало нового мира",
-  "虚构叙事·立界开篇": "Чистый вымысел • Начало нового мира",
-  "命运契约•再启": "Контракт судьбы • Возрождение",
-  "命运契约·再启": "Контракт судьбы • Возрождение"
-};
-const hsrRussianDescriptions = {
-  "末日幻影•兵锋骑士": "Испытание «Апокалиптическая тень». При пробитии слабости врага с эффектом «Крепкая оборона» вся команда снимает контроль, восстанавливает очко навыка и активирует сверхспособность. Урон от навыков повышен на 25%, урон от сверхспособностей — на 15%.",
-  "末日幻影·兵锋骑士": "Испытание «Апокалиптическая тень». При пробитии слабости врага с эффектом «Крепкая оборона» вся команда снимает контроль, восстанавливает очко навыка и активирует сверхспособность. Урон от навыков повышен на 25%, урон от сверхспособностей — на 15%.",
-  "虚构叙事•构事生意": "Испытание «Чистый вымысел». После бонусной атаки по врагу за каждую поражённую цель команда получает 8 очков «Боевого духа».",
-  "虚构叙事·构事生意": "Испытание «Чистый вымысел». После бонусной атаки по врагу за каждую поражённую цель команда получает 8 очков «Боевого духа».",
-  "位面分裂": "Во время события награды за планарные украшения выпадают в двойном количестве.",
-  "超限：狂飙大奖赛": "В Звездограде проходит новая гоночная серия. Соберите команду и примите участие в межзвёздном гран-при.",
-  "方寸大冒险": "Отправляйтесь в маленькое большое приключение, соберите команду героев и преодолейте множество испытаний.",
-  "巡星之礼": "В период события ежедневно входите в игру и получайте награды за вход. За 7 дней можно получить 10 специальных пропусков Звёздного экспресса.",
-  "异相仲裁•军团再临": "Высокосложный режим «Аномальный арбитраж». Получайте награды за прохождение испытаний, включая ресурсы и ограниченную рамку аватара.",
-  "异相仲裁·军团再临": "Высокосложный режим «Аномальный арбитраж». Получайте награды за прохождение испытаний, включая ресурсы и ограниченную рамку аватара.",
-  "异器盈界": "Во время события награды за реликвии из Пещеры коррозии выпадают в двойном количестве.",
-  "混沌回忆•扫除风暴": "Испытание «Память Хаоса». В начале каждого цикла случайный персонаж Пути Охоты или Эрудиции немедленно действует и наносит на 80% больше урона в течение 1 хода.",
-  "混沌回忆·扫除风暴": "Испытание «Память Хаоса». В начале каждого цикла случайный персонаж Пути Охоты или Эрудиции немедленно действует и наносит на 80% больше урона в течение 1 хода.",
-  "末日幻影•仙客天狼": "Испытание «Апокалиптическая тень». При пробитии слабости врага с эффектом «Крепкая оборона» вся команда снимает контроль и активирует сверхспособность. Урон от навыков повышен на 25%, урон от техники радости — на 15%.",
-  "末日幻影·仙客天狼": "Испытание «Апокалиптическая тень». При пробитии слабости врага с эффектом «Крепкая оборона» вся команда снимает контроль и активирует сверхспособность. Урон от навыков повышен на 25%, урон от техники радости — на 15%.",
-  "虚构叙事•立界开篇": "Испытание «Чистый вымысел». Каждый раз, когда вы получаете очки смеха, команда дополнительно получает 2 очка «Боевого духа».",
-  "虚构叙事·立界开篇": "Испытание «Чистый вымысел». Каждый раз, когда вы получаете очки смеха, команда дополнительно получает 2 очка «Боевого духа».",
-  "命运契约•再启": "Во время события войдите в игру и бесплатно получите одного из двух ограниченных 5★ персонажей и материалы для его развития до 60 уровня.",
-  "命运契约·再启": "Во время события войдите в игру и бесплатно получите одного из двух ограниченных 5★ персонажей и материалы для его развития до 60 уровня."
 };
 const zzzRussianDescriptions = {
   "恰浪花逐夏而至": "Тот, кто отправился из небес к океану, получит подарок от волн — незабываемое приключение в сиянии огня и целое незабываемое лето.",
@@ -184,14 +172,15 @@ const zzzRussianDescriptions = {
 const zzzChallengeTypes = new Set(['deadly_assault','shiyu_defense','threshold_simulation','annihilation_simulacrum']);
 function localizeZZZTitle(title){ const value=String(title??'').trim(); return zzzRussianTitles[value] || value; }
 function localizeZZZDesc(title,desc){ const value=String(title??'').trim(); return zzzRussianDescriptions[value] || String(desc??''); }
+function hasCJK(value){ return /[\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]/u.test(String(value??'')); }
+function localizeGameTitle(game,title){ const value=String(title??'').trim(); if(game==='wuwa') return wuwaEnglishTitles[value] || (hasCJK(value)?'Wuthering Waves Event':value); if(game==='zzz') return localizeZZZTitle(value); return value; }
+function localizeGameDesc(game,title,desc){ const key=String(title??'').trim(); if(game==='wuwa') return wuwaEnglishDescriptions[key] || (hasCJK(desc)?'Wuthering Waves event.':String(desc??'')); if(game==='zzz') return localizeZZZDesc(key,desc); return String(desc??''); }
 
 function normalizeCalendarEvent(raw,game,index,source){
   const id=raw.id??raw.activity_id??raw.event_id??raw.ann_id??`${game}-${index}`;
   const rawTitle=raw.name??raw.title??raw.eventName??raw.activity_name;
-  const rawTitleValue=String(rawTitle??'').trim();
-  const title=game==='zzz'?localizeZZZTitle(rawTitleValue):game==='hsr'?(hsrRussianTitles[rawTitleValue] || (/[\u3400-\u9fff]/.test(rawTitleValue)?'Событие ХСР':rawTitleValue)):rawTitleValue;
-  const rawDesc=raw.description??raw.desc??raw.summary??'';
-  const desc=game==='zzz'?localizeZZZDesc(rawTitleValue,rawDesc):game==='hsr'?(hsrRussianDescriptions[rawTitleValue] || (/[\u3400-\u9fff]/.test(String(rawDesc))?'Временное событие Honkai: Star Rail.':String(rawDesc))):String(rawDesc);
+  const title=localizeGameTitle(game,rawTitle);
+  const desc=localizeGameDesc(game,rawTitle,raw.description??raw.desc??raw.summary??'');
   const startRaw=raw.start_time??raw.startTime??raw.start_at??raw.start;
   const endRaw=raw.end_time??raw.endTime??raw.end_at??raw.end;
   let start=typeof startRaw==='number'?new Date(startRaw*1000):new Date(startRaw);
@@ -249,10 +238,8 @@ async function activityEvents(game){
       const now=Date.now();
       return list.map((x,i)=>{
         const rawTitle=x.name??x.title;
-        const rawTitleValue=String(rawTitle??'').trim();
-        const title=game==='zzz'?localizeZZZTitle(rawTitleValue):game==='hsr'?(hsrRussianTitles[rawTitleValue] || (/[\u3400-\u9fff]/.test(rawTitleValue)?'Событие ХСР':rawTitleValue)):rawTitleValue;
-        const rawDesc=x.description??x.desc??'';
-        const desc=game==='zzz'?localizeZZZDesc(rawTitleValue,rawDesc):game==='hsr'?(hsrRussianDescriptions[rawTitleValue] || (/[\u3400-\u9fff]/.test(String(rawDesc))?'Временное событие Honkai: Star Rail.':String(rawDesc))):String(rawDesc);
+        const title=localizeGameTitle(game,rawTitle);
+        const desc=localizeGameDesc(game,rawTitle,x.description??x.desc??'');
         const start=new Date(x.startTime??x.start_time??x.start);
         const end=new Date(x.endTime??x.end_time??x.end);
         if(!title||Number.isNaN(start.getTime())||Number.isNaN(end.getTime())||end<=start||end.getTime()<=now)return null;
