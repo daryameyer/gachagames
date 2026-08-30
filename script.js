@@ -81,9 +81,61 @@ const wuwaEnglishTitles = {
   '声弦涤荡': 'Chord Cleansing',
   '群声共振模拟域': 'Resonance Sim Realm'
 };
+
+const hsrRussianTitles = {
+  '末日幻影•兵锋骑士': 'Апокалиптическая тень • Рыцарь клинка',
+  '末日幻影·兵锋骑士': 'Апокалиптическая тень • Рыцарь клинка',
+  '虚构叙事•构事生意': 'Чистый вымысел • Дело созидания',
+  '虚构叙事·构事生意': 'Чистый вымысел • Дело созидания',
+  '超限：狂飙大奖赛': 'Превосходство: Межзвёздный гран-при',
+  '方寸大冒险': 'Крошечное великое приключение',
+  '巡星之礼': 'Подарок звёздного странствия',
+  '异相仲裁•军团再临': 'Аномальный арбитраж • Возвращение легиона',
+  '异相仲裁·军团再临': 'Аномальный арбитраж • Возвращение легиона',
+  '异器盈界': 'Изобилие реликвий',
+  '混沌回忆•扫除风暴': 'Память Хаоса • Ураганная зачистка',
+  '混沌回忆·扫除风暴': 'Память Хаоса • Ураганная зачистка',
+  '末日幻影•仙客天狼': 'Апокалиптическая тень • Небесный волк',
+  '末日幻影·仙客天狼': 'Апокалиптическая тень • Небесный волк',
+  '虚构叙事•立界开篇': 'Чистый вымысел • Начало нового мира',
+  '虚构叙事·立界开篇': 'Чистый вымысел • Начало нового мира',
+  '命运契约•再启': 'Контракт судьбы • Новое начало',
+  '命运契约·再启': 'Контракт судьбы • Новое начало'
+};
+
+const hsrRussianDescriptions = {
+  '末日幻影•兵锋骑士': 'При пробитии уязвимости противника с эффектом «Крепкая защита» снимает контроль со всех союзников, восстанавливает очко навыка и активирует сверхспособности. Урон навыков противников повышается на 25%, а урон сверхспособностей — на 15%.',
+  '虚构叙事•构事生意': 'После того как союзник наносит дополнительной атакой удар по противнику, за каждую поражённую цель дополнительно накапливается 8 очков «Боевого духа».',
+  '超限：狂飙大奖赛': 'Новая гонка в Звездограде будет проводиться по образцу Игр фантаны, и единственная победившая команда вознесётся, став Богом правил дорожного движения.',
+  '方寸大冒险': 'Отправляйтесь в крошечное великое приключение, в котором столкнётесь с доброй половиной проблем вселенной. Соберите свою команду героев, преодолейте множество испытаний и победите всех грозных врагов.',
+  '巡星之礼': 'Во время события ежедневно входите в игру и получайте награды за вход. За 7 дней можно получить 10 специальных пропусков Звёздного пути.',
+  '异相仲裁•军团再临': 'Высокая сложность испытаний. За прохождение можно получить награды и ограниченную рамкой профиля.',
+  '异器盈界': 'В период события награды за прохождение испытаний Пещеры коррозии увеличены вдвое.',
+  '混沌回忆•扫除风暴': 'В начале каждого цикла случайный союзник Пути Охоты или Эрудиции немедленно действует, а наносимый им урон повышается на 80% на 1 ход.',
+  '末日幻影•仙客天狼': 'При пробитии уязвимости противника с эффектом «Крепкая защита» снимается контроль со всех союзников и активируется сверхспособность. Урон навыков противников повышается на 25%, а урон техники радости — на 15%.',
+  '虚构叙事•立界开篇': 'Каждый раз при получении очков смеха союзники дополнительно накапливают 2 очка «Боевого духа».',
+  '命运契约•再启': 'Во время события войдите в игру и бесплатно получите одного из двух ограниченных 5★ персонажей и материалы для его развития.'
+};
+
+function containsCjk(value){
+  return /[\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]/u.test(String(value||''));
+}
+
 function localizeGameTitle(game,title){
-  if(game==='wuwa') return wuwaEnglishTitles[String(title).trim()] || String(title);
-  return String(title);
+  const value=String(title??'').trim();
+  if(game==='wuwa') return wuwaEnglishTitles[value] || value;
+  if(game==='hsr') return hsrRussianTitles[value] || (containsCjk(value) ? 'Событие HSR' : value);
+  return value;
+}
+
+function localizeGameDescription(game,title,desc){
+  const value=String(desc??'').trim();
+  if(game==='hsr'){
+    const mapped=hsrRussianDescriptions[String(title??'').trim()];
+    if(mapped) return mapped;
+    if(containsCjk(value)) return '';
+  }
+  return value;
 }
 
 function classifyEvent(raw,game,title=''){
@@ -104,8 +156,9 @@ function classifyEvent(raw,game,title=''){
 
 function normalizeRemoteEvent(raw,game,index,source){
   const id=raw.id ?? raw.activity_id ?? raw.event_id ?? raw.ann_id ?? `${game}-${index}`;
-  const title=localizeGameTitle(game, raw.name ?? raw.title ?? raw.eventName ?? raw.activity_name);
-  const desc=raw.description ?? raw.desc ?? raw.summary ?? '';
+  const rawTitle=raw.name ?? raw.title ?? raw.eventName ?? raw.activity_name;
+  const title=localizeGameTitle(game, rawTitle);
+  const desc=localizeGameDescription(game, rawTitle, raw.description ?? raw.desc ?? raw.summary ?? '');
   const startRaw=raw.start_time ?? raw.startTime ?? raw.start_at ?? raw.start;
   const endRaw=raw.end_time ?? raw.endTime ?? raw.end_at ?? raw.end;
   const start=typeof startRaw==='number' ? new Date(startRaw*1000) : new Date(startRaw);
@@ -257,63 +310,27 @@ const dailyConfig = [
   {id:'nikki', name:'Инфинити Никки', color:'#dc5a98', resetMsk:5}
 ];
 
-// Ежедневные поручения: расчёт цикла полностью независим от часового
-// пояса компьютера/браузера. Используем только USER_UTC_OFFSET.
-// Благодаря этому галочка остаётся отмеченной до реального времени сброса.
-function dailyLocalNow(){
-  return new Date(Date.now()+USER_UTC_OFFSET*60*60*1000);
-}
-
-function dailyResetHourLocal(id){
-  const cfg=dailyConfig.find(x=>x.id===id);
-  if(!cfg) return 0;
-  // resetMsk — время сброса по Москве, пользователь живёт MSK+1.
-  return cfg.resetMsk+1;
-}
-
 function dailyPeriodKey(id){
   const cfg=dailyConfig.find(x=>x.id===id);
   if(!cfg) return '';
-  const localNow=dailyLocalNow();
-  const resetHour=dailyResetHourLocal(id);
-
-  let y=localNow.getUTCFullYear();
-  let m=localNow.getUTCMonth();
-  let d=localNow.getUTCDate();
-
-  // До сброса ещё относится к предыдущему ежедневному циклу.
-  if(localNow.getUTCHours() < resetHour){
-    const previousDay=new Date(Date.UTC(y,m,d)-day);
-    y=previousDay.getUTCFullYear();
-    m=previousDay.getUTCMonth();
-    d=previousDay.getUTCDate();
-  }
-
-  return `${id}-${y}-${m+1}-${d}`;
+  const now=new Date();
+  const localNow=new Date(now.getTime()+USER_UTC_OFFSET*60*60*1000);
+  const resetHour=cfg.resetMsk+1;
+  const reset=new Date(localNow);
+  reset.setHours(resetHour,0,0,0);
+  if(localNow<reset) reset.setDate(reset.getDate()-1);
+  return `${id}-${reset.getUTCFullYear()}-${reset.getUTCMonth()+1}-${reset.getUTCDate()}`;
 }
 
 function dailyResetAt(id){
   const cfg=dailyConfig.find(x=>x.id===id);
-  if(!cfg) return new Date(Date.now());
-
-  const localNow=dailyLocalNow();
-  const resetHour=dailyResetHourLocal(id);
-
-  let y=localNow.getUTCFullYear();
-  let m=localNow.getUTCMonth();
-  let d=localNow.getUTCDate();
-
-  let resetLocal=Date.UTC(y,m,d,resetHour,0,0,0);
-
-  if(resetLocal<=localNow.getTime()){
-    const tomorrow=new Date(Date.UTC(y,m,d)+day);
-    y=tomorrow.getUTCFullYear();
-    m=tomorrow.getUTCMonth();
-    d=tomorrow.getUTCDate();
-    resetLocal=Date.UTC(y,m,d,resetHour,0,0,0);
-  }
-
-  return new Date(resetLocal-USER_UTC_OFFSET*60*60*1000);
+  const now=new Date();
+  const resetHourUtc=cfg.resetMsk+1-USER_UTC_OFFSET;
+  const next=new Date(now);
+  next.setUTCMinutes(0,0,0);
+  next.setUTCHours(resetHourUtc);
+  if(next<=now) next.setUTCDate(next.getUTCDate()+1);
+  return next;
 }
 
 function dailyResetLeft(id){
@@ -326,12 +343,12 @@ function dailyLocalHour(id){
 }
 
 function loadDailies(){
-  try{return JSON.parse(localStorage.getItem('eventclock-dailies-v5')||'{}')}
+  try{return JSON.parse(localStorage.getItem('eventclock-dailies-v4')||'{}')}
   catch(e){return {}}
 }
 
 function saveDailies(state){
-  localStorage.setItem('eventclock-dailies-v5',JSON.stringify(state));
+  localStorage.setItem('eventclock-dailies-v4',JSON.stringify(state));
 }
 
 function dailyDone(id){
