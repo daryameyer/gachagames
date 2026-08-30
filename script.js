@@ -60,48 +60,12 @@ let eventsSnapshotUpdatedAt = null;
 let eventsAutoSource = Object.fromEntries(['genshin','hsr','zzz','wuwa','endfield','nte','nikki'].map(x=>[x,false]));
 let eventsSnapshotSource = Object.fromEntries(['genshin','hsr','zzz','wuwa','endfield','nte','nikki'].map(x=>[x,false]));
 
-function eventDoneStorage(){
-  try{return JSON.parse(localStorage.getItem('eventclock-events')||'{}')||{}}
-  catch(e){return {}}
-}
-function eventDoneKey(e){
-  return `${e.game}|${String(e.title||'').trim().toLowerCase()}`;
-}
 function preserveDone(oldEvents, remote){
-  const saved=eventDoneStorage();
-  const byTitle=new Map();
-  const byId=new Map();
-  for(const e of oldEvents){
-    if(e?.done){
-      byTitle.set(eventDoneKey(e),true);
-      byId.set(String(e.id),true);
-    }
-  }
-  // Saved state is authoritative across a page reload. The old in-memory
-  // list is only a fallback for events that have not yet been persisted.
-  for(const [key,value] of Object.entries(saved)){
-    if(value) byId.set(String(key),true);
-  }
-  return remote.map(e=>({
-    ...e,
-    done:byId.get(String(e.id))===true || byTitle.get(eventDoneKey(e))===true
-  }));
-}
-function saveEventDoneState(){
-  const state={};
-  for(const e of events){
-    if(e?.done){
-      state[String(e.id)]=true;
-      state[eventDoneKey(e)]=true;
-    }
-  }
-  localStorage.setItem('eventclock-events',JSON.stringify(state));
+  const map=new Map(oldEvents.map(e=>[`${e.game}|${e.title}`,!!e.done]));
+  return remote.map(e=>({...e,done:map.get(`${e.game}|${e.title}`)??false}));
 }
 function applyRemoteEvents(remoteEvents){
   events=preserveDone(events,remoteEvents);
-  // Persist the merged state again so the same completion survives the next
-  // API refresh even when the API gives the event a new internal id.
-  saveEventDoneState();
   eventsLastUpdated=new Date();
   renderAll();
 }
@@ -117,55 +81,17 @@ const wuwaEnglishTitles = {
   '声弦涤荡': 'Chord Cleansing',
   '群声共振模拟域': 'Resonance Sim Realm'
 };
-const zzzRussianTitles = {
-  "恰浪花逐夏而至": "Дары прибоя",
-  "咔滋酥脆出餐计划": "Прожарка с корочкой",
-  "极危通缉与悠游假期": "Отпуск в розыске",
-  "实战特训-三倍悬赏": "Практическая тренировка — тройная награда",
-  "云端礼赠": "Подарки из облаков",
-  "「嗯呢」大派送！": "Большая раздача «Эн-эн»!",
-  "玛瑟尔周年馈礼": "Подарки к годовщине Марселя",
-  "法厄同年度大揭秘": "Годовой итог Фаэтона",
-  "潛能预演·狩猎游戏": "Прелюдия потенциала · Охотничья игра",
-  "叮咚！见习邮差派件中": "Динь-дон! Стажёр-почтальон доставляет посылки",
-  "末日幻影•兵锋骑士": "Апокалиптическая тень: Рыцарь клинка",
-  "末日幻影·兵锋骑士": "Апокалиптическая тень: Рыцарь клинка"
-};
-const zzzRussianDescriptions = {
-  "恰浪花逐夏而至": "Тот, кто отправился из небес к океану, получит подарок от волн — незабываемое приключение в сиянии огня и целое незабываемое лето.",
-  "咔滋酥脆出餐计划": "Всё самое вкусное — к вашему столу! Особое кулинарное мероприятие уже началось. Встречаемся на площади Люмин.",
-  "极危通缉与悠游假期": "Даже во время каникул разыскиваемый преступник должен выглядеть идеально для камеры. Делайте снимки и получайте награды.",
-  "实战特训-三倍悬赏": "В период события награды за испытания в Зале боевой симуляции увеличены втрое.",
-  "云端礼赠": "Войдите в игру 7 дней во время события и получите 10 зашифрованных мастер-лент.",
-  "「嗯呢」大派送！": "Войдите в игру 7 дней во время события и получите 10 зашифрованных мастер-лент и 10 купонов банбу.",
-  "玛瑟尔周年馈礼": "Получите ограниченного S-агента, S-двигатель, много полихромов и другие награды.",
-  "法厄同年度大揭秘": "Специальная программа с годовыми итогами Фаэтона и важными событиями прошедшего года.",
-  "潛能预演·狩猎游戏": "Новая охотничья игра начинается. Испытайте себя в новом раунде охоты.",
-  "叮咚！见习邮差派件中": "Почтовая служба «Почта желаний» доставляет мечты. Количество наград ограничено.",
-  "末日幻影•兵锋骑士": "Пройдите испытания Апокалиптической тени и получите награды за боевые достижения.",
-  "末日幻影·兵锋骑士": "Пройдите испытания Апокалиптической тени и получите награды за боевые достижения."
-};
-const zzzChallengeTypes = new Set(['deadly_assault','shiyu_defense','threshold_simulation','annihilation_simulacrum']);
 function localizeGameTitle(game,title){
-  const value=String(title??'').trim();
-  if(game==='wuwa') return wuwaEnglishTitles[value] || value;
-  if(game==='zzz') return zzzRussianTitles[value] || value;
-  return value;
-}
-function localizeGameDesc(game,title,desc){
-  if(game==='zzz') return zzzRussianDescriptions[String(title??'').trim()] || String(desc??'');
-  return String(desc??'');
+  if(game==='wuwa') return wuwaEnglishTitles[String(title).trim()] || String(title);
+  return String(title);
 }
 
 function classifyEvent(raw,game,title=''){
   const text=String(title||raw?.name||raw?.title||'').toLowerCase();
   const id=String(raw?.id ?? raw?.activity_id ?? raw?.event_id ?? '');
   // Повторяющиеся боевые/игровые режимы отделяем от обычных событий.
-  const challengeType=String(raw?.challenge_type || raw?.type_name || '').toLowerCase();
-  if(game==='zzz' && ['deadly_assault','shiyu_defense','threshold_simulation','annihilation_simulacrum'].includes(challengeType)) return 'mode';
-
   const modePatterns = [
-    'опасный штурм','оборона шиюй','бездна','мрачный натиск','нулевая каверна','зона нулевой каверны','задани[ея] легенд','башня невзгод','шепчущие пустоши','конечная матрица','фантазии тысячи врат',
+    'бездна','мрачный натиск','нулевая каверна','зона нулевой каверны','задани[ея] легенд','башня невзгод','шепчущие пустоши','конечная матрица','фантазии тысячи врат',
     '幽境危战','盛材移涌','混沌回忆','虚构叙事','末日幻影','位面分裂','异器盈界','声弦涤荡',
     '群声共振模拟域','сверхсложн','испытани[ея] бездн','stygian onslaught','spiral abyss',
     'zero cavern','legend quest','memory of chaos','pure fiction','apocalyptic shadow','tower of adversity','whimpering wastes','endstate matrix','fantasies of the thousand gateways'
@@ -178,9 +104,8 @@ function classifyEvent(raw,game,title=''){
 
 function normalizeRemoteEvent(raw,game,index,source){
   const id=raw.id ?? raw.activity_id ?? raw.event_id ?? raw.ann_id ?? `${game}-${index}`;
-  const rawTitle=raw.name ?? raw.title ?? raw.eventName ?? raw.activity_name;
-  const title=localizeGameTitle(game, rawTitle);
-  const desc=localizeGameDesc(game, rawTitle, raw.description ?? raw.desc ?? raw.summary ?? '');
+  const title=localizeGameTitle(game, raw.name ?? raw.title ?? raw.eventName ?? raw.activity_name);
+  const desc=raw.description ?? raw.desc ?? raw.summary ?? '';
   const startRaw=raw.start_time ?? raw.startTime ?? raw.start_at ?? raw.start;
   const endRaw=raw.end_time ?? raw.endTime ?? raw.end_at ?? raw.end;
   const start=typeof startRaw==='number' ? new Date(startRaw*1000) : new Date(startRaw);
@@ -332,27 +257,46 @@ const dailyConfig = [
   {id:'nikki', name:'Инфинити Никки', color:'#dc5a98', resetMsk:5}
 ];
 
+// Все расчёты ежедневного периода делаем в одном искусственном часовом поясе UTC+4.
+// Нельзя смешивать setHours()/getHours() браузера с UTC+4: браузер пользователя
+// может находиться, например, в Германии (UTC+1/UTC+2), из-за чего дата ключа
+// менялась раньше или позже нужного сброса.
+function dailyLocalNow(){
+  return new Date(Date.now()+USER_UTC_OFFSET*60*60*1000);
+}
+
 function dailyPeriodKey(id){
   const cfg=dailyConfig.find(x=>x.id===id);
   if(!cfg) return '';
-  const now=new Date();
-  const localNow=new Date(now.getTime()+USER_UTC_OFFSET*60*60*1000);
-  const resetHour=cfg.resetMsk+1;
-  const reset=new Date(localNow);
-  reset.setHours(resetHour,0,0,0);
-  if(localNow<reset) reset.setDate(reset.getDate()-1);
-  return `${id}-${reset.getUTCFullYear()}-${reset.getUTCMonth()+1}-${reset.getUTCDate()}`;
+
+  const localNow=dailyLocalNow();
+  const resetHour=cfg.resetMsk+1; // МСК + 1 час = время сброса пользователя
+
+  // Все операции ниже — UTC-методы над уже сдвинутой датой UTC+4.
+  const periodDate=new Date(localNow.getTime());
+  periodDate.setUTCHours(resetHour,0,0,0);
+  if(localNow.getTime()<periodDate.getTime()){
+    periodDate.setUTCDate(periodDate.getUTCDate()-1);
+  }
+
+  return `${id}-${periodDate.getUTCFullYear()}-${periodDate.getUTCMonth()+1}-${periodDate.getUTCDate()}`;
 }
 
 function dailyResetAt(id){
   const cfg=dailyConfig.find(x=>x.id===id);
-  const now=new Date();
-  const resetHourUtc=cfg.resetMsk+1-USER_UTC_OFFSET;
-  const next=new Date(now);
-  next.setUTCMinutes(0,0,0);
-  next.setUTCHours(resetHourUtc);
-  if(next<=now) next.setUTCDate(next.getUTCDate()+1);
-  return next;
+  if(!cfg) return new Date(Date.now());
+
+  const localNow=dailyLocalNow();
+  const resetHour=cfg.resetMsk+1;
+
+  const nextLocal=new Date(localNow.getTime());
+  nextLocal.setUTCHours(resetHour,0,0,0);
+  if(nextLocal.getTime()<=localNow.getTime()){
+    nextLocal.setUTCDate(nextLocal.getUTCDate()+1);
+  }
+
+  // Возвращаем момент из искусственного UTC+4 обратно в обычный UTC timestamp.
+  return new Date(nextLocal.getTime()-USER_UTC_OFFSET*60*60*1000);
 }
 
 function dailyResetLeft(id){
@@ -365,12 +309,12 @@ function dailyLocalHour(id){
 }
 
 function loadDailies(){
-  try{return JSON.parse(localStorage.getItem('eventclock-dailies-v4')||'{}')}
+  try{return JSON.parse(localStorage.getItem('eventclock-dailies-v5')||'{}')}
   catch(e){return {}}
 }
 
 function saveDailies(state){
-  localStorage.setItem('eventclock-dailies-v4',JSON.stringify(state));
+  localStorage.setItem('eventclock-dailies-v5',JSON.stringify(state));
 }
 
 function dailyDone(id){
@@ -672,7 +616,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeEvent();});
 document.querySelector('#modalDone').onclick=()=>{
   const e=events.find(x=>x.id===currentModalId); if(!e)return;
   e.done=!e.done;
-  saveEventDoneState();
+  localStorage.setItem('eventclock-events',JSON.stringify(Object.fromEntries(events.map(x=>[x.id,x.done]))));
   renderAll(); openEvent(e.id);
 };
 
@@ -691,13 +635,8 @@ document.querySelectorAll('.category-btn').forEach(b=>b.onclick=()=>{
   renderAll();
 });
 
-// Для начального списка применяем сохранённые отметки по ID и по
-// стабильному ключу game|title. Живые события подхватят их ещё раз
-// в applyRemoteEvents() после загрузки API.
-const savedEvents = eventDoneStorage();
-if(savedEvents) events.forEach(e=>{
-  e.done = savedEvents[String(e.id)]===true || savedEvents[eventDoneKey(e)]===true;
-});
+const savedEvents = JSON.parse(localStorage.getItem('eventclock-events')||'null');
+if(savedEvents) events.forEach(e=>{if(savedEvents[e.id]!==undefined)e.done=!!savedEvents[e.id];});
 renderAll();
 updateEventsSyncStatus();
 setInterval(()=>{renderEvents();renderNext();renderCounts();renderTimeline();renderPatch();renderDailies()},1000);
