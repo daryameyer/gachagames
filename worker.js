@@ -86,6 +86,10 @@ function parseDatePart(s, yearHint, tzHours) {
   return null;
 }
 
+// NTE: the official news labels these windows as server time (UTC+8),
+// but the in-game countdown for the user's NTE server is consistently 6 hours later.
+// Therefore we interpret NTE event times as UTC+2 when converting to UTC.
+// This is intentionally NTE-only; other games keep their own source timezones.
 function parseDuration(text,kind){
   const marker=kind==='nte'
     ? '(?:Duration|Длительность|Расписание события|Доступно)'
@@ -98,7 +102,7 @@ function parseDuration(text,kind){
   const chunk=text.slice(idx,idx+1200).replace(/\s+/g,' ');
   const yearNow=new Date().getUTCFullYear();
   const tzMatch=chunk.match(/UTC\s*([+-]\d{1,2})(?::(\d{2}))?/i);
-  const tz=tzMatch?+tzMatch[1]:(kind==='nikki'?-7:8);
+  const tz=kind==='nte'?2:(tzMatch?+tzMatch[1]:(kind==='nikki'?-7:8));
   let range=chunk.match(/([A-Za-z]+\s+\d{1,2}(?:,\s*\d{4})?(?:[^–—-]{0,80}))\s+[–—-]\s+([A-Za-z]+\s+\d{1,2}(?:,\s*\d{4})?(?:[^.]{0,100}))/i);
   if(!range)range=chunk.match(/(?:с\s+)?(\d{1,2}\s+[А-Яа-яёЁ]+(?:\s+\d{4})?(?:[^–—-]{0,100}))\s+(?:до|—|-)\s+(\d{1,2}\s+[А-Яа-яёЁ]+(?:\s+\d{4})?(?:[^.]{0,100}))/u);
   if(!range)range=chunk.match(/(\d{4}\/\d{1,2}\/\d{1,2}(?:\s+\d{1,2}:\d{2})?)\s*(?:-|–|—)\s*(\d{4}\/\d{1,2}\/\d{1,2}(?:\s+\d{1,2}:\d{2})?)/);

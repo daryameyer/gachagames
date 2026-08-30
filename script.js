@@ -28,13 +28,18 @@ function d(offsetDays, hour=12){
 function serverDate(y,m,d,h,min){
   return new Date(Date.UTC(y,m-1,d,h-8,min,0));
 }
+// NTE's in-game schedule for this tracker is 6 hours later than the UTC+8
+// timestamps printed in the official news. Keep this correction NTE-only.
+function nteDate(y,m,d,h,min){
+  return new Date(Date.UTC(y,m-1,d,h-2,min,0));
+}
 
 const patches = [
   {game:'genshin', version:'7.0', title:'Вечная зима без милосердия', titleRu:'Вечная зима без милосердия', start:serverDate(2026,8,13,6,0), end:serverDate(2026,9,23,5,59)},
   {game:'hsr', version:'4.4', title:'In Ravages Does the Whistle Sound', titleRu:'В свете разрушений звучит свисток', start:serverDate(2026,7,15,6,0), end:serverDate(2026,8,26,6,0)},
   {game:'zzz', version:'3.1', title:'The Long Goodbye', titleRu:'Долгое прощание', start:serverDate(2026,7,30,6,0), end:serverDate(2026,9,9,6,0)},
   {game:'wuwa', version:'3.6', title:"Lamplight in Mirage, Sword's Resolve in Heart", start:serverDate(2026,8,20,3,59), end:serverDate(2026,9,29,3,59)},
-  {game:'nte', version:'1.3', title:'Rising from the Moonlit Fog', titleRu:'Восстав из лунного тумана', start:serverDate(2026,8,20,5,59), end:serverDate(2026,9,30,5,59)},
+  {game:'nte', version:'1.3', title:'Rising from the Moonlit Fog', titleRu:'Восстав из лунного тумана', start:nteDate(2026,8,20,5,59), end:nteDate(2026,9,30,5,59)},
   {game:'endfield', version:'1.4', title:'Homecoming', titleRu:'Возвращение домой', start:serverDate(2026,7,30,11,59), end:serverDate(2026,8,30,11,59)},
   {game:'nikki', version:'2.8', title:'Golden Dust', titleRu:'Golden Dust', start:serverDate(2026,7,31,3,49), end:serverDate(2026,8,28,3,49)}
 ];
