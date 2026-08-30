@@ -60,12 +60,48 @@ let eventsSnapshotUpdatedAt = null;
 let eventsAutoSource = Object.fromEntries(['genshin','hsr','zzz','wuwa','endfield','nte','nikki'].map(x=>[x,false]));
 let eventsSnapshotSource = Object.fromEntries(['genshin','hsr','zzz','wuwa','endfield','nte','nikki'].map(x=>[x,false]));
 
+function eventDoneStorage(){
+  try{return JSON.parse(localStorage.getItem('eventclock-events')||'{}')||{}}
+  catch(e){return {}}
+}
+function eventDoneKey(e){
+  return `${e.game}|${String(e.title||'').trim().toLowerCase()}`;
+}
 function preserveDone(oldEvents, remote){
-  const map=new Map(oldEvents.map(e=>[`${e.game}|${e.title}`,!!e.done]));
-  return remote.map(e=>({...e,done:map.get(`${e.game}|${e.title}`)??false}));
+  const saved=eventDoneStorage();
+  const byTitle=new Map();
+  const byId=new Map();
+  for(const e of oldEvents){
+    if(e?.done){
+      byTitle.set(eventDoneKey(e),true);
+      byId.set(String(e.id),true);
+    }
+  }
+  // Saved state is authoritative across a page reload. The old in-memory
+  // list is only a fallback for events that have not yet been persisted.
+  for(const [key,value] of Object.entries(saved)){
+    if(value) byId.set(String(key),true);
+  }
+  return remote.map(e=>({
+    ...e,
+    done:byId.get(String(e.id))===true || byTitle.get(eventDoneKey(e))===true
+  }));
+}
+function saveEventDoneState(){
+  const state={};
+  for(const e of events){
+    if(e?.done){
+      state[String(e.id)]=true;
+      state[eventDoneKey(e)]=true;
+    }
+  }
+  localStorage.setItem('eventclock-events',JSON.stringify(state));
 }
 function applyRemoteEvents(remoteEvents){
   events=preserveDone(events,remoteEvents);
+  // Persist the merged state again so the same completion survives the next
+  // API refresh even when the API gives the event a new internal id.
+  saveEventDoneState();
   eventsLastUpdated=new Date();
   renderAll();
 }
@@ -296,59 +332,27 @@ const dailyConfig = [
   {id:'nikki', name:'Инфинити Никки', color:'#dc5a98', resetMsk:5}
 ];
 
-// Ежедневные поручения считаются по фиксированному часовому поясу пользователя
-// (UTC+4), а не по часовому поясу браузера/Windows. Поэтому открытие сайта
-// в другом браузере или изменение системного timezone не меняет текущий цикл.
-function dailyLocalNow(){
-  return new Date(Date.now()+USER_UTC_OFFSET*60*60*1000);
-}
-
-function dailyResetHourLocal(id){
-  const cfg=dailyConfig.find(x=>x.id===id);
-  return cfg ? cfg.resetMsk+1 : 0;
-}
-
 function dailyPeriodKey(id){
   const cfg=dailyConfig.find(x=>x.id===id);
   if(!cfg) return '';
-  const localNow=dailyLocalNow();
-  const resetHour=dailyResetHourLocal(id);
-
-  let y=localNow.getUTCFullYear();
-  let m=localNow.getUTCMonth();
-  let d=localNow.getUTCDate();
-
-  if(localNow.getUTCHours() < resetHour){
-    const prev=new Date(Date.UTC(y,m,d)-day);
-    y=prev.getUTCFullYear();
-    m=prev.getUTCMonth();
-    d=prev.getUTCDate();
-  }
-
-  return `${id}-${y}-${m+1}-${d}`;
+  const now=new Date();
+  const localNow=new Date(now.getTime()+USER_UTC_OFFSET*60*60*1000);
+  const resetHour=cfg.resetMsk+1;
+  const reset=new Date(localNow);
+  reset.setHours(resetHour,0,0,0);
+  if(localNow<reset) reset.setDate(reset.getDate()-1);
+  return `${id}-${reset.getUTCFullYear()}-${reset.getUTCMonth()+1}-${reset.getUTCDate()}`;
 }
 
 function dailyResetAt(id){
   const cfg=dailyConfig.find(x=>x.id===id);
-  if(!cfg) return new Date(Date.now());
-
-  const localNow=dailyLocalNow();
-  const resetHour=dailyResetHourLocal(id);
-
-  let y=localNow.getUTCFullYear();
-  let m=localNow.getUTCMonth();
-  let d=localNow.getUTCDate();
-  let resetLocalMs=Date.UTC(y,m,d,resetHour,0,0,0);
-
-  if(resetLocalMs<=localNow.getTime()){
-    const nextDay=new Date(Date.UTC(y,m,d)+day);
-    y=nextDay.getUTCFullYear();
-    m=nextDay.getUTCMonth();
-    d=nextDay.getUTCDate();
-    resetLocalMs=Date.UTC(y,m,d,resetHour,0,0,0);
-  }
-
-  return new Date(resetLocalMs-USER_UTC_OFFSET*60*60*1000);
+  const now=new Date();
+  const resetHourUtc=cfg.resetMsk+1-USER_UTC_OFFSET;
+  const next=new Date(now);
+  next.setUTCMinutes(0,0,0);
+  next.setUTCHours(resetHourUtc);
+  if(next<=now) next.setUTCDate(next.getUTCDate()+1);
+  return next;
 }
 
 function dailyResetLeft(id){
@@ -668,7 +672,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeEvent();});
 document.querySelector('#modalDone').onclick=()=>{
   const e=events.find(x=>x.id===currentModalId); if(!e)return;
   e.done=!e.done;
-  localStorage.setItem('eventclock-events',JSON.stringify(Object.fromEntries(events.map(x=>[x.id,x.done]))));
+  saveEventDoneState();
   renderAll(); openEvent(e.id);
 };
 
@@ -687,8 +691,13 @@ document.querySelectorAll('.category-btn').forEach(b=>b.onclick=()=>{
   renderAll();
 });
 
-const savedEvents = JSON.parse(localStorage.getItem('eventclock-events')||'null');
-if(savedEvents) events.forEach(e=>{if(savedEvents[e.id]!==undefined)e.done=!!savedEvents[e.id];});
+// Для начального списка применяем сохранённые отметки по ID и по
+// стабильному ключу game|title. Живые события подхватят их ещё раз
+// в applyRemoteEvents() после загрузки API.
+const savedEvents = eventDoneStorage();
+if(savedEvents) events.forEach(e=>{
+  e.done = savedEvents[String(e.id)]===true || savedEvents[eventDoneKey(e)]===true;
+});
 renderAll();
 updateEventsSyncStatus();
 setInterval(()=>{renderEvents();renderNext();renderCounts();renderTimeline();renderPatch();renderDailies()},1000);
