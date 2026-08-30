@@ -204,7 +204,7 @@ const calendarSources={
   hsr:'https://api.ennead.cc/mihoyo/starrail/calendar?lang=ru-ru',
   zzz:'https://api.ennead.cc/mihoyo/zenless/calendar?lang=ru-ru',
   wuwa:'https://gamecal.nv5.me/api/events?game=ww',
-  endfield:'https://gamecal.nv5.me/api/events?game=endfield'
+  endfield:'https://web-news.gryphline.com/api/bulletin?lang=ru-ru&code=arknights_endfield_official&page=1&pageSize=100'
 };
 
 // Второй независимый источник. Он отдаёт именно activities, а не баннеры.
@@ -217,6 +217,7 @@ const activitySources={
 };
 
 async function calendarEvents(game){
+  if(game==='endfield') return endfieldOfficialCalendarEvents();
   const url=calendarSources[game]; if(!url) return [];
   return cached(`calendar:${game}`,async()=>{
     try{
@@ -225,13 +226,12 @@ async function calendarEvents(game){
       const challenges=game==='zzz' && Array.isArray(data?.challenges)
         ? data.challenges.map(x=>({...x,title:x.name,challenge_type:x.type_name,category:'mode'}))
         : [];
-      const list=[...events,...challenges];
-      const now=Date.now();
-      return list.map((x,i)=>normalizeCalendarEvent(x,game,i,'calendar'))
-        .filter(Boolean).filter(e=>e.end.getTime()>now);
-    }catch(err){ console.warn('calendar',game,err.message); return []; }
+      const list=[...events,...challenges], now=Date.now();
+      return list.map((x,k)=>normalizeCalendarEvent(x,game,k,'calendar')).filter(Boolean).filter(e=>e.end.getTime()>now);
+    }catch(err){console.warn('calendar',game,err.message);return[];}
   });
 }
+
 
 async function activityEvents(game){
   const url=activitySources[game]; if(!url) return [];
@@ -277,12 +277,63 @@ function extractOfficialEvents(text,game,baseUrl){
   return out;
 }
 
+const ENDFIELD_BULLETIN_URL='https://web-news.gryphline.com/api/bulletin?lang=ru-ru&code=arknights_endfield_official&page=1&pageSize=100';
+const ENDFIELD_SITE='https://endfield.gryphline.com/ru-ru';
 const ENDFIELD_OFFICIAL_SOURCES=[
-  'https://endfield.gryphline.com/en-us/news/5200',
-  'https://endfield.gryphline.com/en-us/news/4482',
-  'https://endfield.gryphline.com/en-us/news/1329',
-  'https://endfield.gryphline.com/en-us/news/3831'
+  'https://endfield.gryphline.com/ru-ru/news/5200',
+  'https://endfield.gryphline.com/ru-ru/news/4482',
+  'https://endfield.gryphline.com/ru-ru/news/1329',
+  'https://endfield.gryphline.com/ru-ru/news/3831'
 ];
+
+// Endfield: официальный русский источник.
+// Сторонний gamecal для Endfield больше не используется.
+async function endfieldOfficialArticles(){
+  return cached('endfield:bulletin:ru', async()=>{
+    const data=await fetchJson(ENDFIELD_BULLETIN_URL);
+    const list=Array.isArray(data?.data?.list)?data.data.list:[];
+    return list.filter(x=>{
+      const t=String(x?.title||'');
+      const tab=String(x?.tab||'');
+      return tab==='events' ||
+        /сведени[яе]\s+о\s+(?:временн|сюжетн|событи|веб-событи)|временн(?:ое|ого)\s+предложени|поставка|специальн(?:ый|ого)\s+наем|введение\s+в\s+игровой\s+процесс|информаци[яи]\s+об\s+обновлении\s+контента/i.test(t);
+    }).map(x=>({
+      cid:String(x.cid), title:String(x.title||''), brief:String(x.brief||''),
+      tab:String(x.tab||''), url:`${ENDFIELD_SITE}/news/${String(x.cid).replace(/^0+/,'')}`
+    }));
+  });
+}
+function parseEndfieldRussianDuration(text){
+  const clean=text.replace(/\s+/g,' ').replace(/[–—]/g,' - ');
+  const yearNow=new Date().getUTCFullYear();
+  const m=clean.match(/(?:с\s+)?(\d{1,2}\s+[А-Яа-яёЁ]+\s+20\d{2}\s*г\.?(?:\s*(?:в|,)?\s*\d{1,2}:\d{2})?)\s*(?:до|по|-)\s*(\d{1,2}\s+[А-Яа-яёЁ]+\s+20\d{2}\s*г\.?(?:\s*(?:в|,)?\s*\d{1,2}:\d{2})?)/u);
+  if(!m)return null;
+  const s=parseDatePart(m[1].replace(/\s+г\.?/i,''),yearNow,8);
+  const e=parseDatePart(m[2].replace(/\s+г\.?/i,''),yearNow,8);
+  if(!s||!e)return null;
+  if(e<s)e.setUTCFullYear(e.getUTCFullYear()+1);
+  return {start:s,end:e};
+}
+async function endfieldOfficialCalendarEvents(){
+  return cached('calendar:endfield:official-ru',async()=>{
+    try{
+      const articles=await endfieldOfficialArticles();
+      const selected=articles.slice(0,40);
+      const results=await Promise.all(selected.map(async a=>{
+        try{
+          const text=cleanText(await requestText(a.url));
+          const duration=parseEndfieldRussianDuration(text);
+          if(!duration||duration.end.getTime()<=Date.now())return[];
+          const title=a.title.replace(/^Сведения о (?:временном предложении|сюжетном событии|веб-событии)\s*/i,'').replace(/^\[|\]$/g,'').trim();
+          if(!/(поставка|событи|наем|испытан|режим|арсенал|протокол|эхо войны|монумент|справочник|лотере|снабж|дань|взгляд|царство|памятн)/i.test(title+' '+a.brief))return[];
+          return [{id:`official:endfield:${a.cid}`,game:'endfield',title:title||a.title,desc:a.brief,start:duration.start,end:duration.end,done:false,source:'official',url:a.url}];
+        }catch(err){return[];}
+      }));
+      return results.flat();
+    }catch(err){console.warn('endfield official calendar',err.message);return[];}
+  });
+}
+
 const OFFICIAL_GAME_CONFIG={
   genshin:{index:'https://genshin.hoyoverse.com/en/news',match:'/en/news/',fallback:'https://genshin.hoyoverse.com/en/news/398'},
   hsr:{index:'https://hsr.hoyoverse.com/ru-ru/',match:'/ru-ru/news/',fallback:'https://hsr.hoyoverse.com/ru-ru/'},
@@ -383,6 +434,7 @@ async function scrapeOfficial(game){
 }
 
 async function officialEvents(game){
+  if(game==='endfield') return endfieldOfficialCalendarEvents().catch(()=>[]);
   return scrapeOfficial(game).catch(()=>[]);
 }
 
@@ -419,10 +471,9 @@ function priority(source){
 }
 
 async function liveEvents(game){
+  if(game==='endfield') return dedupeEvents(await calendarEvents(game));
   const [calendar,activity,official]=await Promise.all([
-    calendarEvents(game),
-    activityEvents(game),
-    officialEvents(game)
+    calendarEvents(game), activityEvents(game), officialEvents(game)
   ]);
   return dedupeEvents(calendar,activity,official);
 }
@@ -430,6 +481,10 @@ async function liveEvents(game){
 async function getEvents(game){
   const live=await liveEvents(game);
   if(live.length)return {events:live,usedSnapshot:false};
+  // Для Endfield не используем events.json и сторонние резервные источники:
+  // если официальный источник временно недоступен, лучше показать пусто,
+  // чем подмешать устаревшие/неофициальные данные.
+  if(game==='endfield') return {events:[],usedSnapshot:false};
   const backup=await snapshotEvents(game);
   return {events:backup,usedSnapshot:true};
 }
