@@ -86,10 +86,6 @@ function parseDatePart(s,yearHint,tzHours){
   return null;
 }
 
-// NTE: the official news labels these windows as server time (UTC+8),
-// but the in-game countdown for the user's NTE server is consistently 6 hours later.
-// Therefore we interpret NTE event times as UTC+2 when converting to UTC.
-// This is intentionally NTE-only; other games keep their own source timezones.
 function parseDuration(text,kind){
   const marker=kind==='nte'?'(?:Duration|Длительность|Расписание события|Доступно)':'(?:Event Duration|Event Time|Duration|Event Time|Длительность)';
   const idx=text.search(new RegExp(marker,'i'));
@@ -97,7 +93,7 @@ function parseDuration(text,kind){
   const chunk=text.slice(idx,idx+1200).replace(/\s+/g,' ');
   const yearNow=new Date().getUTCFullYear();
   const tzMatch=chunk.match(/UTC\s*([+-]\d{1,2})(?::(\d{2}))?/i);
-  const tz=kind==='nte'?2:(tzMatch?+tzMatch[1]:(kind==='nikki'?-7:8));
+  const tz=tzMatch?+tzMatch[1]:(kind==='nikki'?-7:8);
 
   // English: August 19, 2026 – September 9, 2026, 05:59
   let range=chunk.match(/([A-Za-z]+\s+\d{1,2}(?:,\s*\d{4})?(?:[^–—-]{0,80}))\s+[–—-]\s+([A-Za-z]+\s+\d{1,2}(?:,\s*\d{4})?(?:[^.]{0,100}))/i);
@@ -114,85 +110,16 @@ function parseDuration(text,kind){
   return {start,end};
 }
 
-const wuwaEnglishTitles = {
-  "回音盈域": "Bountiful Crescendo",
-  "第二索拉・诡影迷踪": "Second Coming of Solaris: Coded Deception",
-  "第二索拉·诡影迷踪": "Second Coming of Solaris: Coded Deception",
-  "清弦纪流年": "The Strings Remember",
-  "若梦仍有回声": "If Dreams Still Reverberate",
-  "潮汐觅闻": "Wuthering Exploration: Fogveil Pagoda",
-  "烟云赠礼": "Gifts of Drifting Mist",
-  "声弦涤荡": "Chord Cleansing",
-  "群声共振模拟域": "Resonance Sim Realm",
-};
-const wuwaEnglishDescriptions = {
-  "Bountiful Crescendo": "Complete Simulated Realm and Tacet Field challenges and spend Crystal Waveplates to receive double rewards.",
-  "Second Coming of Solaris: Coded Deception": "A brand-new version of Second Coming of Solaris like you have never seen before is coming soon. What are you waiting for? Come and give it a try!",
-  "The Strings Remember": "With peace restored to the Land of Xuanfang, you once again return to the peak where Qingxiao lives. She gave you a seven-string qin some time ago. This time, she intends to formally teach you how to play it.",
-  "If Dreams Still Reverberate": "The Ivory Gatekeeper has sent you an SOS over WavesLine. The gate in the depths of the Somnoire—the one that should never be opened, the one you once shut—has somehow opened again. Now terrifying Nightmares are once again running rampant in the Somnoire.",
-  "Wuthering Exploration: Fogveil Pagoda": "Pioneer Association picked the Fogveil Pagoda as the new theme for Wutherium Geographic magazine.",
-  "Gifts of Drifting Mist": "During the event, log in each day and claim the corresponding login reward from the event page.",
-  "Chord Cleansing": "Complete Tacet Discord challenges and spend Crystal Waveplates to receive double rewards.",
-  "Resonance Sim Realm": "A combat event and an open test of diverse abilities. The Threnodian system continuously provides different interference sources for participants to connect, combine, and explore richer ability structures.",
-  "回音盈域": "Complete Simulated Realm and Tacet Field challenges and spend Crystal Waveplates to receive double rewards.",
-  "第二索拉・诡影迷踪": "A brand-new version of Second Coming of Solaris like you have never seen before is coming soon. What are you waiting for? Come and give it a try!",
-  "第二索拉·诡影迷踪": "A brand-new version of Second Coming of Solaris like you have never seen before is coming soon. What are you waiting for? Come and give it a try!",
-  "清弦纪流年": "With peace restored to the Land of Xuanfang, you once again return to the peak where Qingxiao lives. She gave you a seven-string qin some time ago. This time, she intends to formally teach you how to play it.",
-  "若梦仍有回声": "The Ivory Gatekeeper has sent you an SOS over WavesLine. The gate in the depths of the Somnoire—the one that should never be opened, the one you once shut—has somehow opened again. Now terrifying Nightmares are once again running rampant in the Somnoire.",
-  "潮汐觅闻": "Pioneer Association picked the Fogveil Pagoda as the new theme for Wutherium Geographic magazine.",
-  "烟云赠礼": "During the event, log in each day and claim the corresponding login reward from the event page.",
-  "声弦涤荡": "Complete Tacet Discord challenges and spend Crystal Waveplates to receive double rewards.",
-  "群声共振模拟域": "A combat event and an open test of diverse abilities. The Threnodian system continuously provides different interference sources for participants to connect, combine, and explore richer ability structures.",
-}
-const zzzRussianTitles = {
-  "恰浪花逐夏而至": "Дары прибоя",
-  "咔滋酥脆出餐计划": "Прожарка с корочкой",
-  "极危通缉与悠游假期": "Отпуск в розыске",
-  "实战特训-三倍悬赏": "Практическая тренировка — тройная награда",
-  "云端礼赠": "Подарки из облаков",
-  "「嗯呢」大派送！": "Большая раздача «Эн-эн»!",
-  "玛瑟尔周年馈礼": "Подарки к годовщине Марселя",
-  "法厄同年度大揭秘": "Годовой итог Фаэтона",
-  "潛能预演·狩猎游戏": "Прелюдия потенциала · Охотничья игра",
-  "叮咚！见习邮差派件中": "Динь-дон! Стажёр-почтальон доставляет посылки",
-  "末日幻影•兵锋骑士": "Апокалиптическая тень: Рыцарь клинка",
-  "末日幻影·兵锋骑士": "Апокалиптическая тень: Рыцарь клинка"
-};
-const zzzRussianDescriptions = {
-  "恰浪花逐夏而至": "Тот, кто отправился из небес к океану, получит подарок от волн — незабываемое приключение в сиянии огня и целое незабываемое лето.",
-  "咔滋酥脆出餐计划": "Всё самое вкусное — к вашему столу! Особое кулинарное мероприятие уже началось. Встречаемся на площади Люмин.",
-  "极危通缉与悠游假期": "Даже во время каникул разыскиваемый преступник должен выглядеть идеально для камеры. Делайте снимки и получайте награды.",
-  "实战特训-三倍悬赏": "В период события награды за испытания в Зале боевой симуляции увеличены втрое.",
-  "云端礼赠": "Войдите в игру 7 дней во время события и получите 10 зашифрованных мастер-лент.",
-  "「嗯呢」大派送！": "Войдите в игру 7 дней во время события и получите 10 зашифрованных мастер-лент и 10 купонов банбу.",
-  "玛瑟尔周年馈礼": "Получите ограниченного S-агента, S-двигатель, много полихромов и другие награды.",
-  "法厄同年度大揭秘": "Специальная программа с годовыми итогами Фаэтона и важными событиями прошедшего года.",
-  "潛能预演·狩猎游戏": "Новая охотничья игра начинается. Испытайте себя в новом раунде охоты.",
-  "叮咚！见习邮差派件中": "Почтовая служба «Почта желаний» доставляет мечты. Количество наград ограничено.",
-  "末日幻影•兵锋骑士": "Пройдите испытания Апокалиптической тени и получите награды за боевые достижения.",
-  "末日幻影·兵锋骑士": "Пройдите испытания Апокалиптической тени и получите награды за боевые достижения."
-};
-const zzzChallengeTypes = new Set(['deadly_assault','shiyu_defense','threshold_simulation','annihilation_simulacrum']);
-function localizeZZZTitle(title){ const value=String(title??'').trim(); return zzzRussianTitles[value] || value; }
-function localizeZZZDesc(title,desc){ const value=String(title??'').trim(); return zzzRussianDescriptions[value] || String(desc??''); }
-function hasCJK(value){ return /[\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]/u.test(String(value??'')); }
-function localizeGameTitle(game,title){ const value=String(title??'').trim(); if(game==='wuwa') return wuwaEnglishTitles[value] || (hasCJK(value)?'Wuthering Waves Event':value); if(game==='zzz') return localizeZZZTitle(value); return value; }
-function localizeGameDesc(game,title,desc){ const key=String(title??'').trim(); if(game==='wuwa') return wuwaEnglishDescriptions[key] || (hasCJK(desc)?'Wuthering Waves event.':String(desc??'')); if(game==='zzz') return localizeZZZDesc(key,desc); return String(desc??''); }
-
 function normalizeCalendarEvent(raw,game,index,source){
   const id=raw.id??raw.activity_id??raw.event_id??raw.ann_id??`${game}-${index}`;
-  const rawTitle=raw.name??raw.title??raw.eventName??raw.activity_name;
-  const title=game==='zzz'?localizeZZZTitle(rawTitle):rawTitle;
+  const title=raw.name??raw.title??raw.eventName??raw.activity_name;
   const desc=raw.description??raw.desc??raw.summary??'';
   const startRaw=raw.start_time??raw.startTime??raw.start_at??raw.start;
   const endRaw=raw.end_time??raw.endTime??raw.end_at??raw.end;
-  let start=typeof startRaw==='number'?new Date(startRaw*1000):new Date(startRaw);
-  let end=typeof endRaw==='number'?new Date(endRaw*1000):new Date(endRaw);
-  const challengeType=String(raw.challenge_type||raw.type_name||'').toLowerCase();
-  const isZZZChallenge=game==='zzz' && zzzChallengeTypes.has(challengeType);
-  if(isZZZChallenge && !Number.isNaN(end.getTime())) { /* shifted in normalizeZZZChallenge */ }
+  const start=typeof startRaw==='number'?new Date(startRaw*1000):new Date(startRaw);
+  const end=typeof endRaw==='number'?new Date(endRaw*1000):new Date(endRaw);
   if(!title||Number.isNaN(start.getTime())||Number.isNaN(end.getTime())||end<=start)return null;
-  return {id:`${source}:${game}:${id}`,game,title:String(title),desc:String(desc),start,end,done:false,source,url:raw.url||raw.link||'',category:isZZZChallenge?'mode':(raw.category||'event'),challenge_type:isZZZChallenge?challengeType:undefined};
+  return {id:`${source}:${game}:${id}`,game,title:String(title),desc:String(desc),start,end,done:false,source,url:raw.url||raw.link||''};
 }
 
 const calendarSources={
@@ -262,6 +189,31 @@ function extractOfficialEvents(text,game,baseUrl){
   return out;
 }
 
+const endfieldRussianTitles = {
+  'Tribute of Companionship':'Дань товариществу',
+  'Fortune Connect-and-Win':'Счастливое соединение и победа',
+  'Main Mission Early Unlock: Wuling':'Раннее открытие основной миссии: Улин',
+  'Gaze Towards the Northern Exclusion':'Взгляд на Северную запретную зону',
+  'Gaze North to the Rift':'Взгляд на северный разлом',
+  'Like a Star Streaking Through the Boundaries':'Как звезда, пересекающая границы',
+  'Bedazzling Dawnstar':'Сверкающая Утренняя звезда',
+  'HEAT RAGE! MEGA ARENA!':'ЖАРА! МЕГА-АРЕНА!',
+  'Sanity Supply':'Пополнение рассудка',
+  'The Rooted Realm':'Коренное царство',
+  'A Forest Mantled in Snow':'Лес, укутанный снегом',
+  'Monumental Etching: Beastly Howl':'Монументальная гравировка: Звериный вой',
+  'Delver of the Cryptic':'Исследователь тайного',
+  'North Yearns the Rift Vigile':'Север жаждет стража разлома',
+  'Good Morning from Your Dawnstar':'Доброе утро от твоей Утренней звезды',
+  'Military Grade Issue':'Военный арсенал',
+  'Bedazzled Issue':'Сверкающий арсенал',
+  'Protocol Pass: Speed Up Missions':'Ускоренные задания Протокольного пропуска'
+};
+function localizeEndfieldTitle(title){
+  const v=String(title||'').trim();
+  return endfieldRussianTitles[v] || v;
+}
+
 const ENDFIELD_OFFICIAL_SOURCES=[
   'https://endfield.gryphline.com/en-us/news/5200',
   'https://endfield.gryphline.com/en-us/news/4482',
@@ -314,28 +266,40 @@ function endfieldRelativeRange(raw){
 function extractEndfieldEvents(text,baseUrl){
   const now=Date.now();
   const compact=text.replace(/\s+/g,' ').replace(/[–—]/g,' - ');
-  const out=[];
-  // Official Homecoming version notes contain a "New Events" section with numbered entries.
-  const sectionMatch=compact.match(/(?:New Events|New Event)[\s:]*([\s\S]*?)(?=Event & Gameplay Updates|Event & Gameplay Update|$)/i);
+  const sectionMatch=compact.match(/(?:New Events|New Event)\s*:?\s*([\s\S]*?)(?=Event & Gameplay Updates|Event & Gameplay Update|Acquisition Center Update|$)/i);
   const section=sectionMatch?sectionMatch[1]:compact;
-  const re=/(?:^|\s)(?:\d+\.\s*)?(?:\[([^\]]+)\]|["“]([^"”]+)["”])([^]{0,500}?)(?=\s+(?:\d+\.\s*)?(?:\[|["“])|$)/gi;
+  const out=[];
+  // Важно: граница события определяется по НОМЕРУ следующего пункта,
+  // а не по квадратным скобкам внутри описания. В описаниях много [Oroberyl],
+  // из-за чего старый regex обрывал событие раньше Event Time.
+  const re=/(?:^|\s)(\d+)\.\s*\[([^\]]+)\]([\s\S]*?)(?=\s+\d+\.\s*\[|$)/gi;
   let m;
   while((m=re.exec(section))){
-    const title=(m[1]||m[2]||'').trim();
+    const rawTitle=m[2].trim();
     const body=m[3]||'';
-    if(!title)continue;
-    const tm=body.match(/Event Time\s*:\s*([^•]+?)(?=\s+·|\s+Event Details|\s+\d+\.|$)/i);
+    const title=localizeEndfieldTitle(rawTitle);
+    if(!rawTitle)continue;
+    const tm=body.match(/Event Time\s*:\s*([\s\S]*?)(?=\s+·\s*Event Details|\s+Event Details|\s+\d+\.\s*\[|$)/i);
     if(!tm)continue;
     let range=endfieldDateRange(tm[1]);
-    // "After [Homecoming] version update - Aug. 9 ..." starts relatively.
-    if(!range){
-      const explicit=tm[1].match(/((?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)\.?\s+\d{1,2},?\s*20\d{2}?[^-]{0,40})\s*-\s*((?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)\.?\s+\d{1,2},?\s*20\d{2}?[^.]*)/i);
-      if(explicit)range=endfieldDateRange(explicit[0]);
+    if(!range)range=endfieldRelativeRange(tm[1],text);
+    const all=endfieldAllDateRanges(tm[1]);
+    if(all.length){
+      const future=all.filter(r=>r.end.getTime()>now).sort((a,b)=>a.start-b.start);
+      if(future.length)range=future[0];
     }
-    if(!range)range=endfieldRelativeRange(tm[1]);
-    if(!range)continue;
-    if(range.end.getTime()<=now)continue;
-    out.push({id:`official:endfield:${Buffer.from(baseUrl+'#'+m.index).toString('base64url')}`,game:'endfield',title,desc:body.replace(/Event Time\s*:[\s\S]*$/i,'').trim().slice(0,500),start:range.start,end:range.end,done:false,source:'official',url:baseUrl});
+    if(!range||range.end.getTime()<=now)continue;
+    out.push({
+      id:`official:endfield:${eventId(baseUrl,m.index)}`,
+      game:'endfield',
+      title,
+      desc:body.replace(/Event Time\s*:[\s\S]*$/i,'').trim().slice(0,500),
+      start:range.start,
+      end:range.end,
+      done:false,
+      source:'official',
+      url:baseUrl
+    });
   }
   return out;
 }
@@ -361,7 +325,7 @@ async function scrapeOfficial(game){
     }
   } else if(cfg.fallback&&!unique.some(x=>x.url===cfg.fallback)) unique.unshift({url:cfg.fallback,title:''});
   // Не опрашиваем десятки страниц последовательно: это и вызывало минутное ожидание.
-  const selected=unique.slice(0,10);
+  const selected=unique.slice(0,30);
   const results=await Promise.all(selected.map(async link=>{
     try{
       const article=await requestText(link.url);
@@ -372,7 +336,7 @@ async function scrapeOfficial(game){
       if(extracted.length) return extracted;
       const duration=parseDuration(text,game);
       if(!duration||duration.end.getTime()<=now) return [];
-      const title=firstTitle(article,link.title||'Событие');
+      const title=localizeEndfieldTitle(firstTitle(article,link.title||'Событие'));
       return [{id:`official:${game}:${Buffer.from(link.url).toString('base64url')}`,game,title,desc:'Официальное событие',start:duration.start,end:duration.end,done:false,source:'official',url:link.url}];
     }catch(err){
       console.warn(game,link.url,err.message);
