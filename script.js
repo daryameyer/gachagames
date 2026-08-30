@@ -70,26 +70,6 @@ function applyRemoteEvents(remoteEvents){
   renderAll();
 }
 
-const endfieldRussianTitles = {
-  'Tribute of Companionship':'Дань товариществу',
-  'Fortune Connect-and-Win':'Счастливое соединение и победа',
-  'Main Mission Early Unlock: Wuling':'Раннее открытие основной миссии: Улин',
-  'Gaze Towards the Northern Exclusion':'Взгляд на Северную запретную зону',
-  'Gaze North to the Rift':'Взгляд на северный разлом',
-  'Like a Star Streaking Through the Boundaries':'Как звезда, пересекающая границы',
-  'Bedazzling Dawnstar':'Сверкающая Утренняя звезда',
-  'HEAT RAGE! MEGA ARENA!':'ЖАРА! МЕГА-АРЕНА!',
-  'Sanity Supply':'Пополнение рассудка',
-  'The Rooted Realm':'Коренное царство',
-  'A Forest Mantled in Snow':'Лес, укутанный снегом',
-  'Monumental Etching: Beastly Howl':'Монументальная гравировка: Звериный вой',
-  'Delver of the Cryptic':'Исследователь тайного',
-  'North Yearns the Rift Vigile':'Север жаждет стража разлома',
-  'Good Morning from Your Dawnstar':'Доброе утро от твоей Утренней звезды',
-  'Military Grade Issue':'Военный арсенал',
-  'Bedazzled Issue':'Сверкающий арсенал',
-  'Protocol Pass: Speed Up Missions':'Ускоренные задания Протокольного пропуска'
-};
 const wuwaEnglishTitles = {
   '回音盈域': 'Bountiful Crescendo',
   '第二索拉・诡影迷踪': 'Second Coming of Solaris: Coded Deception',
@@ -101,18 +81,55 @@ const wuwaEnglishTitles = {
   '声弦涤荡': 'Chord Cleansing',
   '群声共振模拟域': 'Resonance Sim Realm'
 };
+const zzzRussianTitles = {
+  "恰浪花逐夏而至": "Дары прибоя",
+  "咔滋酥脆出餐计划": "Прожарка с корочкой",
+  "极危通缉与悠游假期": "Отпуск в розыске",
+  "实战特训-三倍悬赏": "Практическая тренировка — тройная награда",
+  "云端礼赠": "Подарки из облаков",
+  "「嗯呢」大派送！": "Большая раздача «Эн-эн»!",
+  "玛瑟尔周年馈礼": "Подарки к годовщине Марселя",
+  "法厄同年度大揭秘": "Годовой итог Фаэтона",
+  "潛能预演·狩猎游戏": "Прелюдия потенциала · Охотничья игра",
+  "叮咚！见习邮差派件中": "Динь-дон! Стажёр-почтальон доставляет посылки",
+  "末日幻影•兵锋骑士": "Апокалиптическая тень: Рыцарь клинка",
+  "末日幻影·兵锋骑士": "Апокалиптическая тень: Рыцарь клинка"
+};
+const zzzRussianDescriptions = {
+  "恰浪花逐夏而至": "Тот, кто отправился из небес к океану, получит подарок от волн — незабываемое приключение в сиянии огня и целое незабываемое лето.",
+  "咔滋酥脆出餐计划": "Всё самое вкусное — к вашему столу! Особое кулинарное мероприятие уже началось. Встречаемся на площади Люмин.",
+  "极危通缉与悠游假期": "Даже во время каникул разыскиваемый преступник должен выглядеть идеально для камеры. Делайте снимки и получайте награды.",
+  "实战特训-三倍悬赏": "В период события награды за испытания в Зале боевой симуляции увеличены втрое.",
+  "云端礼赠": "Войдите в игру 7 дней во время события и получите 10 зашифрованных мастер-лент.",
+  "「嗯呢」大派送！": "Войдите в игру 7 дней во время события и получите 10 зашифрованных мастер-лент и 10 купонов банбу.",
+  "玛瑟尔周年馈礼": "Получите ограниченного S-агента, S-двигатель, много полихромов и другие награды.",
+  "法厄同年度大揭秘": "Специальная программа с годовыми итогами Фаэтона и важными событиями прошедшего года.",
+  "潛能预演·狩猎游戏": "Новая охотничья игра начинается. Испытайте себя в новом раунде охоты.",
+  "叮咚！见习邮差派件中": "Почтовая служба «Почта желаний» доставляет мечты. Количество наград ограничено.",
+  "末日幻影•兵锋骑士": "Пройдите испытания Апокалиптической тени и получите награды за боевые достижения.",
+  "末日幻影·兵锋骑士": "Пройдите испытания Апокалиптической тени и получите награды за боевые достижения."
+};
+const zzzChallengeTypes = new Set(['deadly_assault','shiyu_defense','threshold_simulation','annihilation_simulacrum']);
 function localizeGameTitle(game,title){
-  if(game==='wuwa') return wuwaEnglishTitles[String(title).trim()] || String(title);
-  if(game==='endfield') return endfieldRussianTitles[String(title).trim()] || String(title);
-  return String(title);
+  const value=String(title??'').trim();
+  if(game==='wuwa') return wuwaEnglishTitles[value] || value;
+  if(game==='zzz') return zzzRussianTitles[value] || value;
+  return value;
+}
+function localizeGameDesc(game,title,desc){
+  if(game==='zzz') return zzzRussianDescriptions[String(title??'').trim()] || String(desc??'');
+  return String(desc??'');
 }
 
 function classifyEvent(raw,game,title=''){
   const text=String(title||raw?.name||raw?.title||'').toLowerCase();
   const id=String(raw?.id ?? raw?.activity_id ?? raw?.event_id ?? '');
   // Повторяющиеся боевые/игровые режимы отделяем от обычных событий.
+  const challengeType=String(raw?.challenge_type || raw?.type_name || '').toLowerCase();
+  if(game==='zzz' && ['deadly_assault','shiyu_defense','threshold_simulation','annihilation_simulacrum'].includes(challengeType)) return 'mode';
+
   const modePatterns = [
-    'бездна','мрачный натиск','нулевая каверна','зона нулевой каверны','задани[ея] легенд','башня невзгод','шепчущие пустоши','конечная матрица','фантазии тысячи врат',
+    'опасный штурм','оборона шиюй','бездна','мрачный натиск','нулевая каверна','зона нулевой каверны','задани[ея] легенд','башня невзгод','шепчущие пустоши','конечная матрица','фантазии тысячи врат',
     '幽境危战','盛材移涌','混沌回忆','虚构叙事','末日幻影','位面分裂','异器盈界','声弦涤荡',
     '群声共振模拟域','сверхсложн','испытани[ея] бездн','stygian onslaught','spiral abyss',
     'zero cavern','legend quest','memory of chaos','pure fiction','apocalyptic shadow','tower of adversity','whimpering wastes','endstate matrix','fantasies of the thousand gateways'
@@ -125,8 +142,9 @@ function classifyEvent(raw,game,title=''){
 
 function normalizeRemoteEvent(raw,game,index,source){
   const id=raw.id ?? raw.activity_id ?? raw.event_id ?? raw.ann_id ?? `${game}-${index}`;
-  const title=localizeGameTitle(game, raw.name ?? raw.title ?? raw.eventName ?? raw.activity_name);
-  const desc=raw.description ?? raw.desc ?? raw.summary ?? '';
+  const rawTitle=raw.name ?? raw.title ?? raw.eventName ?? raw.activity_name;
+  const title=localizeGameTitle(game, rawTitle);
+  const desc=localizeGameDesc(game, rawTitle, raw.description ?? raw.desc ?? raw.summary ?? '');
   const startRaw=raw.start_time ?? raw.startTime ?? raw.start_at ?? raw.start;
   const endRaw=raw.end_time ?? raw.endTime ?? raw.end_at ?? raw.end;
   const start=typeof startRaw==='number' ? new Date(startRaw*1000) : new Date(startRaw);
@@ -278,27 +296,59 @@ const dailyConfig = [
   {id:'nikki', name:'Инфинити Никки', color:'#dc5a98', resetMsk:5}
 ];
 
+// Ежедневные поручения считаются по фиксированному часовому поясу пользователя
+// (UTC+4), а не по часовому поясу браузера/Windows. Поэтому открытие сайта
+// в другом браузере или изменение системного timezone не меняет текущий цикл.
+function dailyLocalNow(){
+  return new Date(Date.now()+USER_UTC_OFFSET*60*60*1000);
+}
+
+function dailyResetHourLocal(id){
+  const cfg=dailyConfig.find(x=>x.id===id);
+  return cfg ? cfg.resetMsk+1 : 0;
+}
+
 function dailyPeriodKey(id){
   const cfg=dailyConfig.find(x=>x.id===id);
   if(!cfg) return '';
-  const now=new Date();
-  const localNow=new Date(now.getTime()+USER_UTC_OFFSET*60*60*1000);
-  const resetHour=cfg.resetMsk+1;
-  const reset=new Date(localNow);
-  reset.setHours(resetHour,0,0,0);
-  if(localNow<reset) reset.setDate(reset.getDate()-1);
-  return `${id}-${reset.getUTCFullYear()}-${reset.getUTCMonth()+1}-${reset.getUTCDate()}`;
+  const localNow=dailyLocalNow();
+  const resetHour=dailyResetHourLocal(id);
+
+  let y=localNow.getUTCFullYear();
+  let m=localNow.getUTCMonth();
+  let d=localNow.getUTCDate();
+
+  if(localNow.getUTCHours() < resetHour){
+    const prev=new Date(Date.UTC(y,m,d)-day);
+    y=prev.getUTCFullYear();
+    m=prev.getUTCMonth();
+    d=prev.getUTCDate();
+  }
+
+  return `${id}-${y}-${m+1}-${d}`;
 }
 
 function dailyResetAt(id){
   const cfg=dailyConfig.find(x=>x.id===id);
-  const now=new Date();
-  const resetHourUtc=cfg.resetMsk+1-USER_UTC_OFFSET;
-  const next=new Date(now);
-  next.setUTCMinutes(0,0,0);
-  next.setUTCHours(resetHourUtc);
-  if(next<=now) next.setUTCDate(next.getUTCDate()+1);
-  return next;
+  if(!cfg) return new Date(Date.now());
+
+  const localNow=dailyLocalNow();
+  const resetHour=dailyResetHourLocal(id);
+
+  let y=localNow.getUTCFullYear();
+  let m=localNow.getUTCMonth();
+  let d=localNow.getUTCDate();
+  let resetLocalMs=Date.UTC(y,m,d,resetHour,0,0,0);
+
+  if(resetLocalMs<=localNow.getTime()){
+    const nextDay=new Date(Date.UTC(y,m,d)+day);
+    y=nextDay.getUTCFullYear();
+    m=nextDay.getUTCMonth();
+    d=nextDay.getUTCDate();
+    resetLocalMs=Date.UTC(y,m,d,resetHour,0,0,0);
+  }
+
+  return new Date(resetLocalMs-USER_UTC_OFFSET*60*60*1000);
 }
 
 function dailyResetLeft(id){
