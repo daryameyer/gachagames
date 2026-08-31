@@ -60,12 +60,33 @@ let eventsSnapshotUpdatedAt = null;
 let eventsAutoSource = Object.fromEntries(['genshin','hsr','zzz','wuwa','endfield','nte','nikki'].map(x=>[x,false]));
 let eventsSnapshotSource = Object.fromEntries(['genshin','hsr','zzz','wuwa','endfield','nte','nikki'].map(x=>[x,false]));
 
+function readSavedEventDone(){
+  try{
+    const saved=JSON.parse(localStorage.getItem('eventclock-events')||'{}');
+    return saved && typeof saved==='object' ? saved : {};
+  }catch(_){ return {}; }
+}
 function preserveDone(oldEvents, remote){
-  const map=new Map(oldEvents.map(e=>[`${e.game}|${e.title}`,!!e.done]));
-  return remote.map(e=>({...e,done:map.get(`${e.game}|${e.title}`)??false}));
+  const saved=readSavedEventDone();
+  const map=new Map();
+  // Сначала берём уже отмеченные события из текущего массива.
+  oldEvents.forEach(e=>map.set(`${e.game}|${String(e.title).trim()}`,!!e.done));
+  // Затем обязательно накладываем сохранённые отметки из localStorage.
+  // Это важно при первом запуске: сетевые события загружаются асинхронно
+  // и раньше могли перезаписывать отметки после обновления страницы.
+  oldEvents.forEach(e=>{
+    if(saved[e.id]!==undefined) map.set(`${e.game}|${String(e.title).trim()}`,!!saved[e.id]);
+  });
+  return remote.map(e=>{
+    const key=`${e.game}|${String(e.title).trim()}`;
+    return {...e,done:map.get(key)??(saved[e.id]!==undefined?!!saved[e.id]:false)};
+  });
 }
 function applyRemoteEvents(remoteEvents){
   events=preserveDone(events,remoteEvents);
+  // После получения новых данных снова сохраняем итоговое состояние,
+  // чтобы отметки не исчезали при следующем обновлении.
+  localStorage.setItem('eventclock-events',JSON.stringify(Object.fromEntries(events.map(x=>[x.id,!!x.done]))));
   eventsLastUpdated=new Date();
   renderAll();
 }
@@ -242,6 +263,12 @@ function updateEventsSyncStatus(){
     el.textContent=`Автообновление · проверяю ${total} источников…`;
   }
 }
+
+// Восстанавливаем отметки ДО первого сетевого запроса.
+// Иначе remote events могут прийти после старта страницы и затереть done=false.
+const savedEvents = readSavedEventDone();
+if(savedEvents) events.forEach(e=>{if(savedEvents[e.id]!==undefined)e.done=!!savedEvents[e.id];});
+renderAll();
 
 loadRemoteEvents();
 setInterval(loadRemoteEvents,30*60*1000);
@@ -635,9 +662,6 @@ document.querySelectorAll('.category-btn').forEach(b=>b.onclick=()=>{
   renderAll();
 });
 
-const savedEvents = JSON.parse(localStorage.getItem('eventclock-events')||'null');
-if(savedEvents) events.forEach(e=>{if(savedEvents[e.id]!==undefined)e.done=!!savedEvents[e.id];});
-renderAll();
 updateEventsSyncStatus();
 setInterval(()=>{renderEvents();renderNext();renderCounts();renderTimeline();renderPatch();renderDailies()},1000);
 updateReset();
