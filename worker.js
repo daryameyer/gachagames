@@ -277,17 +277,18 @@ function extractOfficialEvents(text,game,baseUrl){
   return out;
 }
 
+
 const ENDFIELD_BULLETIN_URL='https://web-news.gryphline.com/api/bulletin?lang=ru-ru&code=arknights_endfield_official&page=1&pageSize=100';
 const ENDFIELD_SITE='https://endfield.gryphline.com/ru-ru';
+
+// These are official Russian pages which define the current/previous version calendar.
+// The bulletin is used to discover newer articles automatically.
 const ENDFIELD_OFFICIAL_SOURCES=[
   'https://endfield.gryphline.com/ru-ru/news/5200',
-  'https://endfield.gryphline.com/ru-ru/news/4482',
-  'https://endfield.gryphline.com/ru-ru/news/1329',
-  'https://endfield.gryphline.com/ru-ru/news/3831'
+  'https://endfield.gryphline.com/ru-ru/news/3831',
+  'https://endfield.gryphline.com/ru-ru/news/9564'
 ];
 
-// Endfield: официальный русский источник.
-// Сторонний gamecal для Endfield больше не используется.
 async function endfieldOfficialArticles(){
   return cached('endfield:bulletin:ru', async()=>{
     const data=await fetchJson(ENDFIELD_BULLETIN_URL);
@@ -296,78 +297,149 @@ async function endfieldOfficialArticles(){
       const t=String(x?.title||'');
       const tab=String(x?.tab||'');
       return tab==='events' ||
-        /сведени[яе]\s+о\s+(?:временн|сюжетн|событи|веб-событи)|временн(?:ое|ого)\s+предложени|поставка|специальн(?:ый|ого)\s+наем|введение\s+в\s+игровой\s+процесс|информаци[яи]\s+об\s+обновлении\s+контента|описание\s+обновления\s+версии/i.test(t);
+        /поставка|специальн(?:ый|ого)\s+наем|сведени[яе]\s+о\s+(?:временном|сюжетном|событии|веб-событии)|описание\s+обновления\s+версии|обновление.*версии/i.test(t);
     }).map(x=>({
       cid:String(x.cid), title:String(x.title||''), brief:String(x.brief||''),
       tab:String(x.tab||''), url:`${ENDFIELD_SITE}/news/${String(x.cid).replace(/^0+/,'')}`
     }));
   });
 }
-function parseEndfieldRussianDuration(text){
-  const clean=text.replace(/\s+/g,' ').replace(/[–—]/g,' - ');
-  const yearNow=new Date().getUTCFullYear();
-  // Official Russian materials often publish both Asia and Americas/Europe times.
-  // We always use the Europe server line, expressed by the official source in MSK.
-  let m=clean.match(/Сервер\s+Americas\s*\/\s*Europe\s*:\s*(?:с\s*)?(\d{1,2}\s+[А-Яа-яёЁ]+\s+20\d{2}\s*(?:г\.?)?\s*,?\s*\d{1,2}:\d{2})\s*(?:до|-|–)\s*(\d{1,2}\s+[А-Яа-яёЁ]+\s+20\d{2}\s*(?:г\.?)?\s*,?\s*\d{1,2}:\d{2})/iu);
-  if(m){
-    const s=parseDatePart(m[1].replace(/\s+г\.?/i,''),yearNow,3);
-    const e=parseDatePart(m[2].replace(/\s+г\.?/i,''),yearNow,3);
-    if(s&&e){ if(e<s)e.setUTCFullYear(e.getUTCFullYear()+1); return {start:s,end:e}; }
-  }
-  // A single Europe time followed by a common maintenance end.
-  m=clean.match(/(?:с\s*)?(\d{1,2}\s+[А-Яа-яёЁ]+\s+20\d{2}\s*(?:г\.?)?\s*,?\s*\d{1,2}:\d{2})[^.]{0,100}?до\s+начала\s+технических\s+работ/iu);
-  if(m){
-    const s=parseDatePart(m[1].replace(/\s+г\.?/i,''),yearNow,3);
-    const e=endfieldNextVersionMaintenance();
-    if(s&&e&&e>s)return {start:s,end:e};
-  }
-  // Generic explicit Russian date range; these dates are stated in MSK in the RU source.
-  m=clean.match(/(?:с\s*)?(\d{1,2}\s+[А-Яа-яёЁ]+\s+20\d{2}\s*(?:г\.?)?\s*,?\s*\d{1,2}:\d{2})\s*(?:до|-|–)\s*(\d{1,2}\s+[А-Яа-яёЁ]+\s+20\d{2}\s*(?:г\.?)?\s*,?\s*\d{1,2}:\d{2})/iu);
-  if(!m)return null;
-  const s=parseDatePart(m[1].replace(/\s+г\.?/i,''),yearNow,3);
-  const e=parseDatePart(m[2].replace(/\s+г\.?/i,''),yearNow,3);
-  if(!s||!e)return null;
-  if(e<s)e.setUTCFullYear(e.getUTCFullYear()+1);
-  return {start:s,end:e};
-}
+
 function endfieldNextVersionMaintenance(){
-  // Current official Homecoming calendar ends with the 2 Sep 2026 maintenance.
-  // The source is refreshed automatically; this fallback is only for entries that say
-  // "до начала технических работ" and will be replaced when a newer version notice appears.
-  return new Date(Date.UTC(2026,8,1,22,0,0)); // 02 Sep 01:00 MSK
+  // Temporary fallback for the current 1.4 calendar. The official 1.5 update is
+  // scheduled for 2 September 2026; once the official update notice appears,
+  // the parser below will prefer its explicit maintenance window.
+  return new Date(Date.UTC(2026,8,1,22,0,0)); // 02 Sep 2026 01:00 MSK
 }
+
+function endfieldDatePartRu(s, fallbackYear=2026){
+  const clean=String(s||'').replace(/[–—]/g,'-').replace(/\s+/g,' ').trim();
+  const m=clean.match(/(\d{1,2})\s+([А-Яа-яёЁ]+)(?:\s+(\d{4})\s*(?:г\.?)?)?(?:\s*,?\s*(\d{1,2}):(\d{2}))?/u);
+  if(!m)return null;
+  const month=ruMonths[m[2].toLowerCase()];
+  if(month===undefined)return null;
+  return new Date(Date.UTC(+(m[3]||fallbackYear),month,+m[1],+(m[4]||0),+(m[5]||0))-3*3600000);
+}
+
+// Parses the actual Russian wording used by the official Endfield announcements.
+// The important distinction is that Americas/Europe times in the RU community
+// are given in MSK, so 3 hours are subtracted when converting to UTC.
+function parseEndfieldRussianDuration(text){
+  const clean=String(text||'').replace(/\s+/g,' ').replace(/[–—]/g,' - ');
+  const nowYear=new Date().getUTCFullYear();
+
+  // 1) Explicit Americas/Europe range.
+  let m=clean.match(/(?:Сервер\s+)?Americas\s*\/\s*Europe\s*:\s*(?:с\s*)?(\d{1,2}\s+[А-Яа-яёЁ]+\s+20\d{2}\s*,?\s*\d{1,2}:\d{2})\s*(?:до|-)\s*(\d{1,2}\s+[А-Яа-яёЁ]+\s+20\d{2}\s*,?\s*\d{1,2}:\d{2})/iu);
+  if(m){
+    const start=endfieldDatePartRu(m[1],nowYear), end=endfieldDatePartRu(m[2],nowYear);
+    if(start&&end){if(end<start)end.setUTCFullYear(end.getUTCFullYear()+1);return {start,end};}
+  }
+
+  // 2) "from X at ... (Americas/Europe) until version update/maintenance".
+  m=clean.match(/(?:с\s*)?(\d{1,2}\s+[А-Яа-яёЁ]+\s+20\d{2})[^.]{0,180}?(?:Americas\s*\/\s*Europe|Сервер\s+Americas\s*\/\s*Europe)[^.]{0,100}?(?:до|—|-)\s*(?:начала\s+)?технических\s+работ|до\s+обновления\s+версии(?:\s+и\s+технического\s+обслуживания)?/iu);
+  if(m){
+    const start=endfieldDatePartRu(m[1],nowYear), end=endfieldNextVersionMaintenance();
+    if(start&&end&&end>start)return {start,end};
+  }
+
+  // 3) Common Russian range with explicit times. Treat it as MSK.
+  m=clean.match(/(?:с\s*)?(\d{1,2}\s+[А-Яа-яёЁ]+\s+20\d{2}\s*,?\s*\d{1,2}:\d{2})\s*(?:до|-)\s*(\d{1,2}\s+[А-Яа-яёЁ]+\s+20\d{2}\s*,?\s*\d{1,2}:\d{2})/iu);
+  if(m){
+    const start=endfieldDatePartRu(m[1],nowYear), end=endfieldDatePartRu(m[2],nowYear);
+    if(start&&end){if(end<start)end.setUTCFullYear(end.getUTCFullYear()+1);return {start,end};}
+  }
+
+  // 4) Same-day start + "до начала технических работ".
+  m=clean.match(/(?:с\s*)?(\d{1,2}\s+[А-Яа-яёЁ]+\s+20\d{2}\s*,?\s*\d{1,2}:\d{2})[^.]{0,160}?до\s+начала\s+технических\s+работ/iu);
+  if(m){
+    const start=endfieldDatePartRu(m[1],nowYear), end=endfieldNextVersionMaintenance();
+    if(start&&end&&end>start)return {start,end};
+  }
+  return null;
+}
+
+function endfieldExtractRussianArticleEvents(text, url, fallbackTitle=''){
+  const clean=String(text||'').replace(/\r/g,' ').replace(/\s+/g,' ').trim();
+  const out=[];
+  const now=Date.now();
+
+  // Split numbered "New Events" sections. This is deliberately based on the
+  // official article structure rather than machine translation.
+  const sectionMatch=clean.match(/(?:■\s*)?(?:Новые события|События и игровой процесс|Новые события найма и поставки)([\s\S]*?)(?:■\s*(?:Обновления событий|Обновление событий|АПК|Система|Другое)|$)/i);
+  const section=sectionMatch?sectionMatch[1]:clean;
+  const re=/(?:^|\s)(\d+)\.\s*([^·]{2,180}?)(?=\s*·\s*(?:Время|Расписание|Доступность|Период)|\s+\d+\.\s)/gi;
+  let m;
+  while((m=re.exec(section))){
+    const title=m[2].replace(/\s+/g,' ').trim().replace(/^[-–—:]+|[-–—:]+$/g,'');
+    const body=section.slice(m.index,m.index+1600);
+    const duration=parseEndfieldRussianDuration(body);
+    if(!duration||duration.end.getTime()<=now)continue;
+    out.push({id:`official:endfield:${eventId(url,m.index)}`,game:'endfield',title,desc:'Официальное событие',start:duration.start,end:duration.end,done:false,source:'official',url});
+  }
+  return out;
+}
+
+// Current calendar fallback, based on official Russian announcements. It is
+// only used when the official page is client-rendered or temporarily unavailable.
+// The worker still refreshes the bulletin every 5 minutes, so newer official
+// announcements can replace these entries.
+function endfieldCurrentCalendarFallback(){
+  const end=endfieldNextVersionMaintenance();
+  const mk=(id,title,start,desc='')=>({id:`official:endfield:fallback:${id}`,game:'endfield',title,desc,start:new Date(start),end,done:false,source:'official',url:`${ENDFIELD_SITE}#calendar`});
+  return [
+    mk('liino','Приветствие утренней звезды','2026-08-09T17:00:00.000Z','Специальный наем'),
+    mk('bedazzled','Ослепление','2026-08-09T17:00:00.000Z','Поставка арсенала'),
+    mk('forest','Лес, укрытый снегом','2026-08-26T17:00:00.000Z','Временное событие входа'),
+    mk('rooted','Царство корней','2026-08-09T17:00:00.000Z','Развлекательное событие'),
+    {id:'official:endfield:fallback:sanity',game:'endfield',title:'Поставка рассудка',desc:'Временное событие',start:new Date('2026-08-26T09:00:00.000Z'),end:new Date('2026-09-01T22:00:00.000Z'),done:false,source:'official',url:`${ENDFIELD_SITE}#calendar`}
+  ].filter(e=>e.end>Date.now());
+}
+
 async function endfieldOfficialCalendarEvents(){
   return cached('calendar:endfield:official-ru',async()=>{
     try{
       const articles=await endfieldOfficialArticles();
-      // Prefer the current version/update article; it contains the complete in-game event list.
-      const selected=articles.slice(0,60);
-      const results=await Promise.all(selected.map(async a=>{
+      const results=[];
+      for(const a of articles.slice(0,60)){
         try{
           const ruUrl=a.url;
           const ruText=cleanText(await requestText(ruUrl));
-          let text=ruText;
-          let duration=parseEndfieldRussianDuration(text);
-          // If the RU page is client-rendered and has no article body, use the same official
-          // article on the EN site only for date parsing. Names remain taken from RU metadata.
-          if(!duration || text.length<500){
+          let extracted=endfieldExtractRussianArticleEvents(ruText,ruUrl,a.title);
+          if(extracted.length) results.push(...extracted);
+
+          // A few official RU pages are client-rendered. The EN page is used only
+          // to recover timing; names are never machine-translated.
+          if(!extracted.length || ruText.length<500){
             const enUrl=`https://endfield.gryphline.com/en-us/news/${String(a.cid).replace(/^0+/,'')}`;
             const enText=cleanText(await requestText(enUrl));
-            const extracted=extractEndfieldEvents(enText,enUrl);
-            if(extracted.length)return extracted.map(e=>({...e,source:'official',url:ruUrl}));
-            text=enText;
+            const enExtract=extractEndfieldEvents(enText,enUrl);
+            for(const e of enExtract){
+              const title=(a.title||fallbackTitle).replace(/^Сведения о\s+/i,'').trim();
+              results.push({...e,title:title||e.title,source:'official',url:ruUrl});
+            }
           }
-          duration=parseEndfieldRussianDuration(text);
-          if(!duration || duration.end.getTime()<=Date.now())return [];
-          const title=a.title.replace(/^Сведения о (?:временном предложении|сюжетном событии|веб-событии|временном событии)\s*/i,'').replace(/^Описание обновления версии\s*/i,'').replace(/^\[|\]$/g,'').trim();
-          if(!/(поставка|событи|наем|испытан|режим|арсенал|протокол|эхо войны|монумент|справочник|лотере|снабж|дань|взгляд|царство|памятн|лес|рассуд)/i.test(title+' '+a.brief))return [];
-          return [{id:`official:endfield:${a.cid}`,game:'endfield',title:title||a.title,desc:a.brief,start:duration.start,end:duration.end,done:false,source:'official',url:ruUrl}];
-        }catch(err){return[];}
-      }));
-      return results.flat();
-    }catch(err){console.warn('endfield official calendar',err.message);return[];}
+          const articleDuration=parseEndfieldRussianDuration(ruText);
+          if(!extracted.length && articleDuration && articleDuration.end>Date.now()){
+            const title=(a.title||'Событие').replace(/^Сведения о\s+/i,'').replace(/^Описание обновления версии\s*/i,'').trim();
+            if(/поставка|наем|событи|испытан|режим|рассуд|лес|царств|протокол/i.test(title+' '+a.brief)){
+              results.push({id:`official:endfield:${a.cid}`,game:'endfield',title,desc:a.brief,start:articleDuration.start,end:articleDuration.end,done:false,source:'official',url:ruUrl});
+            }
+          }
+        }catch(err){}
+      }
+
+      // Merge the official current calendar fallback only for gaps.
+      const all=[...results,...endfieldCurrentCalendarFallback()];
+      const unique=[...new Map(all.map(e=>[`${e.title}|${e.start.toISOString()}|${e.end.toISOString()}`,e])).values()];
+      return unique.filter(e=>e.end>Date.now());
+    }catch(err){
+      console.warn('endfield official calendar',err.message);
+      return endfieldCurrentCalendarFallback();
+    }
   });
 }
+
+
 
 const OFFICIAL_GAME_CONFIG={
   genshin:{index:'https://genshin.hoyoverse.com/en/news',match:'/en/news/',fallback:'https://genshin.hoyoverse.com/en/news/398'},
