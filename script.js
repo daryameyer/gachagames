@@ -62,31 +62,27 @@ let eventsSnapshotSource = Object.fromEntries(['genshin','hsr','zzz','wuwa','end
 
 function readSavedEventDone(){
   try{
-    const saved=JSON.parse(localStorage.getItem('eventclock-events')||'{}');
-    return saved && typeof saved==='object' ? saved : {};
+    const raw=JSON.parse(localStorage.getItem('eventclock-events')||'{}');
+    return raw && typeof raw==='object' ? raw : {};
   }catch(_){ return {}; }
 }
 function preserveDone(oldEvents, remote){
   const saved=readSavedEventDone();
   const map=new Map();
-  // Сначала берём уже отмеченные события из текущего массива.
-  oldEvents.forEach(e=>map.set(`${e.game}|${String(e.title).trim()}`,!!e.done));
-  // Затем обязательно накладываем сохранённые отметки из localStorage.
-  // Это важно при первом запуске: сетевые события загружаются асинхронно
-  // и раньше могли перезаписывать отметки после обновления страницы.
   oldEvents.forEach(e=>{
-    if(saved[e.id]!==undefined) map.set(`${e.game}|${String(e.title).trim()}`,!!saved[e.id]);
+    const key=`${e.game}|${String(e.title).trim()}`;
+    map.set(key,!!e.done);
+    if(saved[key]!==undefined) map.set(key,!!saved[key]);
+    if(saved[String(e.id)]!==undefined) map.set(key,!!saved[String(e.id)]);
   });
   return remote.map(e=>{
     const key=`${e.game}|${String(e.title).trim()}`;
-    return {...e,done:map.get(key)??(saved[e.id]!==undefined?!!saved[e.id]:false)};
+    const savedValue=saved[key]!==undefined ? !!saved[key] : (saved[String(e.id)]!==undefined ? !!saved[String(e.id)] : undefined);
+    return {...e,done:savedValue!==undefined ? savedValue : (map.get(key)??!!e.done)};
   });
 }
 function applyRemoteEvents(remoteEvents){
   events=preserveDone(events,remoteEvents);
-  // После получения новых данных снова сохраняем итоговое состояние,
-  // чтобы отметки не исчезали при следующем обновлении.
-  localStorage.setItem('eventclock-events',JSON.stringify(Object.fromEntries(events.map(x=>[x.id,!!x.done]))));
   eventsLastUpdated=new Date();
   renderAll();
 }
@@ -263,12 +259,6 @@ function updateEventsSyncStatus(){
     el.textContent=`Автообновление · проверяю ${total} источников…`;
   }
 }
-
-// Восстанавливаем отметки ДО первого сетевого запроса.
-// Иначе remote events могут прийти после старта страницы и затереть done=false.
-const savedEvents = readSavedEventDone();
-if(savedEvents) events.forEach(e=>{if(savedEvents[e.id]!==undefined)e.done=!!savedEvents[e.id];});
-renderAll();
 
 loadRemoteEvents();
 setInterval(loadRemoteEvents,30*60*1000);
@@ -643,7 +633,12 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeEvent();});
 document.querySelector('#modalDone').onclick=()=>{
   const e=events.find(x=>x.id===currentModalId); if(!e)return;
   e.done=!e.done;
-  localStorage.setItem('eventclock-events',JSON.stringify(Object.fromEntries(events.map(x=>[x.id,x.done]))));
+  const saved={...readSavedEventDone()};
+  events.forEach(x=>{
+    saved[String(x.id)]=!!x.done;
+    saved[`${x.game}|${String(x.title).trim()}`]=!!x.done;
+  });
+  localStorage.setItem('eventclock-events',JSON.stringify(saved));
   renderAll(); openEvent(e.id);
 };
 
@@ -662,6 +657,9 @@ document.querySelectorAll('.category-btn').forEach(b=>b.onclick=()=>{
   renderAll();
 });
 
+const savedEvents = JSON.parse(localStorage.getItem('eventclock-events')||'null');
+if(savedEvents) events.forEach(e=>{if(savedEvents[e.id]!==undefined)e.done=!!savedEvents[e.id];});
+renderAll();
 updateEventsSyncStatus();
 setInterval(()=>{renderEvents();renderNext();renderCounts();renderTimeline();renderPatch();renderDailies()},1000);
 updateReset();
