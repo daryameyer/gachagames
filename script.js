@@ -66,19 +66,23 @@ function readSavedEventDone(){
     return raw && typeof raw==='object' ? raw : {};
   }catch(_){ return {}; }
 }
+
 function preserveDone(oldEvents, remote){
   const saved=readSavedEventDone();
   const map=new Map();
-  oldEvents.forEach(e=>{
-    const key=`${e.game}|${String(e.title).trim()}`;
-    map.set(key,!!e.done);
-    if(saved[key]!==undefined) map.set(key,!!saved[key]);
-    if(saved[String(e.id)]!==undefined) map.set(key,!!saved[String(e.id)]);
-  });
+  for(const e of oldEvents){
+    const titleKey=`${e.game}|${String(e.title||'').trim()}`;
+    if(e.id!==undefined) map.set(String(e.id),!!e.done);
+    map.set(titleKey,!!e.done);
+  }
   return remote.map(e=>{
-    const key=`${e.game}|${String(e.title).trim()}`;
-    const savedValue=saved[key]!==undefined ? !!saved[key] : (saved[String(e.id)]!==undefined ? !!saved[String(e.id)] : undefined);
-    return {...e,done:savedValue!==undefined ? savedValue : (map.get(key)??!!e.done)};
+    const idKey=String(e.id);
+    const titleKey=`${e.game}|${String(e.title||'').trim()}`;
+    const done = saved[idKey]!==undefined ? !!saved[idKey]
+      : saved[titleKey]!==undefined ? !!saved[titleKey]
+      : map.has(idKey) ? map.get(idKey)
+      : map.get(titleKey) ?? !!e.done;
+    return {...e,done};
   });
 }
 function applyRemoteEvents(remoteEvents){
@@ -633,11 +637,9 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeEvent();});
 document.querySelector('#modalDone').onclick=()=>{
   const e=events.find(x=>x.id===currentModalId); if(!e)return;
   e.done=!e.done;
-  const saved={...readSavedEventDone()};
-  events.forEach(x=>{
-    saved[String(x.id)]=!!x.done;
-    saved[`${x.game}|${String(x.title).trim()}`]=!!x.done;
-  });
+  const saved=readSavedEventDone();
+  saved[String(e.id)]=!!e.done;
+  saved[`${e.game}|${String(e.title||'').trim()}`]=!!e.done;
   localStorage.setItem('eventclock-events',JSON.stringify(saved));
   renderAll(); openEvent(e.id);
 };
@@ -657,8 +659,8 @@ document.querySelectorAll('.category-btn').forEach(b=>b.onclick=()=>{
   renderAll();
 });
 
-const savedEvents = JSON.parse(localStorage.getItem('eventclock-events')||'null');
-if(savedEvents) events.forEach(e=>{if(savedEvents[e.id]!==undefined)e.done=!!savedEvents[e.id];});
+// Local event completion is restored inside preserveDone() before/while remote events load.
+// This initial render is only for the built-in fallback list.
 renderAll();
 updateEventsSyncStatus();
 setInterval(()=>{renderEvents();renderNext();renderCounts();renderTimeline();renderPatch();renderDailies()},1000);
