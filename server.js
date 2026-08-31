@@ -265,6 +265,17 @@ function endfieldCurrentCalendarFallback(){
     mk('bedazzled','Ослепление','2026-08-09T17:00:00.000Z','Поставка арсенала'),
     mk('forest','Лес, укрытый снегом','2026-08-26T17:00:00.000Z','Временное событие входа'),
     mk('rooted','Царство корней','2026-08-09T17:00:00.000Z','Развлекательное событие'),
+
+    // Игровые режимы из официального календаря Endfield.
+    // Они идут отдельной категорией `mode`, поэтому появляются во вкладке
+    // «Временные режимы», как Бездна/Зал Забвения в других играх.
+    {id:'official:endfield:mode:war-echo',game:'endfield',title:'Эхо войны',desc:'Постоянный режим испытаний',start:new Date('2026-07-16T17:00:00.000Z'),end:new Date(end),done:false,source:'official',category:'mode',url:`${ENDFIELD_SITE}#calendar`},
+    {id:'official:endfield:mode:memories-season',game:'endfield',title:'Сезон воспоминаний',desc:'Сезон режима «Эхо войны»',start:new Date('2026-07-16T17:00:00.000Z'),end:new Date('2026-08-09T17:00:00.000Z'),done:false,source:'official',category:'mode',url:`${ENDFIELD_SITE}#calendar`},
+    {id:'official:endfield:mode:madness-season',game:'endfield',title:'Сезон помешательства',desc:'Текущий сезон режима «Эхо войны»',start:new Date('2026-08-09T17:00:00.000Z'),end:new Date(end),done:false,source:'official',category:'mode',url:`${ENDFIELD_SITE}#calendar`},
+    {id:'official:endfield:mode:dimensional-abode',game:'endfield',title:'Обитель шести искусных измерений',desc:'Скопление разломов «Исследование загадок». Доступно бессрочно после открытия.',start:new Date('2026-08-26T09:00:00.000Z'),end:new Date(end),done:false,source:'official',category:'mode',url:`${ENDFIELD_SITE}#calendar`},
+    {id:'official:endfield:mode:shadow-monument',game:'endfield',title:'Сумрачный монумент',desc:'Постоянный режим испытаний. Серия «Ревуны скал» доступна с 6 августа.',start:new Date('2026-08-06T17:00:00.000Z'),end:new Date(end),done:false,source:'official',category:'mode',url:`${ENDFIELD_SITE}#calendar`},
+    {id:'official:endfield:mode:memory-marks',game:'endfield',title:'Памятные знаки: Звериный вой',desc:'Временное событие, связанное с серией «Ревуны скал».',start:new Date('2026-08-06T17:00:00.000Z'),end:new Date('2026-08-20T09:00:00.000Z'),done:false,source:'official',category:'mode',url:`${ENDFIELD_SITE}#calendar`},
+
     {id:'official:endfield:fallback:sanity',game:'endfield',title:'Поставка рассудка',desc:'Временное событие',start:new Date('2026-08-26T09:00:00.000Z'),end:new Date('2026-09-01T22:00:00.000Z'),done:false,source:'official',url:`${ENDFIELD_SITE}#calendar`}
   ].filter(e=>e.end>Date.now());
 }
