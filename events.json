@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "updatedAt": "2026-08-31T00:06:40.568Z",
+  "updatedAt": "2026-08-31T00:19:02.766Z",
   "games": {
     "genshin": {
       "ok": true,
@@ -23,9 +23,9 @@
       "usedPrevious": false
     },
     "endfield": {
-      "ok": false,
-      "count": 1,
-      "usedPrevious": true
+      "ok": true,
+      "count": 6,
+      "usedPrevious": false
     },
     "nte": {
       "ok": true,
@@ -108,13 +108,68 @@
     {
       "id": "official:endfield:official:endfield:https%3A%2F%2Fendfield.gryphline.com%2Fen-us%2Fnews%2F5200%233138",
       "game": "endfield",
-      "title": "Sanity Supply",
+      "title": "Описание обновления версии «Возвращение домой»",
       "desc": "Limited-Time Event ·",
       "start": "2026-08-25T20:00:00.000Z",
       "end": "2026-09-01T20:00:00.000Z",
       "done": false,
       "source": "official",
-      "url": "https://endfield.gryphline.com/en-us/news/5200"
+      "url": "https://endfield.gryphline.com/ru-ru/news/5200"
+    },
+    {
+      "id": "official:endfield:official:endfield:fallback:liino",
+      "game": "endfield",
+      "title": "Приветствие утренней звезды",
+      "desc": "Специальный наем",
+      "start": "2026-08-09T17:00:00.000Z",
+      "end": "2026-09-01T22:00:00.000Z",
+      "done": false,
+      "source": "official",
+      "url": "https://endfield.gryphline.com/ru-ru#calendar"
+    },
+    {
+      "id": "official:endfield:official:endfield:fallback:bedazzled",
+      "game": "endfield",
+      "title": "Ослепление",
+      "desc": "Поставка арсенала",
+      "start": "2026-08-09T17:00:00.000Z",
+      "end": "2026-09-01T22:00:00.000Z",
+      "done": false,
+      "source": "official",
+      "url": "https://endfield.gryphline.com/ru-ru#calendar"
+    },
+    {
+      "id": "official:endfield:official:endfield:fallback:forest",
+      "game": "endfield",
+      "title": "Лес, укрытый снегом",
+      "desc": "Временное событие входа",
+      "start": "2026-08-26T17:00:00.000Z",
+      "end": "2026-09-01T22:00:00.000Z",
+      "done": false,
+      "source": "official",
+      "url": "https://endfield.gryphline.com/ru-ru#calendar"
+    },
+    {
+      "id": "official:endfield:official:endfield:fallback:rooted",
+      "game": "endfield",
+      "title": "Царство корней",
+      "desc": "Развлекательное событие",
+      "start": "2026-08-09T17:00:00.000Z",
+      "end": "2026-09-01T22:00:00.000Z",
+      "done": false,
+      "source": "official",
+      "url": "https://endfield.gryphline.com/ru-ru#calendar"
+    },
+    {
+      "id": "official:endfield:official:endfield:fallback:sanity",
+      "game": "endfield",
+      "title": "Поставка рассудка",
+      "desc": "Временное событие",
+      "start": "2026-08-26T09:00:00.000Z",
+      "end": "2026-09-01T22:00:00.000Z",
+      "done": false,
+      "source": "official",
+      "url": "https://endfield.gryphline.com/ru-ru#calendar"
     },
     {
       "id": "calendar:zzz:5000153",
