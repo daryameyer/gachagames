@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "updatedAt": "2026-09-01T16:44:47.402Z",
+  "updatedAt": "2026-09-01T21:07:38.392Z",
   "games": {
     "genshin": {
       "ok": true,
@@ -24,7 +24,7 @@
     },
     "endfield": {
       "ok": true,
-      "count": 10,
+      "count": 9,
       "usedPrevious": false
     },
     "nte": {
@@ -93,17 +93,6 @@
       "done": false,
       "source": "official",
       "url": "https://infinitynikki.infoldgames.com/en/news/568"
-    },
-    {
-      "id": "official:endfield:official:endfield:https%3A%2F%2Fendfield.gryphline.com%2Fen-us%2Fnews%2F5200%233138",
-      "game": "endfield",
-      "title": "Описание обновления версии «Возвращение домой»",
-      "desc": "Limited-Time Event ·",
-      "start": "2026-08-25T20:00:00.000Z",
-      "end": "2026-09-01T20:00:00.000Z",
-      "done": false,
-      "source": "official",
-      "url": "https://endfield.gryphline.com/ru-ru/news/5200"
     },
     {
       "id": "official:endfield:official:endfield:fallback:liino",
