@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "updatedAt": "2026-09-04T11:27:27.264Z",
+  "updatedAt": "2026-09-04T16:28:06.477Z",
   "games": {
     "genshin": {
       "ok": true,
@@ -23,9 +23,9 @@
       "usedPrevious": false
     },
     "endfield": {
-      "ok": true,
+      "ok": false,
       "count": 16,
-      "usedPrevious": false
+      "usedPrevious": true
     },
     "nte": {
       "ok": true,
