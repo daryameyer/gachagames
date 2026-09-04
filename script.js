@@ -23,21 +23,12 @@ function d(offsetDays, hour=12){
   return x;
 }
 
-// Актуальные версии патчей.
-// Время окончания указано в часовом поясе сервера UTC+8.
-function serverDate(y,m,d,h,min){
-  return new Date(Date.UTC(y,m-1,d,h-8,min,0));
-}
+// Патчи загружаются из Cloudflare Worker автоматически.
+// Здесь нет постоянного списка версий: при выходе новой версии Worker
+// сам получает свежую официальную информацию.
+let patches = [];
+let patchesLastUpdated = null;
 
-const patches = [
-  {game:'genshin', version:'7.0', title:'Вечная зима без милосердия', titleRu:'Вечная зима без милосердия', start:serverDate(2026,8,13,6,0), end:serverDate(2026,9,23,5,59)},
-  {game:'hsr', version:'4.4', title:'In Ravages Does the Whistle Sound', titleRu:'В свете разрушений звучит свисток', start:serverDate(2026,7,15,6,0), end:serverDate(2026,8,26,6,0)},
-  {game:'zzz', version:'3.1', title:'The Long Goodbye', titleRu:'Долгое прощание', start:serverDate(2026,7,30,6,0), end:serverDate(2026,9,9,6,0)},
-  {game:'wuwa', version:'3.6', title:"Lamplight in Mirage, Sword's Resolve in Heart", start:serverDate(2026,8,20,3,59), end:serverDate(2026,9,29,3,59)},
-  {game:'nte', version:'1.3', title:'Rising from the Moonlit Fog', titleRu:'Восстав из лунного тумана', start:serverDate(2026,8,20,5,59), end:serverDate(2026,9,30,5,59)},
-  {game:'endfield', version:'1.4', title:'Homecoming', titleRu:'Возвращение домой', start:serverDate(2026,7,30,11,59), end:serverDate(2026,8,30,11,59)},
-  {game:'nikki', version:'2.8', title:'Golden Dust', titleRu:'Golden Dust', start:serverDate(2026,7,31,3,49), end:serverDate(2026,8,28,3,49)}
-];
 let currentModalId=null;
 
 let events = [
@@ -578,6 +569,18 @@ function renderTimeline(){
 }
 function updateReset(){ renderDailies(); }
 
+async function loadPatches(){
+  try{
+    const data=await fetchJson('/api/patches');
+    const list=Array.isArray(data?.patches)?data.patches:[];
+    if(list.length){
+      patches=list.map(p=>({...p,start:new Date(p.start),end:p.end?new Date(p.end):null}));
+      patchesLastUpdated=data.updatedAt?new Date(data.updatedAt):new Date();
+      renderPatch();
+    }
+  }catch(err){ console.warn('EVENTCLOCK: патчи недоступны',err); }
+}
+
 function renderPatch(){
   const root=document.querySelector('#patchList');
   if(!root) return;
@@ -597,12 +600,13 @@ function renderPatch(){
   root.innerHTML=list.map(p=>{
     const g=games[p.game] || {};
     const color=g.color || '#5d8ff0';
-    const left=Math.max(0,p.end-nowDate);
-    const total=Math.max(1,p.end-p.start);
-    const progress=Math.min(1,Math.max(0,1-left/total));
+    const hasEnd=p.end instanceof Date && !Number.isNaN(p.end.getTime());
+    const left=hasEnd?Math.max(0,p.end-nowDate):0;
+    const total=hasEnd?Math.max(1,p.end-p.start):1;
+    const progress=hasEnd?Math.min(1,Math.max(0,1-left/total)):0;
     const filled=Math.round(progress*16);
-    const expired=p.end<=nowDate;
-    const countdown=expired ? 'Завершён' : formatLeft(left);
+    const expired=hasEnd && p.end<=nowDate;
+    const countdown=expired ? 'Завершён' : (hasEnd?formatLeft(left):'Дата окончания не объявлена');
     const gameName=g.short || g.name || p.game;
     const title=p.titleRu || p.title || '';
 
@@ -617,7 +621,7 @@ function renderPatch(){
       <div class="patch-card-countdown">${countdown}</div>
       <div class="patch-card-subtitle">${expired ? 'патч завершён' : 'до конца патча'}</div>
       <div class="patch-card-progress">${Array.from({length:16},(_,i)=>`<span class="${i<filled?'filled':''}"></span>`).join('')}</div>
-      <div class="patch-card-dates">${formatDate(p.start)} — ${formatDate(p.end)}</div>
+      <div class="patch-card-dates">${formatDate(p.start)} — ${hasEnd?formatDate(p.end):'—'}</div>
     </article>`;
   }).join('');
 }
@@ -669,5 +673,7 @@ document.querySelectorAll('.category-btn').forEach(b=>b.onclick=()=>{
 // This initial render is only for the built-in fallback list.
 renderAll();
 updateEventsSyncStatus();
+loadPatches();
+setInterval(loadPatches, 5*60*1000);
 setInterval(()=>{renderEvents();renderNext();renderCounts();renderTimeline();renderPatch();renderDailies()},1000);
 updateReset();

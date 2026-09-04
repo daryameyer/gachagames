@@ -300,76 +300,110 @@ async function endfieldOfficialArticles(){
         /поставка|специальн(?:ый|ого)\s+наем|сведени[яе]\s+о\s+(?:временном|сюжетном|событии|веб-событии)|описание\s+обновления\s+версии|обновление.*версии/i.test(t);
     }).map(x=>({
       cid:String(x.cid), title:String(x.title||''), brief:String(x.brief||''),
-      tab:String(x.tab||''), url:`https://endfield.gryphline.com/news/${String(x.cid).replace(/^0+/,'')}`
+      tab:String(x.tab||''), url:`${ENDFIELD_SITE}/news/${String(x.cid).replace(/^0+/,'')}`
     }));
   });
 }
 
 function endfieldNextVersionMaintenance(){
-  // Current official Endfield 1.5 version window.
-  // Russian official announcements give the current version events through
-  // 30 September 2026; times below are converted from MSK to UTC.
-  return new Date(Date.UTC(2026,8,30,16,59,0));
+  // Temporary fallback for the current 1.4 calendar. The official 1.5 update is
+  // scheduled for 2 September 2026; once the official update notice appears,
+  // the parser below will prefer its explicit maintenance window.
+  return new Date(Date.UTC(2026,8,1,22,0,0)); // 02 Sep 2026 01:00 MSK
 }
 
+function endfieldDatePartRu(s, fallbackYear=2026){
+  const clean=String(s||'').replace(/[–—]/g,'-').replace(/\s+/g,' ').trim();
+  const m=clean.match(/(\d{1,2})\s+([А-Яа-яёЁ]+)(?:\s+(\d{4})\s*(?:г\.?)?)?(?:\s*,?\s*(\d{1,2}):(\d{2}))?/u);
+  if(!m)return null;
+  const month=ruMonths[m[2].toLowerCase()];
+  if(month===undefined)return null;
+  return new Date(Date.UTC(+(m[3]||fallbackYear),month,+m[1],+(m[4]||0),+(m[5]||0))-3*3600000);
+}
+
+// Parses the actual Russian wording used by the official Endfield announcements.
+// The important distinction is that Americas/Europe times in the RU community
+// are given in MSK, so 3 hours are subtracted when converting to UTC.
+function parseEndfieldRussianDuration(text){
+  const clean=String(text||'').replace(/\s+/g,' ').replace(/[–—]/g,' - ');
+  const nowYear=new Date().getUTCFullYear();
+
+  // 1) Explicit Americas/Europe range.
+  let m=clean.match(/(?:Сервер\s+)?Americas\s*\/\s*Europe\s*:\s*(?:с\s*)?(\d{1,2}\s+[А-Яа-яёЁ]+\s+20\d{2}\s*,?\s*\d{1,2}:\d{2})\s*(?:до|-)\s*(\d{1,2}\s+[А-Яа-яёЁ]+\s+20\d{2}\s*,?\s*\d{1,2}:\d{2})/iu);
+  if(m){
+    const start=endfieldDatePartRu(m[1],nowYear), end=endfieldDatePartRu(m[2],nowYear);
+    if(start&&end){if(end<start)end.setUTCFullYear(end.getUTCFullYear()+1);return {start,end};}
+  }
+
+  // 2) "from X at ... (Americas/Europe) until version update/maintenance".
+  m=clean.match(/(?:с\s*)?(\d{1,2}\s+[А-Яа-яёЁ]+\s+20\d{2})[^.]{0,180}?(?:Americas\s*\/\s*Europe|Сервер\s+Americas\s*\/\s*Europe)[^.]{0,100}?(?:до|—|-)\s*(?:начала\s+)?технических\s+работ|до\s+обновления\s+версии(?:\s+и\s+технического\s+обслуживания)?/iu);
+  if(m){
+    const start=endfieldDatePartRu(m[1],nowYear), end=endfieldNextVersionMaintenance();
+    if(start&&end&&end>start)return {start,end};
+  }
+
+  // 3) Common Russian range with explicit times. Treat it as MSK.
+  m=clean.match(/(?:с\s*)?(\d{1,2}\s+[А-Яа-яёЁ]+\s+20\d{2}\s*,?\s*\d{1,2}:\d{2})\s*(?:до|-)\s*(\d{1,2}\s+[А-Яа-яёЁ]+\s+20\d{2}\s*,?\s*\d{1,2}:\d{2})/iu);
+  if(m){
+    const start=endfieldDatePartRu(m[1],nowYear), end=endfieldDatePartRu(m[2],nowYear);
+    if(start&&end){if(end<start)end.setUTCFullYear(end.getUTCFullYear()+1);return {start,end};}
+  }
+
+  // 4) Same-day start + "до начала технических работ".
+  m=clean.match(/(?:с\s*)?(\d{1,2}\s+[А-Яа-яёЁ]+\s+20\d{2}\s*,?\s*\d{1,2}:\d{2})[^.]{0,160}?до\s+начала\s+технических\s+работ/iu);
+  if(m){
+    const start=endfieldDatePartRu(m[1],nowYear), end=endfieldNextVersionMaintenance();
+    if(start&&end&&end>start)return {start,end};
+  }
+  return null;
+}
+
+function endfieldExtractRussianArticleEvents(text, url, fallbackTitle=''){
+  const clean=String(text||'').replace(/\r/g,' ').replace(/\s+/g,' ').trim();
+  const out=[];
+  const now=Date.now();
+
+  // Split numbered "New Events" sections. This is deliberately based on the
+  // official article structure rather than machine translation.
+  const sectionMatch=clean.match(/(?:■\s*)?(?:Новые события|События и игровой процесс|Новые события найма и поставки)([\s\S]*?)(?:■\s*(?:Обновления событий|Обновление событий|АПК|Система|Другое)|$)/i);
+  const section=sectionMatch?sectionMatch[1]:clean;
+  const re=/(?:^|\s)(\d+)\.\s*([^·]{2,180}?)(?=\s*·\s*(?:Время|Расписание|Доступность|Период)|\s+\d+\.\s)/gi;
+  let m;
+  while((m=re.exec(section))){
+    const title=m[2].replace(/\s+/g,' ').trim().replace(/^[-–—:]+|[-–—:]+$/g,'');
+    const body=section.slice(m.index,m.index+1600);
+    const duration=parseEndfieldRussianDuration(body);
+    if(!duration||duration.end.getTime()<=now)continue;
+    out.push({id:`official:endfield:${eventId(url,m.index)}`,game:'endfield',title,desc:'Официальное событие',start:duration.start,end:duration.end,done:false,source:'official',url});
+  }
+  return out;
+}
+
+// Current calendar fallback, based on official Russian announcements. It is
+// only used when the official page is client-rendered or temporarily unavailable.
+// The worker still refreshes the bulletin every 5 minutes, so newer official
+// announcements can replace these entries.
 function endfieldCurrentCalendarFallback(){
-  const versionEnd=endfieldNextVersionMaintenance();
-  const mk=(id,title,start,desc='',category='event')=>({
-    id:`official:endfield:fallback:${id}`,
-    game:'endfield',
-    title,
-    desc,
-    start:new Date(start),
-    end:versionEnd,
-    done:false,
-    source:'official',
-    category,
-    url:`${ENDFIELD_SITE}#calendar`
-  });
+  const end=endfieldNextVersionMaintenance();
+  const mk=(id,title,start,desc='')=>({id:`official:endfield:fallback:${id}`,game:'endfield',title,desc,start:new Date(start),end,done:false,source:'official',url:`${ENDFIELD_SITE}#calendar`});
+  return [
+    mk('liino','Приветствие утренней звезды','2026-08-09T17:00:00.000Z','Специальный наем'),
+    mk('bedazzled','Ослепление','2026-08-09T17:00:00.000Z','Поставка арсенала'),
+    mk('forest','Лес, укрытый снегом','2026-08-26T17:00:00.000Z','Временное событие входа'),
+    mk('rooted','Царство корней','2026-08-09T17:00:00.000Z','Развлекательное событие'),
 
-  const events=[
-    // Current version 1.5 — names taken from the official Russian materials.
-    mk('winter-hunt','Зимняя охота','2026-09-02T04:00:00.000Z','Специальный наем'),
-    mk('fletched-irontip','Оперенная железная стрела','2026-09-02T04:00:00.000Z','Временное событие входа'),
-    mk('combat-drills','Боевые учения','2026-09-02T04:00:00.000Z','Испытание оперативника'),
-    mk('snow-in-the-thicket','Снег в дремучей чаще','2026-09-02T04:00:00.000Z','Событие справочника'),
-    mk('winter-dream','Зимний сон в окутанной туманом лесной чаще','2026-09-02T04:00:00.000Z','Сюжетное событие'),
-    mk('season-virtuality','Эхо войны — сезон виртуальности','2026-09-09T04:00:00.000Z','Сезон режима «Эхо войны»','mode'),
-    mk('trial-of-the-archer','Испытание стрелка','2026-09-02T04:00:00.000Z','Временное испытание'),
-    mk('aic-puffmoon','Поддержка АПК: Атака пухлика-луна','2026-09-02T04:00:00.000Z','Событие производства АПК'),
-    mk('purrchena-gift','Большая мурчащая Фелин! Р-Р-Р!','2026-09-24T04:00:00.000Z','Раздача подарков'),
-    mk('old-city-bell','Эхо колокола старого города','2026-09-02T04:00:00.000Z','Событие справочника'),
-    mk('autumn-mountain-streams','Осенние потоки горных хребтов','2026-09-24T04:00:00.000Z','Временное событие входа'),
-    mk('obstacle-race','Гонка с препятствиями','2026-09-02T04:00:00.000Z','Развлекательное событие'),
-    mk('orbipom-fusion','OrbiPom! СЛИЯНИЕ!','2026-09-02T04:00:00.000Z','Развлекательное событие'),
-    mk('shadow-monument-mark','Памятные знаки: Метка тени','2026-09-02T04:00:00.000Z','Временное событие с испытанием'),
-    {
-      id:'official:endfield:mode:war-echo',
-      game:'endfield',
-      title:'Эхо войны',
-      desc:'Постоянный режим испытаний',
-      start:new Date('2026-07-16T17:00:00.000Z'),
-      end:versionEnd,
-      done:false,
-      source:'official',
-      category:'mode',
-      url:`${ENDFIELD_SITE}#calendar`
-    },
-    {
-      id:'official:endfield:mode:shadow-monument',
-      game:'endfield',
-      title:'Сумрачный монумент',
-      desc:'Постоянный режим испытаний',
-      start:new Date('2026-08-06T17:00:00.000Z'),
-      end:versionEnd,
-      done:false,
-      source:'official',
-      category:'mode',
-      url:`${ENDFIELD_SITE}#calendar`
-    }
-  ];
+    // Игровые режимы из официального календаря Endfield.
+    // Они идут отдельной категорией `mode`, поэтому появляются во вкладке
+    // «Временные режимы», как Бездна/Зал Забвения в других играх.
+    {id:'official:endfield:mode:war-echo',game:'endfield',title:'Эхо войны',desc:'Постоянный режим испытаний',start:new Date('2026-07-16T17:00:00.000Z'),end:new Date(end),done:false,source:'official',category:'mode',url:`${ENDFIELD_SITE}#calendar`},
+    {id:'official:endfield:mode:memories-season',game:'endfield',title:'Сезон воспоминаний',desc:'Сезон режима «Эхо войны»',start:new Date('2026-07-16T17:00:00.000Z'),end:new Date('2026-08-09T17:00:00.000Z'),done:false,source:'official',category:'mode',url:`${ENDFIELD_SITE}#calendar`},
+    {id:'official:endfield:mode:madness-season',game:'endfield',title:'Сезон помешательства',desc:'Текущий сезон режима «Эхо войны»',start:new Date('2026-08-09T17:00:00.000Z'),end:new Date(end),done:false,source:'official',category:'mode',url:`${ENDFIELD_SITE}#calendar`},
+    {id:'official:endfield:mode:dimensional-abode',game:'endfield',title:'Обитель шести искусных измерений',desc:'Скопление разломов «Исследование загадок». Доступно бессрочно после открытия.',start:new Date('2026-08-26T09:00:00.000Z'),end:new Date(end),done:false,source:'official',category:'mode',url:`${ENDFIELD_SITE}#calendar`},
+    {id:'official:endfield:mode:shadow-monument',game:'endfield',title:'Сумрачный монумент',desc:'Постоянный режим испытаний. Серия «Ревуны скал» доступна с 6 августа.',start:new Date('2026-08-06T17:00:00.000Z'),end:new Date(end),done:false,source:'official',category:'mode',url:`${ENDFIELD_SITE}#calendar`},
+    {id:'official:endfield:mode:memory-marks',game:'endfield',title:'Памятные знаки: Звериный вой',desc:'Временное событие, связанное с серией «Ревуны скал».',start:new Date('2026-08-06T17:00:00.000Z'),end:new Date('2026-08-20T09:00:00.000Z'),done:false,source:'official',category:'mode',url:`${ENDFIELD_SITE}#calendar`},
 
-  return events.filter(e=>e.end>Date.now());
+    {id:'official:endfield:fallback:sanity',game:'endfield',title:'Поставка рассудка',desc:'Временное событие',start:new Date('2026-08-26T09:00:00.000Z'),end:new Date('2026-09-01T22:00:00.000Z'),done:false,source:'official',url:`${ENDFIELD_SITE}#calendar`}
+  ].filter(e=>e.end>Date.now());
 }
 
 async function endfieldOfficialCalendarEvents(){
@@ -383,24 +417,6 @@ async function endfieldOfficialCalendarEvents(){
           const ruText=cleanText(await requestText(ruUrl));
           let extracted=endfieldExtractRussianArticleEvents(ruText,ruUrl,a.title);
           if(extracted.length) results.push(...extracted);
-
-          // The canonical official /news/CID page may resolve to the English
-          // article. Parse it as a date source, but keep Russian names from
-          // the official ru-ru bulletin whenever possible.
-          try{
-            const enUrl=`https://endfield.gryphline.com/news/${String(a.cid).replace(/^0+/,'')}`;
-            const enText=cleanText(await requestText(enUrl));
-            const enExtract=extractEndfieldEvents(enText,enUrl);
-            const russianTitle=String(a.title||'').replace(/^Сведения о\s+/i,'').trim();
-            if(enExtract.length){
-              for(const e of enExtract){
-                const title = russianTitle && (
-                  /поставка|наем|событи|испытан|режим|обновлен/i.test(russianTitle)
-                ) ? russianTitle : e.title;
-                results.push({...e,title,source:'official',url:ruUrl});
-              }
-            }
-          }catch(_){}
 
           // A few official RU pages are client-rendered. The EN page is used only
           // to recover timing; names are never machine-translated.
@@ -436,10 +452,127 @@ async function endfieldOfficialCalendarEvents(){
 
 
 
+
+
+// ---------------- PATCH TRACKER ----------------
+// Patch cards are NOT maintained in the frontend. The Worker discovers the
+// latest version announcement from each game's official news site and parses
+// version number/title/start/end from the announcement. The small fallback
+// below is only a safety net for a temporary official-site outage; it is never
+// preferred over freshly parsed official data.
+const PATCH_FALLBACK = {
+  genshin:{version:'7.0',title:'Вечная зима без милосердия',titleRu:'Вечная зима без милосердия',start:'2026-08-12T06:00:00Z',end:'2026-09-23T05:59:00Z'},
+  hsr:{version:'4.5',title:'В свете разрушений звучит свисток',titleRu:'В свете разрушений звучит свисток',start:'2026-08-26T06:00:00Z',end:'2026-09-28T06:00:00Z'},
+  zzz:{version:'3.1',title:'Долгое прощание',titleRu:'Долгое прощание',start:'2026-07-29T06:00:00Z',end:'2026-09-09T06:00:00Z'},
+  wuwa:{version:'3.6',title:"Lamplight in Mirage, Sword's Resolve in Heart",start:'2026-08-20T03:00:00Z',end:'2026-09-30T03:59:00Z'},
+  nte:{version:'1.3',title:'Восстав из лунного тумана',start:'2026-08-19T03:00:00Z',end:'2026-09-30T05:59:00Z'},
+  endfield:{version:'1.5',title:'Сны средь ветров и снегов',start:'2026-09-02T04:00:00Z',end:'2026-10-15T04:00:00Z'},
+  nikki:{version:'2.9',title:'Blooming Under a Radiant Sky',start:'2026-08-27T03:50:00Z',end:'2026-09-24T03:50:00Z'}
+};
+
+function patchVersionInfo(text,game){
+  const clean=text.replace(/\s+/g,' ');
+  let m=clean.match(/\b(?:Version|Версия)\s+(\d+(?:\.\d+)+)\s*(?:["“«]([^"”»]+)["”»])?/i);
+  if(!m && game==='endfield'){
+    m=clean.match(/\b(\d+\.\d+)\s*(?:Version|版本)\b[^.]{0,120}[\[【]([^\]】]+)[\]】]/i)
+      || clean.match(/\b(\d+\.\d+)\b[^.]{0,80}[\[【]([^\]】]+)[\]】]\s*Version/i);
+  }
+  if(!m)return null;
+  return {version:m[1],title:(m[2]||'').trim()};
+}
+
+function patchDateCandidates(text){
+  const t=text.replace(/\s+/g,' ');
+  const out=[];
+  const rx=/\b(20\d{2}[\/-]\d{1,2}[\/-]\d{1,2})\s*(?:at|,)?\s*(\d{1,2}:\d{2})\s*\(UTC\s*([+-]\d{1,2})(?::(\d{2}))?\)/gi;
+  let m; while((m=rx.exec(t))) out.push({raw:m[0],d:parseDatePart(`${m[1].replace(/\//g,'-')} ${m[2]}`,0,+m[3])});
+  const rx2=/\b([A-Za-z]+\s+\d{1,2},\s*20\d{2})\s*(?:at|,)?\s*(\d{1,2}:\d{2})\s*\(UTC\s*([+-]\d{1,2})(?::(\d{2}))?\)/gi;
+  while((m=rx2.exec(t))) out.push({raw:m[0],d:parseDatePart(`${m[1]} ${m[2]}`,new Date().getUTCFullYear(),+m[3])});
+  return out.filter(x=>x.d&&!Number.isNaN(x.d.getTime()));
+}
+function extractPatchDates(text,game){
+  const t=text.replace(/\s+/g,' ');
+  const candidates=patchDateCandidates(t);
+  const versionStart=/((?:Update Time|Version Update Time|Update Start Time|Maintenance Duration|Version Maintenance Time)[^]{0,250})/i.exec(t);
+  let start=null,end=null;
+  if(versionStart){
+    const cs=patchDateCandidates(versionStart[1]); if(cs.length) start=cs[0].d;
+  }
+  // Prefer explicit version-run/end wording so event dates inside patch notes
+  // do not get mistaken for the patch end.
+  const endPatterns=[
+    /Version\s+\d+(?:\.\d+)+[^.]{0,220}?(?:run|running)[^.]{0,100}?(?:until|ending|ends)\s+([^.;]{0,100})/i,
+    /Version\s+\d+(?:\.\d+)+[^.]{0,260}?(?:until|ending|ends)\s+([^.;]{0,100})/i,
+    /(?:version|update)[^.]{0,180}?(?:ends|ending|until)\s+([^.;]{0,100})/i
+  ];
+  for(const ep of endPatterns){
+    const em=ep.exec(t); if(!em) continue;
+    const cs=patchDateCandidates(em[1]); if(cs.length){end=cs[0].d;break;}
+    const ymd=em[1].match(/20\d{2}[\/-]\d{1,2}[\/-]\d{1,2}/); if(ymd){
+      const tm=em[1].match(/(\d{1,2}:\d{2})/); const tz=(em[1].match(/UTC\s*([+-]\d{1,2})/i)||[])[1];
+      if(tz) end=parseDatePart(`${ymd[0]} ${tm?tm[1]:'00:00'}`,0,+tz);
+    }
+  }
+  if(!start && candidates.length) start=candidates[0].d;
+  if(!end && candidates.length>1){
+    const later=candidates.filter(x=>!start||x.d>start).sort((a,b)=>a.d-b.d); if(later.length) end=later[0].d;
+  }
+  if(start&&end&&end<=start) end=null;
+  return {start,end};
+}
+
+function patchIndexLinks(game){
+  const cfg=OFFICIAL_GAME_CONFIG[game];
+  return requestText(cfg.index).then(html=>linksFrom(html,cfg.index)
+    .filter(x=>x.url.includes(cfg.match)))
+    .catch(()=>[]);
+}
+async function scrapeOfficialPatch(game){
+  const cfg=OFFICIAL_GAME_CONFIG[game];
+  let links=await patchIndexLinks(game);
+  if(cfg.fallback) links.unshift({url:cfg.fallback,title:''});
+  const unique=[...new Map(links.map(x=>[x.url,x])).values()].slice(0,40);
+  const found=[];
+  for(const link of unique){
+    try{
+      const html=await requestText(link.url), text=cleanText(html);
+      const vi=patchVersionInfo(text,game); if(!vi) continue;
+      const dates=extractPatchDates(text,game);
+      if(!dates.start) continue;
+      found.push({game,version:vi.version,title:vi.title,titleRu:vi.title,start:dates.start,end:dates.end||null,url:link.url,source:'official'});
+    }catch(_){ }
+  }
+  const valid=found.filter(x=>x.start instanceof Date&&!Number.isNaN(x.start.getTime()));
+  if(!valid.length)return null;
+  const now=Date.now();
+  // Current/live patch first; otherwise the nearest announced future patch.
+  const live=valid.filter(x=>x.start.getTime()<=now && (!x.end||x.end.getTime()>now)).sort((a,b)=>b.start-a.start);
+  if(live.length)return live[0];
+  const future=valid.filter(x=>x.start.getTime()>now).sort((a,b)=>a.start-b.start);
+  if(future.length)return future[0];
+  return valid.sort((a,b)=>b.start-a.start)[0];
+}
+async function getPatches(){
+  return cached('patches:official',async()=>{
+    const games=['genshin','hsr','zzz','wuwa','nte','endfield','nikki'];
+    const out=[];
+    for(const game of games){
+      let p=null;
+      try{p=await scrapeOfficialPatch(game);}catch(_){p=null;}
+      if(!p){
+        const f=PATCH_FALLBACK[game];
+        if(f)p={...f,start:new Date(f.start),end:new Date(f.end),game,source:'fallback'};
+      }
+      if(p)out.push(p);
+    }
+    return out;
+  });
+}
+
 const OFFICIAL_GAME_CONFIG={
-  genshin:{index:'https://genshin.hoyoverse.com/en/news',match:'/en/news/',fallback:'https://genshin.hoyoverse.com/en/news/398'},
+  genshin:{index:'https://genshin.hoyoverse.com/ru-ru/news',match:'/ru-ru/news/',fallback:'https://genshin.hoyoverse.com/en/news/398'},
   hsr:{index:'https://hsr.hoyoverse.com/ru-ru/',match:'/ru-ru/news/',fallback:'https://hsr.hoyoverse.com/ru-ru/'},
-  zzz:{index:'https://zenless.hoyoverse.com/en-us/news',match:'/en-us/news/',fallback:'https://zenless.hoyoverse.com/en-us/news/165414'},
+  zzz:{index:'https://zenless.hoyoverse.com/ru-ru/news',match:'/ru-ru/news/',fallback:'https://zenless.hoyoverse.com/en-us/news/165414'},
   wuwa:{index:'https://wutheringwaves.kurogames.com/en/main/news',match:'/en/main/news/detail/',fallback:'https://wutheringwaves.kurogames.com/en/main/news/detail/5365'},
   nte:{index:'https://nte.perfectworld.com/ru/article/news/gamenews/index.html',match:'/article/news/gamenews/',fallback:'https://nte.perfectworld.com/ru/article/news/gamenews/20260817/263612.html'},
   nikki:{index:'https://infinitynikki.infoldgames.com/en/news',match:'/en/news/',fallback:'https://infinitynikki.infoldgames.com/en/news/568'},
@@ -632,6 +765,10 @@ export default {
           usedSnapshot:result.usedSnapshot,
           events:result.events
         });
+      }
+      if(u.pathname==='/api/patches'){
+        const patches=await getPatches();
+        return json({ok:true,source:'official',updatedAt:new Date().toISOString(),patches});
       }
       if(u.pathname==='/api/health'){
         return json({
