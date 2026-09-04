@@ -579,71 +579,48 @@ function renderTimeline(){
 function updateReset(){ renderDailies(); }
 
 function renderPatch(){
-  const root=document.querySelector('.patch-card');
+  const root=document.querySelector('#patchList');
   if(!root) return;
 
   const nowDate=new Date();
-  const titleEl=document.querySelector('#patchTitle');
-  const gameEl=document.querySelector('#patchGame');
-  const versionEl=document.querySelector('#patchVersion');
-  const countdownEl=document.querySelector('#patchCountdown');
-  const labelEl=document.querySelector('.patch-label');
-  const progressEl=document.querySelector('#patchProgress');
-  const datesEl=document.querySelector('#patchDates');
-
-  // В режиме конкретной игры показываем именно её текущий патч.
-  // В режиме «Все» — ближайший из ещё не завершившихся патчей.
-  let candidates = selected && selected !== 'all' && selected !== 'ended'
-    ? patches.filter(p => p.game === selected)
-    : patches.filter(p => p.end > nowDate);
-
-  // Если патч уже закончился, но пользователь выбрал игру — показываем
-  // последний известный патч этой игры, а не оставляем карточку пустой.
-  if(!candidates.length && selected && selected !== 'all' && selected !== 'ended'){
-    candidates = patches.filter(p => p.game === selected);
-  }
-
-  candidates.sort((a,b)=>{
-    const aActive=a.start<=nowDate && a.end>nowDate;
-    const bActive=b.start<=nowDate && b.end>nowDate;
-    if(aActive!==bActive) return aActive ? -1 : 1;
-    return a.end-b.end;
+  // Патчи всегда показываются ВСЕХ игр, независимо от выбранного фильтра.
+  // Для каждой игры берём её последний/актуальный известный патч.
+  const byGame=new Map();
+  patches.forEach(p=>{
+    const old=byGame.get(p.game);
+    if(!old || p.end>old.end) byGame.set(p.game,p);
   });
 
-  const patch=candidates[0];
-  if(!patch){
-    gameEl.textContent='—';
-    titleEl.textContent='—';
-    versionEl.textContent='—';
-    countdownEl.textContent='—';
-    labelEl.textContent='до конца патча';
-    progressEl.innerHTML='';
-    datesEl.textContent='—';
-    return;
-  }
+  const orderedGames=['genshin','hsr','zzz','wuwa','nte','endfield','nikki'];
+  const list=orderedGames.map(id=>byGame.get(id)).filter(Boolean);
 
-  const g=games[patch.game] || {};
-  const left=Math.max(0,patch.end-nowDate);
-  const total=Math.max(1,patch.end-patch.start);
-  const progress=Math.min(1,Math.max(0,1-left/total));
-  const filled=Math.round(progress*16);
-  const expired=patch.end<=nowDate;
+  root.innerHTML=list.map(p=>{
+    const g=games[p.game] || {};
+    const color=g.color || '#5d8ff0';
+    const left=Math.max(0,p.end-nowDate);
+    const total=Math.max(1,p.end-p.start);
+    const progress=Math.min(1,Math.max(0,1-left/total));
+    const filled=Math.round(progress*16);
+    const expired=p.end<=nowDate;
+    const countdown=expired ? 'Завершён' : formatLeft(left);
+    const gameName=g.short || g.name || p.game;
+    const title=p.titleRu || p.title || '';
 
-  root.style.setProperty('--patch-color',g.color || '#5d8ff0');
-  gameEl.textContent='';
-  titleEl.textContent=g.short || g.name || patch.game;
-  versionEl.textContent=patch.version || '';
-  versionEl.style.color=g.color || '';
-  titleEl.style.color=g.color || '';
-  countdownEl.textContent=expired ? 'Завершён' : formatLeft(left);
-  countdownEl.style.color=g.color || '';
-  labelEl.textContent=expired ? 'патч завершён' : 'до конца патча';
-  progressEl.innerHTML=Array.from({length:16},(_,i)=>`<span class="${i<filled?'on':''}"></span>`).join('');
-  progressEl.querySelectorAll('span').forEach(el=>el.style.backgroundColor = '');
-  progressEl.querySelectorAll('span.on').forEach(el=>el.style.backgroundColor = g.color || '');
-  datesEl.textContent=`${formatDate(patch.start)} — ${formatDate(patch.end)}`;
+    return `<article class="patch-card-item" style="--patch-color:${color}">
+      <div class="patch-card-top">
+        <span class="patch-card-label">ПАТЧ</span>
+        <span class="patch-card-game">${gameName}</span>
+      </div>
+      <div class="patch-card-title">${gameName}</div>
+      <div class="patch-card-version">${p.version || ''}</div>
+      ${title ? `<div class="patch-card-name">${title}</div>` : ''}
+      <div class="patch-card-countdown">${countdown}</div>
+      <div class="patch-card-subtitle">${expired ? 'патч завершён' : 'до конца патча'}</div>
+      <div class="patch-card-progress">${Array.from({length:16},(_,i)=>`<span class="${i<filled?'filled':''}"></span>`).join('')}</div>
+      <div class="patch-card-dates">${formatDate(p.start)} — ${formatDate(p.end)}</div>
+    </article>`;
+  }).join('');
 }
-
 function openEvent(id){
   const e=events.find(x=>x.id===id); if(!e)return;
   currentModalId=id;
