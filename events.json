@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "updatedAt": "2026-09-04T04:42:18.396Z",
+  "updatedAt": "2026-09-04T11:27:27.264Z",
   "games": {
     "genshin": {
       "ok": true,
@@ -23,9 +23,9 @@
       "usedPrevious": false
     },
     "endfield": {
-      "ok": false,
-      "count": 9,
-      "usedPrevious": true
+      "ok": true,
+      "count": 16,
+      "usedPrevious": false
     },
     "nte": {
       "ok": true,
@@ -93,105 +93,6 @@
       "done": false,
       "source": "official",
       "url": "https://infinitynikki.infoldgames.com/en/news/568"
-    },
-    {
-      "id": "official:endfield:official:endfield:fallback:liino",
-      "game": "endfield",
-      "title": "Приветствие утренней звезды",
-      "desc": "Специальный наем",
-      "start": "2026-08-09T17:00:00.000Z",
-      "end": "2026-09-01T22:00:00.000Z",
-      "done": false,
-      "source": "official",
-      "url": "https://endfield.gryphline.com/ru-ru#calendar"
-    },
-    {
-      "id": "official:endfield:official:endfield:fallback:bedazzled",
-      "game": "endfield",
-      "title": "Ослепление",
-      "desc": "Поставка арсенала",
-      "start": "2026-08-09T17:00:00.000Z",
-      "end": "2026-09-01T22:00:00.000Z",
-      "done": false,
-      "source": "official",
-      "url": "https://endfield.gryphline.com/ru-ru#calendar"
-    },
-    {
-      "id": "official:endfield:official:endfield:fallback:forest",
-      "game": "endfield",
-      "title": "Лес, укрытый снегом",
-      "desc": "Временное событие входа",
-      "start": "2026-08-26T17:00:00.000Z",
-      "end": "2026-09-01T22:00:00.000Z",
-      "done": false,
-      "source": "official",
-      "url": "https://endfield.gryphline.com/ru-ru#calendar"
-    },
-    {
-      "id": "official:endfield:official:endfield:fallback:rooted",
-      "game": "endfield",
-      "title": "Царство корней",
-      "desc": "Развлекательное событие",
-      "start": "2026-08-09T17:00:00.000Z",
-      "end": "2026-09-01T22:00:00.000Z",
-      "done": false,
-      "source": "official",
-      "url": "https://endfield.gryphline.com/ru-ru#calendar"
-    },
-    {
-      "id": "official:endfield:official:endfield:mode:war-echo",
-      "game": "endfield",
-      "title": "Эхо войны",
-      "desc": "Постоянный режим испытаний",
-      "start": "2026-07-16T17:00:00.000Z",
-      "end": "2026-09-01T22:00:00.000Z",
-      "done": false,
-      "source": "official",
-      "url": "https://endfield.gryphline.com/ru-ru#calendar"
-    },
-    {
-      "id": "official:endfield:official:endfield:mode:madness-season",
-      "game": "endfield",
-      "title": "Сезон помешательства",
-      "desc": "Текущий сезон режима «Эхо войны»",
-      "start": "2026-08-09T17:00:00.000Z",
-      "end": "2026-09-01T22:00:00.000Z",
-      "done": false,
-      "source": "official",
-      "url": "https://endfield.gryphline.com/ru-ru#calendar"
-    },
-    {
-      "id": "official:endfield:official:endfield:mode:dimensional-abode",
-      "game": "endfield",
-      "title": "Обитель шести искусных измерений",
-      "desc": "Скопление разломов «Исследование загадок». Доступно бессрочно после открытия.",
-      "start": "2026-08-26T09:00:00.000Z",
-      "end": "2026-09-01T22:00:00.000Z",
-      "done": false,
-      "source": "official",
-      "url": "https://endfield.gryphline.com/ru-ru#calendar"
-    },
-    {
-      "id": "official:endfield:official:endfield:mode:shadow-monument",
-      "game": "endfield",
-      "title": "Сумрачный монумент",
-      "desc": "Постоянный режим испытаний. Серия «Ревуны скал» доступна с 6 августа.",
-      "start": "2026-08-06T17:00:00.000Z",
-      "end": "2026-09-01T22:00:00.000Z",
-      "done": false,
-      "source": "official",
-      "url": "https://endfield.gryphline.com/ru-ru#calendar"
-    },
-    {
-      "id": "official:endfield:official:endfield:fallback:sanity",
-      "game": "endfield",
-      "title": "Поставка рассудка",
-      "desc": "Временное событие",
-      "start": "2026-08-26T09:00:00.000Z",
-      "end": "2026-09-01T22:00:00.000Z",
-      "done": false,
-      "source": "official",
-      "url": "https://endfield.gryphline.com/ru-ru#calendar"
     },
     {
       "id": "calendar:zzz:5000153",
@@ -797,6 +698,182 @@
       "done": false,
       "source": "activity",
       "url": ""
+    },
+    {
+      "id": "official:endfield:official:endfield:fallback:winter-hunt",
+      "game": "endfield",
+      "title": "Зимняя охота",
+      "desc": "Специальный наем",
+      "start": "2026-09-02T04:00:00.000Z",
+      "end": "2026-09-30T16:59:00.000Z",
+      "done": false,
+      "source": "official",
+      "url": "https://endfield.gryphline.com/ru-ru#calendar"
+    },
+    {
+      "id": "official:endfield:official:endfield:fallback:fletched-irontip",
+      "game": "endfield",
+      "title": "Оперенная железная стрела",
+      "desc": "Временное событие входа",
+      "start": "2026-09-02T04:00:00.000Z",
+      "end": "2026-09-30T16:59:00.000Z",
+      "done": false,
+      "source": "official",
+      "url": "https://endfield.gryphline.com/ru-ru#calendar"
+    },
+    {
+      "id": "official:endfield:official:endfield:fallback:combat-drills",
+      "game": "endfield",
+      "title": "Боевые учения",
+      "desc": "Испытание оперативника",
+      "start": "2026-09-02T04:00:00.000Z",
+      "end": "2026-09-30T16:59:00.000Z",
+      "done": false,
+      "source": "official",
+      "url": "https://endfield.gryphline.com/ru-ru#calendar"
+    },
+    {
+      "id": "official:endfield:official:endfield:fallback:snow-in-the-thicket",
+      "game": "endfield",
+      "title": "Снег в дремучей чаще",
+      "desc": "Событие справочника",
+      "start": "2026-09-02T04:00:00.000Z",
+      "end": "2026-09-30T16:59:00.000Z",
+      "done": false,
+      "source": "official",
+      "url": "https://endfield.gryphline.com/ru-ru#calendar"
+    },
+    {
+      "id": "official:endfield:official:endfield:fallback:winter-dream",
+      "game": "endfield",
+      "title": "Зимний сон в окутанной туманом лесной чаще",
+      "desc": "Сюжетное событие",
+      "start": "2026-09-02T04:00:00.000Z",
+      "end": "2026-09-30T16:59:00.000Z",
+      "done": false,
+      "source": "official",
+      "url": "https://endfield.gryphline.com/ru-ru#calendar"
+    },
+    {
+      "id": "official:endfield:official:endfield:fallback:season-virtuality",
+      "game": "endfield",
+      "title": "Эхо войны — сезон виртуальности",
+      "desc": "Сезон режима «Эхо войны»",
+      "start": "2026-09-09T04:00:00.000Z",
+      "end": "2026-09-30T16:59:00.000Z",
+      "done": false,
+      "source": "official",
+      "url": "https://endfield.gryphline.com/ru-ru#calendar"
+    },
+    {
+      "id": "official:endfield:official:endfield:fallback:trial-of-the-archer",
+      "game": "endfield",
+      "title": "Испытание стрелка",
+      "desc": "Временное испытание",
+      "start": "2026-09-02T04:00:00.000Z",
+      "end": "2026-09-30T16:59:00.000Z",
+      "done": false,
+      "source": "official",
+      "url": "https://endfield.gryphline.com/ru-ru#calendar"
+    },
+    {
+      "id": "official:endfield:official:endfield:fallback:aic-puffmoon",
+      "game": "endfield",
+      "title": "Поддержка АПК: Атака пухлика-луна",
+      "desc": "Событие производства АПК",
+      "start": "2026-09-02T04:00:00.000Z",
+      "end": "2026-09-30T16:59:00.000Z",
+      "done": false,
+      "source": "official",
+      "url": "https://endfield.gryphline.com/ru-ru#calendar"
+    },
+    {
+      "id": "official:endfield:official:endfield:fallback:purrchena-gift",
+      "game": "endfield",
+      "title": "Большая мурчащая Фелин! Р-Р-Р!",
+      "desc": "Раздача подарков",
+      "start": "2026-09-24T04:00:00.000Z",
+      "end": "2026-09-30T16:59:00.000Z",
+      "done": false,
+      "source": "official",
+      "url": "https://endfield.gryphline.com/ru-ru#calendar"
+    },
+    {
+      "id": "official:endfield:official:endfield:fallback:old-city-bell",
+      "game": "endfield",
+      "title": "Эхо колокола старого города",
+      "desc": "Событие справочника",
+      "start": "2026-09-02T04:00:00.000Z",
+      "end": "2026-09-30T16:59:00.000Z",
+      "done": false,
+      "source": "official",
+      "url": "https://endfield.gryphline.com/ru-ru#calendar"
+    },
+    {
+      "id": "official:endfield:official:endfield:fallback:autumn-mountain-streams",
+      "game": "endfield",
+      "title": "Осенние потоки горных хребтов",
+      "desc": "Временное событие входа",
+      "start": "2026-09-24T04:00:00.000Z",
+      "end": "2026-09-30T16:59:00.000Z",
+      "done": false,
+      "source": "official",
+      "url": "https://endfield.gryphline.com/ru-ru#calendar"
+    },
+    {
+      "id": "official:endfield:official:endfield:fallback:obstacle-race",
+      "game": "endfield",
+      "title": "Гонка с препятствиями",
+      "desc": "Развлекательное событие",
+      "start": "2026-09-02T04:00:00.000Z",
+      "end": "2026-09-30T16:59:00.000Z",
+      "done": false,
+      "source": "official",
+      "url": "https://endfield.gryphline.com/ru-ru#calendar"
+    },
+    {
+      "id": "official:endfield:official:endfield:fallback:orbipom-fusion",
+      "game": "endfield",
+      "title": "OrbiPom! СЛИЯНИЕ!",
+      "desc": "Развлекательное событие",
+      "start": "2026-09-02T04:00:00.000Z",
+      "end": "2026-09-30T16:59:00.000Z",
+      "done": false,
+      "source": "official",
+      "url": "https://endfield.gryphline.com/ru-ru#calendar"
+    },
+    {
+      "id": "official:endfield:official:endfield:fallback:shadow-monument-mark",
+      "game": "endfield",
+      "title": "Памятные знаки: Метка тени",
+      "desc": "Временное событие с испытанием",
+      "start": "2026-09-02T04:00:00.000Z",
+      "end": "2026-09-30T16:59:00.000Z",
+      "done": false,
+      "source": "official",
+      "url": "https://endfield.gryphline.com/ru-ru#calendar"
+    },
+    {
+      "id": "official:endfield:official:endfield:mode:war-echo",
+      "game": "endfield",
+      "title": "Эхо войны",
+      "desc": "Постоянный режим испытаний",
+      "start": "2026-07-16T17:00:00.000Z",
+      "end": "2026-09-30T16:59:00.000Z",
+      "done": false,
+      "source": "official",
+      "url": "https://endfield.gryphline.com/ru-ru#calendar"
+    },
+    {
+      "id": "official:endfield:official:endfield:mode:shadow-monument",
+      "game": "endfield",
+      "title": "Сумрачный монумент",
+      "desc": "Постоянный режим испытаний",
+      "start": "2026-08-06T17:00:00.000Z",
+      "end": "2026-09-30T16:59:00.000Z",
+      "done": false,
+      "source": "official",
+      "url": "https://endfield.gryphline.com/ru-ru#calendar"
     },
     {
       "id": "activity:hsr:8",
