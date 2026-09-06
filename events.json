@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "updatedAt": "2026-09-06T15:32:32.087Z",
+  "updatedAt": "2026-09-06T20:29:55.801Z",
   "games": {
     "genshin": {
       "ok": true,
@@ -14,7 +14,7 @@
     },
     "zzz": {
       "ok": true,
-      "count": 16,
+      "count": 13,
       "usedPrevious": false
     },
     "wuwa": {
@@ -93,39 +93,6 @@
       "done": false,
       "source": "official",
       "url": "https://infinitynikki.infoldgames.com/en/news/568"
-    },
-    {
-      "id": "calendar:zzz:5000153",
-      "game": "zzz",
-      "title": "Дары прибоя",
-      "desc": "",
-      "start": "2026-07-28T02:00:00.000Z",
-      "end": "2026-09-06T19:59:59.000Z",
-      "done": false,
-      "source": "calendar",
-      "url": ""
-    },
-    {
-      "id": "calendar:zzz:5000157",
-      "game": "zzz",
-      "title": "Отпуск в розыске",
-      "desc": "",
-      "start": "2026-08-24T02:00:00.000Z",
-      "end": "2026-09-06T19:59:59.000Z",
-      "done": false,
-      "source": "calendar",
-      "url": ""
-    },
-    {
-      "id": "calendar:zzz:5000156",
-      "game": "zzz",
-      "title": "Прожарка с корочкой",
-      "desc": "",
-      "start": "2026-08-19T02:00:00.000Z",
-      "end": "2026-09-06T19:59:59.000Z",
-      "done": false,
-      "source": "calendar",
-      "url": ""
     },
     {
       "id": "activity:zzz:4",
