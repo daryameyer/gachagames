@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "updatedAt": "2026-09-07T04:52:36.725Z",
+  "updatedAt": "2026-09-07T12:44:53.049Z",
   "games": {
     "genshin": {
       "ok": true,
@@ -29,7 +29,7 @@
     },
     "nte": {
       "ok": true,
-      "count": 9,
+      "count": 8,
       "usedPrevious": false
     },
     "nikki": {
@@ -93,17 +93,6 @@
       "done": false,
       "source": "official",
       "url": "https://infinitynikki.infoldgames.com/en/news/568"
-    },
-    {
-      "id": "activity:nte:7",
-      "game": "nte",
-      "title": "夺金大作战",
-      "desc": "限时活动。活动期间，在「粉爪大劫案」中方斯的获取效率提升为2倍。",
-      "start": "2026-08-24T05:00:00.000Z",
-      "end": "2026-09-07T04:59:59.000Z",
-      "done": false,
-      "source": "activity",
-      "url": ""
     },
     {
       "id": "activity:zzz:3",
