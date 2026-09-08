@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "updatedAt": "2026-09-07T21:35:19.634Z",
+  "updatedAt": "2026-09-08T04:48:29.649Z",
   "games": {
     "genshin": {
       "ok": true,
@@ -14,7 +14,7 @@
     },
     "zzz": {
       "ok": true,
-      "count": 9,
+      "count": 7,
       "usedPrevious": false
     },
     "wuwa": {
@@ -93,28 +93,6 @@
       "done": false,
       "source": "official",
       "url": "https://infinitynikki.infoldgames.com/en/news/568"
-    },
-    {
-      "id": "activity:zzz:3",
-      "game": "zzz",
-      "title": "Подарки из облаков",
-      "desc": "Войдите в игру 7 дней во время события и получите 10 зашифрованных мастер-лент.",
-      "start": "2026-07-29T06:00:00.000Z",
-      "end": "2026-09-08T03:59:59.000Z",
-      "done": false,
-      "source": "activity",
-      "url": ""
-    },
-    {
-      "id": "activity:zzz:6",
-      "game": "zzz",
-      "title": "Большая раздача «Эн-эн»!",
-      "desc": "Войдите в игру 7 дней во время события и получите 10 зашифрованных мастер-лент и 10 купонов банбу.",
-      "start": "2026-08-19T10:00:00.000Z",
-      "end": "2026-09-08T03:59:59.000Z",
-      "done": false,
-      "source": "activity",
-      "url": ""
     },
     {
       "id": "calendar:zzz:16000002",
