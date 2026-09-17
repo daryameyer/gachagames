@@ -1,10 +1,10 @@
 {
   "ok": true,
-  "updatedAt": "2026-09-16T21:24:02.377Z",
+  "updatedAt": "2026-09-17T04:59:39.695Z",
   "games": {
     "genshin": {
       "ok": true,
-      "count": 9,
+      "count": 8,
       "usedPrevious": false
     },
     "hsr": {
@@ -93,17 +93,6 @@
       "done": false,
       "source": "official",
       "url": "https://infinitynikki.infoldgames.com/en/news/568"
-    },
-    {
-      "id": "activity:genshin:3",
-      "game": "genshin",
-      "title": "禁界拟想阵地战",
-      "desc": "阵地战活动，累计原石×420。",
-      "start": "2026-09-07T04:00:00.000Z",
-      "end": "2026-09-17T03:59:59.000Z",
-      "done": false,
-      "source": "activity",
-      "url": ""
     },
     {
       "id": "calendar:genshin:429",
