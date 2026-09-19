@@ -256,7 +256,7 @@ async function calendarEvents(game){
         : [];
       const list=[...events,...challenges], now=Date.now();
       return list
-        .filter(x => !(game === 'genshin' && String(x?.id ?? x?.event_id ?? '') === '429'))
+        .filter(x => !(game === 'genshin' && ['428','429'].includes(String(x?.id ?? x?.event_id ?? ''))))
         .map((x,k)=>normalizeCalendarEvent(x,game,k,'calendar')).filter(Boolean).filter(e=>e.end.getTime()>now);
     }catch(err){console.warn('calendar',game,err.message);return[];}
   });
@@ -275,7 +275,11 @@ async function activityEvents(game){
         const title=localizeGameTitle(game,rawTitle);
         const desc=localizeGameDesc(game,rawTitle,x.description??x.desc??'');
         const start=new Date(x.startTime??x.start_time??x.start);
-        const end=new Date(x.endTime??x.end_time??x.end);
+        let end=new Date(x.endTime??x.end_time??x.end);
+        // The current Genshin activity feed is one hour later than the in-game countdown for these two events.
+        if(game==='genshin' && (String(rawTitle).trim()==='幽境危战' || String(rawTitle).trim()==='盛材移涌') && !Number.isNaN(end.getTime())){
+          end=new Date(end.getTime()-60*60*1000);
+        }
         if(!title||Number.isNaN(start.getTime())||Number.isNaN(end.getTime())||end<=start||end.getTime()<=now)return null;
         return {
           id:`activity:${game}:${i}:${encodeURIComponent(String(title))}`,
