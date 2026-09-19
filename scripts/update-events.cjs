@@ -62,6 +62,34 @@ const zzzRussianDescriptions = {
   "末日幻影·兵锋骑士": "Пройдите испытания Апокалиптической тени и получите награды за боевые достижения."
 };
 
+
+const genshinRussianTitles = {
+  "盛材移涌": "Разлив изобилия",
+  "幽境危战": "Мрачный натиск",
+  "砺行修远（第五期）": "Долгий путь совершенства",
+  "砺行修远(第五期)": "Долгий путь совершенства"
+};
+const genshinRussianDescriptions = {
+  "盛材移涌": "Во время события проходите Подземелья мастерства или Подземелья воли и расходуйте Первородную смолу, чтобы получить двойные награды. Каждый день доступно 3 шанса удвоения наград.",
+  "幽境危战": "Боевой режим с испытаниями повышенной сложности. За прохождение испытаний можно получить до 450 Камней Истока.",
+  "砺行修远（第五期）": "Выполняйте ежедневные и еженедельные тренировочные цели, чтобы получать награды и прогресс события «Долгий путь совершенства».",
+  "砺行修远(第五期)": "Выполняйте ежедневные и еженедельные тренировочные цели, чтобы получать награды и прогресс события «Долгий путь совершенства»."
+};
+const hsrRussianTitles = {
+  "位面分裂": "Планарный раскол",
+  "异器盈界": "Царство странности",
+  "超限：狂飙大奖赛": "Превосходство: Межзвёздный гран-при",
+  "方寸大冒险": "Крошечное великое приключение",
+  "巡星之礼": "Подарок звёздного странника"
+};
+const hsrRussianDescriptions = {
+  "位面分裂": "Во время события получайте вдвое больше Планарных украшений за прохождение Виртуальной вселенной.",
+  "异器盈界": "Во время события получайте вдвое больше наград за прохождение Пещер коррозии.",
+  "超限：狂飙大奖赛": "Новая гоночная активность в Звездограде. Соберите команду и примите участие в Межзвёздном гран-при.",
+  "方寸大冒险": "Отправляйтесь в маленькое великое приключение, соберите команду героев и преодолейте множество испытаний.",
+  "巡星之礼": "Ежедневно входите в игру во время события, чтобы получать награды за вход. За 7 дней можно получить 10 Звёздных пропусков."
+};
+
 const wuwaEnglishTitles = {
   "回音盈域": "Bountiful Crescendo",
   "第二索拉・诡影迷踪": "Second Coming of Solaris: Coded Deception",
@@ -93,18 +121,8 @@ const wuwaEnglishDescriptions = {
   "群声共振模拟域": "A combat event and an open test of diverse abilities. The Threnodian system continuously provides different interference sources for participants to connect, combine, and explore richer ability structures.",
 }
 function hasCJK(value){ return /[\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]/u.test(String(value??'')); }
-function localizeGameTitle(game,title){
-  const value=String(title??'').trim();
-  if(game==='wuwa') return wuwaEnglishTitles[value] || (hasCJK(value) ? 'Wuthering Waves Event' : value);
-  if(game==='zzz') return zzzRussianTitles[value] || value;
-  return value;
-}
-function localizeGameDesc(game,title,desc){
-  const key=String(title??'').trim();
-  if(game==='wuwa') return wuwaEnglishDescriptions[key] || (hasCJK(desc) ? 'Wuthering Waves event.' : String(desc??''));
-  if(game==='zzz') return zzzRussianDescriptions[key] || String(desc??'');
-  return String(desc??'');
-}
+function localizeGameTitle(game,title){ const value=String(title??'').trim(); if(game==='wuwa') return wuwaEnglishTitles[value] || (hasCJK(value)?'Wuthering Waves Event':value); if(game==='genshin') return genshinRussianTitles[value] || value; if(game==='hsr') return hsrRussianTitles[value] || value; if(game==='zzz') return zzzRussianTitles[value] || value; return value; }
+function localizeGameDesc(game,title,desc){ const key=String(title??'').trim(); if(game==='wuwa') return wuwaEnglishDescriptions[key] || (hasCJK(desc)?'Wuthering Waves event.':String(desc??'')); if(game==='genshin') return genshinRussianDescriptions[key] || String(desc??''); if(game==='hsr') return hsrRussianDescriptions[key] || String(desc??''); if(game==='zzz') return zzzRussianDescriptions[key] || String(desc??''); return String(desc??''); }
 
 function toEvent(x, game, i, source) {
   const title = localizeGameTitle(game, x?.name ?? x?.title ?? x?.eventName ?? x?.activity_name);
