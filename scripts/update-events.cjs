@@ -252,7 +252,7 @@ async function fetchLiveGame(game) {
       const list = isActivity ? activityList(data) : calendarList(data);
       return list
         .filter(x => !(game === 'genshin' && !isActivity && ['428','429'].includes(String(x?.id ?? x?.event_id ?? ''))))
-        .map((x,i) => normalizeKnownGenshinEvent(toEvent(x, game, i, isActivity ? 'activity' : 'calendar'))).filter(Boolean).filter(e=>!isHiddenGenshinEvent(e));
+        .map((x,i) => normalizeKnownGenshinEvent(toEvent(x, game, i, isActivity ? 'activity' : 'calendar'))).filter(Boolean);
     }));
     return dedupe(settled.filter(x => x.status === 'fulfilled').flatMap(x => x.value));
   }
