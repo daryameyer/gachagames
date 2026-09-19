@@ -34,7 +34,6 @@ let currentModalId=null;
 let events = [
   {id:1,game:'nikki',title:'Вдохновение в мгновение',desc:'Получите двойные награды в царстве Эврики!',start:d(-2),end:d(1.55),done:false,category:'event'},
   {id:2,game:'zzz',title:'Фокусный разбор: столкновение',desc:'Пройдите боевые испытания и заберите временные награды.',start:d(-1.8),end:d(3.55),done:false,category:'event'},
-  {id:3,game:'genshin',title:'Взаимопомощь в цвету: Фронтиры',desc:'Делайте снимки и выполняйте цели исследовательского события.',start:d(-1.4),end:d(3.7),done:false,category:'event'},
   {id:4,game:'hsr',title:'Сад изобилия 4.4',desc:'Получайте двойные награды за прохождение Золотых и Багровых чашелистиков.',start:d(-1.1),end:d(5.55),done:false,category:'event'},
   {id:5,game:'genshin',title:'Веб-событие «Путеводитель по Снежной»',desc:'Зарабатывайте награды за выполнение заданий и изучение новых механик.',start:d(-.7),end:d(7.4),done:false,category:'event'},
   {id:6,game:'hsr',title:'Антигравитационный разрушитель',desc:'Помогите Авантюрину исследовать заражённый информационный блок.',start:d(-5),end:d(10.55),done:false,category:'event'},
@@ -258,14 +257,6 @@ function manualModes(){
   ];
 }
 
-function isHiddenGenshinEventTitle(title){
-  const t=String(title||'').trim().toLowerCase();
-  return t.includes('взаимопомощь в цвету') && t.includes('фронтир');
-}
-function isGenshinSnapshotFallback(e){
-  return e?.game==='genshin' && ['Разлив изобилия','Изысканные наряды: Тепло','Мрачный натиск'].includes(String(e.title||'').trim());
-}
-
 async function loadRemoteEvents(){
   const gamesToLoad=['genshin','hsr','zzz','wuwa','endfield','nte','nikki'];
   eventsAutoSource=Object.fromEntries(gamesToLoad.map(x=>[x,false]));
@@ -279,14 +270,20 @@ async function loadRemoteEvents(){
 
   const merged=[];
   for(const game of gamesToLoad){
-    const live=(liveByGame[game]||[]).filter(e=>!(game==='genshin' && isHiddenGenshinEventTitle(e.title)));
-    const backup=snapshot.filter(e=>e.game===game && !(game==='genshin' && isHiddenGenshinEventTitle(e.title)));
-    const legacy=events.filter(e=>e.game===game && e.end>new Date() && !(game==='genshin' && isHiddenGenshinEventTitle(e.title)));
-    if(game==='genshin'){
-      const fallbacks=backup.filter(isGenshinSnapshotFallback);
-      merged.push(...live, ...fallbacks);
-    }else if(live.length) merged.push(...live);
-    else if(backup.length) merged.push(...backup);
+    const live=liveByGame[game]||[];
+    const backup=snapshot.filter(e=>e.game===game);
+    const legacy=events.filter(e=>e.game===game && e.end>new Date());
+    if(live.length){
+      // Онлайн-источник может вернуть неполный набор. Для Genshin добавляем
+      // отсутствующие события из последнего снимка по названию, без дублей.
+      if(game==='genshin'){
+        const liveTitles=new Set(live.map(e=>String(e.title).trim().toLowerCase()));
+        merged.push(...live);
+        merged.push(...backup.filter(e=>!liveTitles.has(String(e.title).trim().toLowerCase())));
+      }else{
+        merged.push(...live);
+      }
+    }else if(backup.length) merged.push(...backup);
     else merged.push(...legacy);
   }
 

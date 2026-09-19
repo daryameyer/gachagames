@@ -345,20 +345,6 @@ async function calendarEvents(game){
 }
 
 
-const GENSHIN_HIDDEN_TITLES = new Set([
-  'Взаимопомощь в цвету: Фронтиры',
-  'Взаимопомощь в цвету: Фронтиры — исследование'
-]);
-const GENSHIN_SNAPSHOT_FALLBACK_TITLES = new Set([
-  'Разлив изобилия',
-  'Изысканные наряды: Тепло',
-  'Мрачный натиск'
-]);
-function isHiddenGenshinTitle(title){
-  const t=String(title||'').trim().toLowerCase();
-  return t.includes('взаимопомощь в цвету') && t.includes('фронтир');
-}
-
 async function activityEvents(game){
   const url=activitySources[game]; if(!url) return [];
   return cached(`activity:${game}`,async()=>{
@@ -368,8 +354,10 @@ async function activityEvents(game){
       const now=Date.now();
       return list.map((x,i)=>{
         const rawTitle=x.name??x.title;
+        // Это событие есть в старых/сторонних данных, но его нет среди актуальных
+        // событий Genshin в игре. Не показываем его в EVENTCLOCK.
+        if(game==='genshin' && String(rawTitle).trim()==='新芽相助·初探雪原') return null;
         const title=localizeGameTitle(game,rawTitle);
-        if(game==='genshin' && isHiddenGenshinTitle(title || rawTitle)) return null;
         const desc=localizeGameDesc(game,rawTitle,x.description??x.desc??'');
         const start=new Date(x.startTime??x.start_time??x.start);
         let end=new Date(x.endTime??x.end_time??x.end);
@@ -844,21 +832,20 @@ async function liveEvents(game){
   const [calendar,activity,official]=await Promise.all([
     calendarEvents(game), activityEvents(game), officialEvents(game)
   ]);
-  let live=dedupeEvents(calendar,activity,official);
-  if(game==='genshin'){
-    // The live activity feed can temporarily omit real in-game events.
-    // Keep these three from the repository snapshot as a supplement,
-    // while explicitly excluding the false "Frontiers" activity.
-    const snapshot=await snapshotEvents(game);
-    const fallback=snapshot.filter(e=>GENSHIN_SNAPSHOT_FALLBACK_TITLES.has(String(e.title).trim()) && !isHiddenGenshinTitle(e.title));
-    live=dedupeEvents(live,fallback);
-    live=live.filter(e=>!isHiddenGenshinTitle(e.title));
-  }
-  return live;
+  return dedupeEvents(calendar,activity,official);
 }
 
 async function getEvents(game){
   const live=await liveEvents(game);
+  // Live-источник может временно отдавать только часть событий.
+  // Для Genshin дополняем его последним снимком, но не дублируем события
+  // с тем же названием. Так пропавшие из API события не исчезают с сайта.
+  if(live.length && game==='genshin'){
+    const backup=await snapshotEvents(game);
+    const liveTitles=new Set(live.map(e=>String(e.title).trim().toLowerCase()));
+    const missing=backup.filter(e=>!liveTitles.has(String(e.title).trim().toLowerCase()));
+    return {events:dedupeEvents(live,missing),usedSnapshot:missing.length>0};
+  }
   if(live.length)return {events:live,usedSnapshot:false};
   // Для Endfield не используем events.json и сторонние резервные источники:
   // если официальный источник временно недоступен, лучше показать пусто,
