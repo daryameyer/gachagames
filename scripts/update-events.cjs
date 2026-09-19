@@ -131,7 +131,12 @@ function toEvent(x, game, i, source) {
   const startRaw = x?.start_time ?? x?.startTime ?? x?.start_at ?? x?.start;
   const endRaw = x?.end_time ?? x?.endTime ?? x?.end_at ?? x?.end;
   const start = typeof startRaw === 'number' ? new Date(startRaw * 1000) : new Date(startRaw);
-  const end = typeof endRaw === 'number' ? new Date(endRaw * 1000) : new Date(endRaw);
+  let end = typeof endRaw === 'number' ? new Date(endRaw * 1000) : new Date(endRaw);
+  // The current Genshin activity feed is one hour later than the in-game countdown for these two events.
+  const rawTitle = x?.name ?? x?.title ?? x?.eventName ?? x?.activity_name;
+  if (game === 'genshin' && (String(rawTitle).trim() === '幽境危战' || String(rawTitle).trim() === '盛材移涌') && !Number.isNaN(end.getTime())) {
+    end = new Date(end.getTime() - 60 * 60 * 1000);
+  }
   if (!title || Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || end <= start || end.getTime() <= Date.now()) return null;
   return {
     id: `${source}:${game}:${x?.id ?? x?.activity_id ?? i}`,
@@ -169,7 +174,7 @@ async function fetchLiveGame(game) {
       const isActivity = url.includes('starrailassistant.top');
       const list = isActivity ? activityList(data) : calendarList(data);
       return list
-        .filter(x => !(game === 'genshin' && !isActivity && String(x?.id ?? x?.event_id ?? '') === '429'))
+        .filter(x => !(game === 'genshin' && !isActivity && ['428','429'].includes(String(x?.id ?? x?.event_id ?? ''))))
         .map((x,i) => toEvent(x, game, i, isActivity ? 'activity' : 'calendar')).filter(Boolean);
     }));
     return dedupe(settled.filter(x => x.status === 'fulfilled').flatMap(x => x.value));
