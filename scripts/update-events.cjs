@@ -64,6 +64,19 @@ const zzzRussianDescriptions = {
 
 
 
+const GENSHIN_HIDDEN_TITLES = new Set([
+  'Взаимопомощь в цвету: Фронтиры',
+  'В пламени горна: Битва умов',
+  'Разлив артерий земли'
+]);
+const GENSHIN_PROTECTED_IDS = new Set([
+  'activity:genshin:1',
+  'activity:genshin:4',
+  'activity:genshin:5',
+  'activity:genshin:6',
+  'activity:genshin:7'
+]);
+
 function normalizeKnownGenshinEvent(e) {
   if (!e || e.game !== 'genshin') return e;
   if (e.id === 'activity:genshin:6') {
@@ -252,7 +265,9 @@ async function fetchLiveGame(game) {
       const list = isActivity ? activityList(data) : calendarList(data);
       return list
         .filter(x => !(game === 'genshin' && !isActivity && ['428','429'].includes(String(x?.id ?? x?.event_id ?? ''))))
-        .map((x,i) => normalizeKnownGenshinEvent(toEvent(x, game, i, isActivity ? 'activity' : 'calendar'))).filter(Boolean);
+        .map((x,i) => normalizeKnownGenshinEvent(toEvent(x, game, i, isActivity ? 'activity' : 'calendar')))
+        .filter(Boolean)
+        .filter(e => !(game === 'genshin' && GENSHIN_HIDDEN_TITLES.has(String(e.title || '').trim())));
     }));
     return dedupe(settled.filter(x => x.status === 'fulfilled').flatMap(x => x.value));
   }
@@ -284,8 +299,19 @@ async function main() {
     const r = results[i];
 
     if (r.status === 'fulfilled' && r.value.length) {
-      games[game] = { ok: true, count: r.value.length, usedPrevious: false };
-      all.push(...r.value);
+      let liveEventsForGame = r.value;
+      if (game === 'genshin') {
+        const previousProtected = (previousByGame[game] || []).filter(e =>
+          GENSHIN_PROTECTED_IDS.has(String(e.id || '')) &&
+          !GENSHIN_HIDDEN_TITLES.has(String(e.title || '').trim()) &&
+          new Date(e.end).getTime() > Date.now()
+        );
+        const protectedNames = new Set(previousProtected.map(e => String(e.title || '').trim()));
+        liveEventsForGame = liveEventsForGame.filter(e => !protectedNames.has(String(e.title || '').trim()));
+        liveEventsForGame.push(...previousProtected);
+      }
+      games[game] = { ok: true, count: liveEventsForGame.length, usedPrevious: false };
+      all.push(...liveEventsForGame);
     } else {
       // A temporary outage must not erase a previously valid snapshot.
       const backup = previousByGame[game] || [];
