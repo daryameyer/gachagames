@@ -1,10 +1,10 @@
 {
   "ok": true,
-  "updatedAt": "2026-09-19T11:10:00.211Z",
+  "updatedAt": "2026-09-19T14:01:16.615Z",
   "games": {
     "genshin": {
       "ok": true,
-      "count": 8,
+      "count": 7,
       "usedPrevious": false
     },
     "hsr": {
