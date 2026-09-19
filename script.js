@@ -82,6 +82,34 @@ function applyRemoteEvents(remoteEvents){
   renderAll();
 }
 
+
+const genshinRussianTitles = {
+  "盛材移涌": "Разлив изобилия",
+  "幽境危战": "Мрачный натиск",
+  "砺行修远（第五期）": "Долгий путь совершенства",
+  "砺行修远(第五期)": "Долгий путь совершенства"
+};
+const genshinRussianDescriptions = {
+  "盛材移涌": "Во время события проходите Подземелья мастерства или Подземелья воли и расходуйте Первородную смолу, чтобы получить двойные награды. Каждый день доступно 3 шанса удвоения наград.",
+  "幽境危战": "Боевой режим с испытаниями повышенной сложности. За прохождение испытаний можно получить до 450 Камней Истока.",
+  "砺行修远（第五期）": "Выполняйте ежедневные и еженедельные тренировочные цели, чтобы получать награды и прогресс события «Долгий путь совершенства».",
+  "砺行修远(第五期)": "Выполняйте ежедневные и еженедельные тренировочные цели, чтобы получать награды и прогресс события «Долгий путь совершенства»."
+};
+const hsrRussianTitles = {
+  "位面分裂": "Планарный раскол",
+  "异器盈界": "Царство странности",
+  "超限：狂飙大奖赛": "Превосходство: Межзвёздный гран-при",
+  "方寸大冒险": "Крошечное великое приключение",
+  "巡星之礼": "Подарок звёздного странника"
+};
+const hsrRussianDescriptions = {
+  "位面分裂": "Во время события получайте вдвое больше Планарных украшений за прохождение Виртуальной вселенной.",
+  "异器盈界": "Во время события получайте вдвое больше наград за прохождение Пещер коррозии.",
+  "超限：狂飙大奖赛": "Новая гоночная активность в Звездограде. Соберите команду и примите участие в Межзвёздном гран-при.",
+  "方寸大冒险": "Отправляйтесь в маленькое великое приключение, соберите команду героев и преодолейте множество испытаний.",
+  "巡星之礼": "Ежедневно входите в игру во время события, чтобы получать награды за вход. За 7 дней можно получить 10 Звёздных пропусков."
+};
+
 const wuwaEnglishTitles = {
   '回音盈域': 'Bountiful Crescendo',
   '第二索拉・诡影迷踪': 'Second Coming of Solaris: Coded Deception',
@@ -94,8 +122,11 @@ const wuwaEnglishTitles = {
   '群声共振模拟域': 'Resonance Sim Realm'
 };
 function localizeGameTitle(game,title){
-  if(game==='wuwa') return wuwaEnglishTitles[String(title).trim()] || String(title);
-  return String(title);
+  const value=String(title??'').trim();
+  if(game==='wuwa') return wuwaEnglishTitles[value] || value;
+  if(game==='genshin') return genshinRussianTitles[value] || value;
+  if(game==='hsr') return hsrRussianTitles[value] || value;
+  return value;
 }
 
 function classifyEvent(raw,game,title=''){
@@ -117,7 +148,9 @@ function classifyEvent(raw,game,title=''){
 function normalizeRemoteEvent(raw,game,index,source){
   const id=raw.id ?? raw.activity_id ?? raw.event_id ?? raw.ann_id ?? `${game}-${index}`;
   const title=localizeGameTitle(game, raw.name ?? raw.title ?? raw.eventName ?? raw.activity_name);
-  const desc=raw.description ?? raw.desc ?? raw.summary ?? '';
+  const rawDesc=raw.description ?? raw.desc ?? raw.summary ?? '';
+  const rawTitle=raw.name ?? raw.title ?? raw.eventName ?? raw.activity_name;
+  const desc=game==='genshin' ? (genshinRussianDescriptions[String(rawTitle??'').trim()] || rawDesc) : game==='hsr' ? (hsrRussianDescriptions[String(rawTitle??'').trim()] || rawDesc) : rawDesc;
   const startRaw=raw.start_time ?? raw.startTime ?? raw.start_at ?? raw.start;
   const endRaw=raw.end_time ?? raw.endTime ?? raw.end_at ?? raw.end;
   const start=typeof startRaw==='number' ? new Date(startRaw*1000) : new Date(startRaw);
