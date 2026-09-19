@@ -255,7 +255,9 @@ async function calendarEvents(game){
         ? data.challenges.map(x=>({...x,title:x.name,challenge_type:x.type_name,category:'mode'}))
         : [];
       const list=[...events,...challenges], now=Date.now();
-      return list.map((x,k)=>normalizeCalendarEvent(x,game,k,'calendar')).filter(Boolean).filter(e=>e.end.getTime()>now);
+      return list
+        .filter(x => !(game === 'genshin' && String(x?.id ?? x?.event_id ?? '') === '429'))
+        .map((x,k)=>normalizeCalendarEvent(x,game,k,'calendar')).filter(Boolean).filter(e=>e.end.getTime()>now);
     }catch(err){console.warn('calendar',game,err.message);return[];}
   });
 }
