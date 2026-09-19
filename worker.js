@@ -149,10 +149,7 @@ const wuwaEnglishDescriptions = {
 
 function normalizeKnownGenshinEvent(e) {
   if (!e || e.game !== 'genshin') return e;
-  if (e.game === 'genshin' && e.title === 'Изысканные наряды: Нежное тепло') {
-    e.title = 'Изысканные наряды: Тепло';
-    e.end = new Date(new Date(e.end).getTime() - 8*60*60*1000).toISOString();
-  }
+  if (e.title === 'Изысканные наряды: Нежное тепло') e.title = 'Изысканные наряды: Тепло';
   return e;
 }
 
@@ -824,12 +821,44 @@ function priority(source){
   return source==='official'?4:source==='activity'?3:source==='calendar'?2:source==='snapshot'?1:0;
 }
 
+const GENSHIN_HIDDEN_TITLES = new Set([
+  'Взаимопомощь в цвету: Фронтиры',
+  'В пламени горна: Битва умов',
+  'Разлив артерий земли'
+]);
+const GENSHIN_PROTECTED_TITLES = new Set([
+  'Мрачный натиск',
+  'Разлив изобилия',
+  'Изысканные наряды: Тепло',
+  'Долгий путь совершенства',
+  'Богом забытая тундра'
+]);
+
+function sanitizeGenshinLive(events){
+  return (events || []).filter(e => {
+    if (e?.game !== 'genshin') return true;
+    return !GENSHIN_HIDDEN_TITLES.has(String(e.title || '').trim());
+  });
+}
+
 async function liveEvents(game){
   if(game==='endfield') return dedupeEvents(await calendarEvents(game));
   const [calendar,activity,official]=await Promise.all([
     calendarEvents(game), activityEvents(game), officialEvents(game)
   ]);
-  return dedupeEvents(calendar,activity,official);
+  let live = sanitizeGenshinLive(dedupeEvents(calendar,activity,official));
+  // Keep the verified active Genshin events from the repository snapshot if a
+  // live source temporarily omits them. This prevents individual feed changes
+  // from making real in-game events disappear from the tracker.
+  if(game==='genshin'){
+    const snapshot = await snapshotEvents(game);
+    const protectedSnapshot = snapshot.filter(e => GENSHIN_PROTECTED_TITLES.has(String(e.title || '').trim()));
+    const protectedNames = new Set(protectedSnapshot.map(e => String(e.title || '').trim()));
+    live = live.filter(e => !protectedNames.has(String(e.title || '').trim()));
+    live.push(...protectedSnapshot);
+    live = sanitizeGenshinLive(live);
+  }
+  return dedupeEvents(live);
 }
 
 async function getEvents(game){
