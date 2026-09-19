@@ -1,26 +1,26 @@
 {
   "ok": true,
-  "updatedAt": "2026-09-19T11:10:00.211Z",
+  "updatedAt": "2026-09-19T16:27:10.710Z",
   "games": {
     "genshin": {
-      "ok": true,
-      "count": 8,
-      "usedPrevious": false
+      "ok": false,
+      "count": 5,
+      "usedPrevious": true
     },
     "hsr": {
-      "ok": true,
-      "count": 15,
-      "usedPrevious": false
+      "ok": false,
+      "count": 10,
+      "usedPrevious": true
     },
     "zzz": {
-      "ok": true,
-      "count": 16,
-      "usedPrevious": false
+      "ok": false,
+      "count": 5,
+      "usedPrevious": true
     },
     "wuwa": {
-      "ok": true,
+      "ok": false,
       "count": 6,
-      "usedPrevious": false
+      "usedPrevious": true
     },
     "endfield": {
       "ok": false,
@@ -28,8 +28,8 @@
       "usedPrevious": true
     },
     "nte": {
-      "ok": true,
-      "count": 7,
+      "ok": false,
+      "count": 0,
       "usedPrevious": false
     },
     "nikki": {
@@ -95,17 +95,6 @@
       "url": "https://infinitynikki.infoldgames.com/en/news/568"
     },
     {
-      "id": "calendar:hsr:278",
-      "game": "hsr",
-      "title": "Планарный раскол",
-      "desc": "Во время события пройдите Виртуальную вселенную или Расходящуюся вселенную, чтобы получить вдвое больше Планарных украшений.",
-      "start": "2026-09-07T03:00:00.000Z",
-      "end": "2026-09-21T02:59:59.000Z",
-      "done": false,
-      "source": "calendar",
-      "url": ""
-    },
-    {
       "id": "activity:genshin:4",
       "game": "genshin",
       "title": "Разлив изобилия",
@@ -114,6 +103,17 @@
       "end": "2026-09-21T02:59:59Z",
       "done": false,
       "source": "activity",
+      "url": ""
+    },
+    {
+      "id": "calendar:hsr:278",
+      "game": "hsr",
+      "title": "Планарный раскол",
+      "desc": "Во время события пройдите Виртуальную вселенную или Расходящуюся вселенную, чтобы получить вдвое больше Планарных украшений.",
+      "start": "2026-09-07T03:00:00.000Z",
+      "end": "2026-09-21T02:59:59.000Z",
+      "done": false,
+      "source": "calendar",
       "url": ""
     },
     {
