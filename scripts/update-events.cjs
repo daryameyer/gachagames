@@ -63,6 +63,16 @@ const zzzRussianDescriptions = {
 };
 
 
+
+function normalizeKnownGenshinEvent(e) {
+  if (!e || e.game !== 'genshin') return e;
+  if (e.id === 'activity:genshin:6') {
+    e.title = 'Изысканные наряды: Тепло';
+    e.end = '2026-09-22T21:59:59.000Z';
+  }
+  return e;
+}
+
 const genshinRussianTitles = {
   "盛材移涌": "Разлив изобилия",
   "幽境危战": "Мрачный натиск",
@@ -120,9 +130,76 @@ const wuwaEnglishDescriptions = {
   "声弦涤荡": "Complete Tacet Discord challenges and spend Crystal Waveplates to receive double rewards.",
   "群声共振模拟域": "A combat event and an open test of diverse abilities. The Threnodian system continuously provides different interference sources for participants to connect, combine, and explore richer ability structures.",
 }
+
+const extraRussianTitles = {
+  "淘方斯记": "Хроники Фанса",
+  "环期赠礼": "Подарки за вход",
+  "排球之星": "Звезда волейбола",
+  "单骑破浪": "Одинокий рейд по волнам",
+  "争锋赏宴": "Праздник соперничества",
+  "逐光破浪": "Навстречу волнам",
+  "遗舸寻珍": "Поиск сокровищ на обломках",
+  "异相仲裁•军团再临": "Апокалиптическая тень: Возвращение легиона",
+  "先遣赏金-区域巡防": "Авангардная награда — патрулирование района",
+  "混沌回忆•扫除风暴": "Воспоминания о хаосе: Ураганная зачистка",
+  "末日幻影•仙客天狼": "Апокалиптическая тень: Небесный волк",
+  "虚构叙事•立界开篇": "Вымышленная вселенная: Начало нового мира",
+  "虚境逐影争锋": "Соперничество в виртуальном мире",
+  "「弹球勇者」哐哐当！": "«Герои пинбола» — бах-бах!",
+  "锵锵！球仔成长日记": "Дневник взросления Бангбу",
+  "跛脚乌鸦奇探录": "Дело хромой вороны",
+  "数据悬赏-实战模拟": "Награда за данные — боевая симуляция",
+  "全新放送": "Новая трансляция",
+  "惊喜放映企划": "Проект «Сюрпризный показ»",
+  "「嗯呢」从天降": "«Эн-эн» с небес",
+  "潜能预演·烈火重锤": "Прелюдия потенциала: Огненный молот",
+  "天使应援大作战": "Большая поддержка ангелов"
+};
+const extraRussianDescriptions = {
+  "淘方斯记": "Временное событие с заданиями и наградами, связанными с Фансом.",
+  "环期赠礼": "Войдите в игру в течение 7 дней, чтобы получить награды за ежедневный вход.",
+  "排球之星": "Солнце, пляж и волейбол! Участвуйте в матчах и получайте временные награды события.",
+  "单骑破浪": "Проходите гоночные испытания и получайте награды за завершение трасс.",
+  "争锋赏宴": "Проходите новые испытания и накапливайте очки, чтобы получать награды события.",
+  "逐光破浪": "Ограниченное событие с лутбоксами и дополнительными наградами.",
+  "遗舸寻珍": "Участвуйте в событии, собирайте дрейфующие бутылки и обменивайте их на награды.",
+  "异相仲裁•军团再临": "Испытание высокой сложности с наградами за прохождение.",
+  "先遣赏金-区域巡防": "Во время события награды за испытания «Патрулирование района» увеличены вдвое.",
+  "混沌回忆•扫除风暴": "В начале каждого цикла случайная цель Пути Охоты или Эрудиции немедленно действует, а её урон повышается на 80% на 1 ход.",
+  "末日幻影•仙客天狼": "При пробитии уязвимости врага со статусом «Стойкая оборона» команда снимает контроль и активирует сверхспособности.",
+  "虚构叙事•立界开篇": "Каждый раз при получении очков повествования дополнительно накапливаются 2 очка боевого духа.",
+  "虚境逐影争锋": "Станьте легендарным игроком, проходя виртуальные боевые испытания.",
+  "「弹球勇者」哐哐当！": "В заброшенном мире герои пинбола бросают вызов судьбе и ищут истинную красоту.",
+  "锵锵！球仔成长日记": "Нажимайте кнопки, ухаживайте за своим Бангбу и укрепляйте связь с ним.",
+  "跛脚乌鸦奇探录": "Исключите невозможное — и даже самое невероятное может оказаться правдой.",
+  "数据悬赏-实战模拟": "Во время события награды за испытания в комнате боевой симуляции увеличены вдвое.",
+  "全新放送": "Войдите в игру 7 дней во время события и получите 10 зашифрованных мастер-лент.",
+  "惊喜放映企划": "Получайте награды, включая костюм «Ангел грёз», за ежедневные отметки.",
+  "「嗯呢」从天降": "Войдите в игру 7 дней во время события и получите 10 купонов банбу.",
+  "潜能预演·烈火重锤": "Примите участие в новом испытании от «Белого знамени» и получите награды.",
+  "天使应援大作战": "Участвуйте в событиях версии и получайте награды, связанные с «Ангелом грёз»."
+};
+
 function hasCJK(value){ return /[\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]/u.test(String(value??'')); }
-function localizeGameTitle(game,title){ const value=String(title??'').trim(); if(game==='wuwa') return wuwaEnglishTitles[value] || (hasCJK(value)?'Wuthering Waves Event':value); if(game==='genshin') return genshinRussianTitles[value] || value; if(game==='hsr') return hsrRussianTitles[value] || value; if(game==='zzz') return zzzRussianTitles[value] || value; return value; }
-function localizeGameDesc(game,title,desc){ const key=String(title??'').trim(); if(game==='wuwa') return wuwaEnglishDescriptions[key] || (hasCJK(desc)?'Wuthering Waves event.':String(desc??'')); if(game==='genshin') return genshinRussianDescriptions[key] || String(desc??''); if(game==='hsr') return hsrRussianDescriptions[key] || String(desc??''); if(game==='zzz') return zzzRussianDescriptions[key] || String(desc??''); return String(desc??''); }
+function hasCJK(value){ return /[\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]/u.test(String(value??'')); }
+function localizeGameTitle(game,title){
+  const value=String(title??'').trim();
+  if(!value) return '';
+  if(game==='wuwa') return wuwaEnglishTitles[value] || (hasCJK(value)?'Wuthering Waves Event':value);
+  if(game==='genshin') return genshinRussianTitles[value] || (hasCJK(value)?'':value);
+  if(game==='hsr') return hsrRussianTitles[value] || (hasCJK(value)?'':value);
+  if(game==='zzz') return zzzRussianTitles[value] || (hasCJK(value)?'':value);
+  return hasCJK(value)?'':value;
+}
+function localizeGameDesc(game,title,desc){
+  const key=String(title??'').trim();
+  const value=String(desc??'').trim();
+  if(game==='wuwa') return wuwaEnglishDescriptions[key] || (hasCJK(value)?'':value);
+  if(game==='genshin') return genshinRussianDescriptions[key] || (hasCJK(value)?'':value);
+  if(game==='hsr') return hsrRussianDescriptions[key] || (hasCJK(value)?'':value);
+  if(game==='zzz') return zzzRussianDescriptions[key] || (hasCJK(value)?'':value);
+  return hasCJK(value)?'':value;
+}
 
 function toEvent(x, game, i, source) {
   const title = localizeGameTitle(game, x?.name ?? x?.title ?? x?.eventName ?? x?.activity_name);
@@ -175,7 +252,7 @@ async function fetchLiveGame(game) {
       const list = isActivity ? activityList(data) : calendarList(data);
       return list
         .filter(x => !(game === 'genshin' && !isActivity && ['428','429'].includes(String(x?.id ?? x?.event_id ?? ''))))
-        .map((x,i) => toEvent(x, game, i, isActivity ? 'activity' : 'calendar')).filter(Boolean);
+        .map((x,i) => normalizeKnownGenshinEvent(toEvent(x, game, i, isActivity ? 'activity' : 'calendar'))).filter(Boolean);
     }));
     return dedupe(settled.filter(x => x.status === 'fulfilled').flatMap(x => x.value));
   }
