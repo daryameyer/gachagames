@@ -168,7 +168,9 @@ async function fetchLiveGame(game) {
       const data = await fetchJson(url);
       const isActivity = url.includes('starrailassistant.top');
       const list = isActivity ? activityList(data) : calendarList(data);
-      return list.map((x,i) => toEvent(x, game, i, isActivity ? 'activity' : 'calendar')).filter(Boolean);
+      return list
+        .filter(x => !(game === 'genshin' && !isActivity && String(x?.id ?? x?.event_id ?? '') === '429'))
+        .map((x,i) => toEvent(x, game, i, isActivity ? 'activity' : 'calendar')).filter(Boolean);
     }));
     return dedupe(settled.filter(x => x.status === 'fulfilled').flatMap(x => x.value));
   }
