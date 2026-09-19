@@ -1,20 +1,20 @@
 {
   "ok": true,
-  "updatedAt": "2026-09-19T16:00:02.997Z",
+  "updatedAt": "2026-09-19T11:10:00.211Z",
   "games": {
     "genshin": {
       "ok": true,
-      "count": 5,
+      "count": 8,
       "usedPrevious": false
     },
     "hsr": {
       "ok": true,
-      "count": 10,
+      "count": 15,
       "usedPrevious": false
     },
     "zzz": {
       "ok": true,
-      "count": 5,
+      "count": 16,
       "usedPrevious": false
     },
     "wuwa": {
@@ -28,8 +28,8 @@
       "usedPrevious": true
     },
     "nte": {
-      "ok": false,
-      "count": 0,
+      "ok": true,
+      "count": 7,
       "usedPrevious": false
     },
     "nikki": {
@@ -95,17 +95,6 @@
       "url": "https://infinitynikki.infoldgames.com/en/news/568"
     },
     {
-      "id": "activity:genshin:4",
-      "game": "genshin",
-      "title": "Разлив изобилия",
-      "desc": "Во время события проходите Подземелья мастерства или Подземелья воли и расходуйте Первородную смолу, чтобы получить двойные награды. Каждый день доступно 3 шанса удвоения наград.",
-      "start": "2026-09-14T04:00:00.000Z",
-      "end": "2026-09-21T02:59:59Z",
-      "done": false,
-      "source": "activity",
-      "url": ""
-    },
-    {
       "id": "calendar:hsr:278",
       "game": "hsr",
       "title": "Планарный раскол",
@@ -114,6 +103,17 @@
       "end": "2026-09-21T02:59:59.000Z",
       "done": false,
       "source": "calendar",
+      "url": ""
+    },
+    {
+      "id": "activity:genshin:4",
+      "game": "genshin",
+      "title": "Разлив изобилия",
+      "desc": "Во время события проходите Подземелья мастерства или Подземелья воли и расходуйте Первородную смолу, чтобы получить двойные награды. Каждый день доступно 3 шанса удвоения наград.",
+      "start": "2026-09-14T04:00:00.000Z",
+      "end": "2026-09-21T02:59:59Z",
+      "done": false,
+      "source": "activity",
       "url": ""
     },
     {

@@ -149,7 +149,10 @@ const wuwaEnglishDescriptions = {
 
 function normalizeKnownGenshinEvent(e) {
   if (!e || e.game !== 'genshin') return e;
-  if (e.title === 'Изысканные наряды: Нежное тепло') e.title = 'Изысканные наряды: Тепло';
+  if (e.game === 'genshin' && e.title === 'Изысканные наряды: Нежное тепло') {
+    e.title = 'Изысканные наряды: Тепло';
+    e.end = new Date(new Date(e.end).getTime() - 8*60*60*1000).toISOString();
+  }
   return e;
 }
 
@@ -342,6 +345,20 @@ async function calendarEvents(game){
 }
 
 
+const GENSHIN_HIDDEN_TITLES = new Set([
+  'Взаимопомощь в цвету: Фронтиры',
+  'Взаимопомощь в цвету: Фронтиры — исследование'
+]);
+const GENSHIN_SNAPSHOT_FALLBACK_TITLES = new Set([
+  'Разлив изобилия',
+  'Изысканные наряды: Тепло',
+  'Мрачный натиск'
+]);
+function isHiddenGenshinTitle(title){
+  const t=String(title||'').trim().toLowerCase();
+  return t.includes('взаимопомощь в цвету') && t.includes('фронтир');
+}
+
 async function activityEvents(game){
   const url=activitySources[game]; if(!url) return [];
   return cached(`activity:${game}`,async()=>{
@@ -352,6 +369,7 @@ async function activityEvents(game){
       return list.map((x,i)=>{
         const rawTitle=x.name??x.title;
         const title=localizeGameTitle(game,rawTitle);
+        if(game==='genshin' && isHiddenGenshinTitle(title || rawTitle)) return null;
         const desc=localizeGameDesc(game,rawTitle,x.description??x.desc??'');
         const start=new Date(x.startTime??x.start_time??x.start);
         let end=new Date(x.endTime??x.end_time??x.end);
@@ -821,44 +839,22 @@ function priority(source){
   return source==='official'?4:source==='activity'?3:source==='calendar'?2:source==='snapshot'?1:0;
 }
 
-const GENSHIN_HIDDEN_TITLES = new Set([
-  'Взаимопомощь в цвету: Фронтиры',
-  'В пламени горна: Битва умов',
-  'Разлив артерий земли'
-]);
-const GENSHIN_PROTECTED_TITLES = new Set([
-  'Мрачный натиск',
-  'Разлив изобилия',
-  'Изысканные наряды: Тепло',
-  'Долгий путь совершенства',
-  'Богом забытая тундра'
-]);
-
-function sanitizeGenshinLive(events){
-  return (events || []).filter(e => {
-    if (e?.game !== 'genshin') return true;
-    return !GENSHIN_HIDDEN_TITLES.has(String(e.title || '').trim());
-  });
-}
-
 async function liveEvents(game){
   if(game==='endfield') return dedupeEvents(await calendarEvents(game));
   const [calendar,activity,official]=await Promise.all([
     calendarEvents(game), activityEvents(game), officialEvents(game)
   ]);
-  let live = sanitizeGenshinLive(dedupeEvents(calendar,activity,official));
-  // Keep the verified active Genshin events from the repository snapshot if a
-  // live source temporarily omits them. This prevents individual feed changes
-  // from making real in-game events disappear from the tracker.
+  let live=dedupeEvents(calendar,activity,official);
   if(game==='genshin'){
-    const snapshot = await snapshotEvents(game);
-    const protectedSnapshot = snapshot.filter(e => GENSHIN_PROTECTED_TITLES.has(String(e.title || '').trim()));
-    const protectedNames = new Set(protectedSnapshot.map(e => String(e.title || '').trim()));
-    live = live.filter(e => !protectedNames.has(String(e.title || '').trim()));
-    live.push(...protectedSnapshot);
-    live = sanitizeGenshinLive(live);
+    // The live activity feed can temporarily omit real in-game events.
+    // Keep these three from the repository snapshot as a supplement,
+    // while explicitly excluding the false "Frontiers" activity.
+    const snapshot=await snapshotEvents(game);
+    const fallback=snapshot.filter(e=>GENSHIN_SNAPSHOT_FALLBACK_TITLES.has(String(e.title).trim()) && !isHiddenGenshinTitle(e.title));
+    live=dedupeEvents(live,fallback);
+    live=live.filter(e=>!isHiddenGenshinTitle(e.title));
   }
-  return dedupeEvents(live);
+  return live;
 }
 
 async function getEvents(game){

@@ -258,6 +258,14 @@ function manualModes(){
   ];
 }
 
+function isHiddenGenshinEventTitle(title){
+  const t=String(title||'').trim().toLowerCase();
+  return t.includes('взаимопомощь в цвету') && t.includes('фронтир');
+}
+function isGenshinSnapshotFallback(e){
+  return e?.game==='genshin' && ['Разлив изобилия','Изысканные наряды: Тепло','Мрачный натиск'].includes(String(e.title||'').trim());
+}
+
 async function loadRemoteEvents(){
   const gamesToLoad=['genshin','hsr','zzz','wuwa','endfield','nte','nikki'];
   eventsAutoSource=Object.fromEntries(gamesToLoad.map(x=>[x,false]));
@@ -271,10 +279,13 @@ async function loadRemoteEvents(){
 
   const merged=[];
   for(const game of gamesToLoad){
-    const live=liveByGame[game]||[];
-    const backup=snapshot.filter(e=>e.game===game);
-    const legacy=events.filter(e=>e.game===game && e.end>new Date());
-    if(live.length) merged.push(...live);
+    const live=(liveByGame[game]||[]).filter(e=>!(game==='genshin' && isHiddenGenshinEventTitle(e.title)));
+    const backup=snapshot.filter(e=>e.game===game && !(game==='genshin' && isHiddenGenshinEventTitle(e.title)));
+    const legacy=events.filter(e=>e.game===game && e.end>new Date() && !(game==='genshin' && isHiddenGenshinEventTitle(e.title)));
+    if(game==='genshin'){
+      const fallbacks=backup.filter(isGenshinSnapshotFallback);
+      merged.push(...live, ...fallbacks);
+    }else if(live.length) merged.push(...live);
     else if(backup.length) merged.push(...backup);
     else merged.push(...legacy);
   }
