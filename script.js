@@ -123,10 +123,21 @@ const wuwaEnglishTitles = {
 };
 function localizeGameTitle(game,title){
   const value=String(title??'').trim();
-  if(game==='wuwa') return wuwaEnglishTitles[value] || value;
-  if(game==='genshin') return genshinRussianTitles[value] || value;
-  if(game==='hsr') return hsrRussianTitles[value] || value;
-  return value;
+  if(!value) return '';
+  if(game==='wuwa') return wuwaEnglishTitles[value] || (hasCJK(value)?'Wuthering Waves Event':value);
+  if(game==='genshin') return genshinRussianTitles[value] || (hasCJK(value)?'':value);
+  if(game==='hsr') return hsrRussianTitles[value] || (hasCJK(value)?'':value);
+  if(game==='zzz') return zzzRussianTitles[value] || (hasCJK(value)?'':value);
+  return hasCJK(value)?'':value;
+}
+function localizeGameDesc(game,title,desc){
+  const key=String(title??'').trim();
+  const value=String(desc??'').trim();
+  if(game==='wuwa') return wuwaEnglishDescriptions[key] || (hasCJK(value)?'':value);
+  if(game==='genshin') return genshinRussianDescriptions[key] || (hasCJK(value)?'':value);
+  if(game==='hsr') return hsrRussianDescriptions[key] || (hasCJK(value)?'':value);
+  if(game==='zzz') return zzzRussianDescriptions[key] || (hasCJK(value)?'':value);
+  return hasCJK(value)?'':value;
 }
 
 function classifyEvent(raw,game,title=''){
