@@ -1,15 +1,15 @@
 {
   "ok": true,
-  "updatedAt": "2026-09-20T20:54:34.703Z",
+  "updatedAt": "2026-09-21T05:06:22.417Z",
   "games": {
     "genshin": {
       "ok": true,
-      "count": 4,
+      "count": 3,
       "usedPrevious": false
     },
     "hsr": {
       "ok": true,
-      "count": 10,
+      "count": 8,
       "usedPrevious": false
     },
     "zzz": {
@@ -19,7 +19,7 @@
     },
     "wuwa": {
       "ok": true,
-      "count": 6,
+      "count": 5,
       "usedPrevious": false
     },
     "endfield": {
@@ -93,50 +93,6 @@
       "done": false,
       "source": "official",
       "url": "https://infinitynikki.infoldgames.com/en/news/568"
-    },
-    {
-      "id": "activity:genshin:4",
-      "game": "genshin",
-      "title": "Разлив изобилия",
-      "desc": "Во время события проходите Подземелья мастерства или Подземелья воли и расходуйте Первородную смолу, чтобы получить двойные награды. Каждый день доступно 3 шанса удвоения наград.",
-      "start": "2026-09-14T04:00:00.000Z",
-      "end": "2026-09-21T02:59:59.000Z",
-      "done": false,
-      "source": "activity",
-      "url": ""
-    },
-    {
-      "id": "calendar:hsr:278",
-      "game": "hsr",
-      "title": "Планарный раскол",
-      "desc": "Во время события пройдите Виртуальную вселенную или Расходящуюся вселенную, чтобы получить вдвое больше Планарных украшений.",
-      "start": "2026-09-07T03:00:00.000Z",
-      "end": "2026-09-21T02:59:59.000Z",
-      "done": false,
-      "source": "calendar",
-      "url": ""
-    },
-    {
-      "id": "activity:hsr:4",
-      "game": "hsr",
-      "title": "Планарный раскол",
-      "desc": "Во время события получайте вдвое больше Планарных украшений за прохождение Виртуальной вселенной.",
-      "start": "2026-09-07T04:00:00.000Z",
-      "end": "2026-09-21T03:59:59.000Z",
-      "done": false,
-      "source": "activity",
-      "url": ""
-    },
-    {
-      "id": "activity:wuwa:2",
-      "game": "wuwa",
-      "title": "The Strings Remember",
-      "desc": "With peace restored to the Land of Xuanfang, you once again return to the peak where Qingxiao lives. She gave you a seven-string qin some time ago. This time, she intends to formally teach you how to play it.",
-      "start": "2026-09-03T04:00:00.000Z",
-      "end": "2026-09-21T03:59:59.000Z",
-      "done": false,
-      "source": "activity",
-      "url": ""
     },
     {
       "id": "calendar:genshin:425",
