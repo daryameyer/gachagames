@@ -1,10 +1,10 @@
 {
   "ok": true,
-  "updatedAt": "2026-09-21T22:03:03.918Z",
+  "updatedAt": "2026-09-22T05:08:19.282Z",
   "games": {
     "genshin": {
       "ok": true,
-      "count": 2,
+      "count": 1,
       "usedPrevious": false
     },
     "hsr": {
@@ -93,17 +93,6 @@
       "done": false,
       "source": "official",
       "url": "https://infinitynikki.infoldgames.com/en/news/568"
-    },
-    {
-      "id": "activity:genshin:1",
-      "game": "genshin",
-      "title": "Мрачный натиск",
-      "desc": "Боевой режим с испытаниями повышенной сложности. За прохождение испытаний можно получить до 450 Камней Истока.",
-      "start": "2026-08-19T04:00:00.000Z",
-      "end": "2026-09-22T02:59:59.000Z",
-      "done": false,
-      "source": "activity",
-      "url": ""
     },
     {
       "id": "calendar:hsr:279",
