@@ -1,10 +1,10 @@
 {
   "ok": true,
-  "updatedAt": "2026-09-22T21:26:07.769Z",
+  "updatedAt": "2026-09-23T04:52:40.168Z",
   "games": {
     "genshin": {
       "ok": true,
-      "count": 1,
+      "count": 4,
       "usedPrevious": false
     },
     "hsr": {
@@ -469,7 +469,7 @@
       "url": ""
     },
     {
-      "id": "activity:genshin:5",
+      "id": "activity:genshin:0",
       "game": "genshin",
       "title": "Долгий путь совершенства",
       "desc": "Выполняйте ежедневные и еженедельные тренировочные цели, чтобы получать награды и прогресс события «Долгий путь совершенства».",
@@ -477,6 +477,39 @@
       "end": "2026-11-02T03:59:59.000Z",
       "done": false,
       "source": "activity",
+      "url": ""
+    },
+    {
+      "id": "calendar:genshin:453",
+      "game": "genshin",
+      "title": "В снегах закаляется сталь",
+      "desc": "",
+      "start": "2026-09-22T23:00:00.000Z",
+      "end": "2026-11-03T06:59:59.000Z",
+      "done": false,
+      "source": "calendar",
+      "url": ""
+    },
+    {
+      "id": "calendar:genshin:454",
+      "game": "genshin",
+      "title": "Настольная труппа: Канун приключений",
+      "desc": "",
+      "start": "2026-09-22T23:00:00.000Z",
+      "end": "2026-11-03T06:59:59.000Z",
+      "done": false,
+      "source": "calendar",
+      "url": ""
+    },
+    {
+      "id": "calendar:genshin:451",
+      "game": "genshin",
+      "title": "В пламени горна: Хитрые стратагемы",
+      "desc": "",
+      "start": "2026-09-22T23:00:00.000Z",
+      "end": "2026-11-03T23:00:00.000Z",
+      "done": false,
+      "source": "calendar",
       "url": ""
     }
   ]
