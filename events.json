@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "updatedAt": "2026-09-24T17:18:31.638Z",
+  "updatedAt": "2026-09-24T21:36:00.028Z",
   "games": {
     "genshin": {
       "ok": true,
@@ -13,9 +13,9 @@
       "usedPrevious": false
     },
     "zzz": {
-      "ok": false,
+      "ok": true,
       "count": 5,
-      "usedPrevious": true
+      "usedPrevious": false
     },
     "wuwa": {
       "ok": true,
