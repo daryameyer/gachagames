@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "updatedAt": "2026-09-28T23:22:12.623Z",
+  "updatedAt": "2026-09-29T05:51:45.778Z",
   "games": {
     "genshin": {
       "ok": true,
@@ -19,7 +19,7 @@
     },
     "wuwa": {
       "ok": true,
-      "count": 5,
+      "count": 1,
       "usedPrevious": false
     },
     "endfield": {
@@ -93,50 +93,6 @@
       "done": false,
       "source": "official",
       "url": "https://infinitynikki.infoldgames.com/en/news/568"
-    },
-    {
-      "id": "activity:wuwa:3",
-      "game": "wuwa",
-      "title": "If Dreams Still Reverberate",
-      "desc": "The Ivory Gatekeeper has sent you an SOS over WavesLine. The gate in the depths of the Somnoire—the one that should never be opened, the one you once shut—has somehow opened again. Now terrifying Nightmares are once again running rampant in the Somnoire.",
-      "start": "2026-09-10T10:00:00.000Z",
-      "end": "2026-09-29T03:59:59.000Z",
-      "done": false,
-      "source": "activity",
-      "url": ""
-    },
-    {
-      "id": "activity:wuwa:4",
-      "game": "wuwa",
-      "title": "Wuthering Exploration: Fogveil Pagoda",
-      "desc": "Pioneer Association picked the Fogveil Pagoda as the new theme for Wutherium Geographic magazine.",
-      "start": "2026-09-17T04:00:00.000Z",
-      "end": "2026-09-29T03:59:59.000Z",
-      "done": false,
-      "source": "activity",
-      "url": ""
-    },
-    {
-      "id": "activity:wuwa:5",
-      "game": "wuwa",
-      "title": "Gifts of Drifting Mist",
-      "desc": "During the event, log in each day and claim the corresponding login reward from the event page.",
-      "start": "2026-08-20T11:00:00.000Z",
-      "end": "2026-09-29T03:59:59.000Z",
-      "done": false,
-      "source": "activity",
-      "url": ""
-    },
-    {
-      "id": "activity:wuwa:6",
-      "game": "wuwa",
-      "title": "Chord Cleansing",
-      "desc": "Complete Tacet Discord challenges and spend Crystal Waveplates to receive double rewards.",
-      "start": "2026-09-22T04:00:00.000Z",
-      "end": "2026-09-29T03:59:59.000Z",
-      "done": false,
-      "source": "activity",
-      "url": ""
     },
     {
       "id": "activity:wuwa:0",
