@@ -1,10 +1,10 @@
 {
   "ok": true,
-  "updatedAt": "2026-09-29T22:23:03.326Z",
+  "updatedAt": "2026-09-30T05:41:46.241Z",
   "games": {
     "genshin": {
       "ok": true,
-      "count": 5,
+      "count": 6,
       "usedPrevious": false
     },
     "hsr": {
@@ -18,9 +18,9 @@
       "usedPrevious": false
     },
     "wuwa": {
-      "ok": false,
-      "count": 1,
-      "usedPrevious": true
+      "ok": true,
+      "count": 6,
+      "usedPrevious": false
     },
     "endfield": {
       "ok": false,
@@ -93,17 +93,6 @@
       "done": false,
       "source": "official",
       "url": "https://infinitynikki.infoldgames.com/en/news/568"
-    },
-    {
-      "id": "activity:wuwa:0",
-      "game": "wuwa",
-      "title": "Resonance Sim Realm",
-      "desc": "A combat event and an open test of diverse abilities. The Threnodian system continuously provides different interference sources for participants to connect, combine, and explore richer ability structures.",
-      "start": "2026-08-22T10:00:00.000Z",
-      "end": "2026-09-29T11:59:59.000Z",
-      "done": false,
-      "source": "activity",
-      "url": ""
     },
     {
       "id": "official:endfield:official:endfield:fallback:winter-hunt",
@@ -348,6 +337,17 @@
       "url": ""
     },
     {
+      "id": "activity:wuwa:5",
+      "game": "wuwa",
+      "title": "Bountiful Crescendo",
+      "desc": "Complete Simulated Realm and Tacet Field challenges and spend Crystal Waveplates to receive double rewards.",
+      "start": "2026-10-15T04:00:00.000Z",
+      "end": "2026-10-22T03:59:59.000Z",
+      "done": false,
+      "source": "activity",
+      "url": ""
+    },
+    {
       "id": "calendar:hsr:284",
       "game": "hsr",
       "title": "Планарный раскол",
@@ -359,6 +359,17 @@
       "url": ""
     },
     {
+      "id": "activity:wuwa:4",
+      "game": "wuwa",
+      "title": "Wuthering Waves Event",
+      "desc": "",
+      "start": "2026-10-08T04:00:00.000Z",
+      "end": "2026-10-26T03:59:59.000Z",
+      "done": false,
+      "source": "activity",
+      "url": ""
+    },
+    {
       "id": "activity:genshin:0",
       "game": "genshin",
       "title": "Долгий путь совершенства",
@@ -367,6 +378,17 @@
       "end": "2026-11-02T03:59:59.000Z",
       "done": false,
       "source": "activity",
+      "url": ""
+    },
+    {
+      "id": "calendar:genshin:447",
+      "game": "genshin",
+      "title": "Мрачный натиск",
+      "desc": "Удивительная флуктуация артерий земли появилась вновь, на этот раз в Солёных землях Ли Юэ. Остановить её беспорядки можно, только пройдя испытание подземелья и победив сильных врагов. Конечно, там, где подстерегает опасность, сокрыты и необыкновенные сокровища...",
+      "start": "2026-09-30T02:00:00.000Z",
+      "end": "2026-11-02T19:59:59.000Z",
+      "done": false,
+      "source": "calendar",
       "url": ""
     },
     {
@@ -400,6 +422,17 @@
       "end": "2026-11-03T23:00:00.000Z",
       "done": false,
       "source": "calendar",
+      "url": ""
+    },
+    {
+      "id": "activity:wuwa:6",
+      "game": "wuwa",
+      "title": "Wuthering Waves Event",
+      "desc": "",
+      "start": "2026-10-22T10:00:00.000Z",
+      "end": "2026-11-09T03:59:59.000Z",
+      "done": false,
+      "source": "activity",
       "url": ""
     },
     {
@@ -469,12 +502,45 @@
       "url": ""
     },
     {
+      "id": "activity:wuwa:1",
+      "game": "wuwa",
+      "title": "Wuthering Waves Event",
+      "desc": "",
+      "start": "2026-09-30T11:00:00.000Z",
+      "end": "2026-11-11T03:59:59.000Z",
+      "done": false,
+      "source": "activity",
+      "url": ""
+    },
+    {
+      "id": "activity:wuwa:9",
+      "game": "wuwa",
+      "title": "Chord Cleansing",
+      "desc": "Complete Tacet Discord challenges and spend Crystal Waveplates to receive double rewards.",
+      "start": "2026-11-04T04:00:00.000Z",
+      "end": "2026-11-11T03:59:59.000Z",
+      "done": false,
+      "source": "activity",
+      "url": ""
+    },
+    {
       "id": "activity:hsr:8",
       "game": "hsr",
       "title": "Подарок звёздного странника",
       "desc": "Ежедневно входите в игру во время события, чтобы получать награды за вход. За 7 дней можно получить 10 Звёздных пропусков.",
       "start": "2026-09-28T11:00:00.000Z",
       "end": "2026-11-11T05:59:59.000Z",
+      "done": false,
+      "source": "activity",
+      "url": ""
+    },
+    {
+      "id": "activity:wuwa:0",
+      "game": "wuwa",
+      "title": "Wuthering Waves Event",
+      "desc": "",
+      "start": "2026-09-30T11:00:00.000Z",
+      "end": "2026-11-11T11:59:59.000Z",
       "done": false,
       "source": "activity",
       "url": ""
