@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "updatedAt": "2026-10-02T22:20:07.637Z",
+  "updatedAt": "2026-10-03T05:26:43.185Z",
   "games": {
     "genshin": {
       "ok": true,
@@ -304,22 +304,22 @@
       "url": ""
     },
     {
-      "id": "calendar:zzz:5000162",
+      "id": "calendar:zzz:5000164",
       "game": "zzz",
-      "title": "Расти, Кругляш, большой и маленький!",
+      "title": "Хроники «Хромой вороны»",
       "desc": "",
-      "start": "2026-09-30T02:00:00.000Z",
+      "start": "2026-10-03T02:00:00.000Z",
       "end": "2026-10-18T19:59:59.000Z",
       "done": false,
       "source": "calendar",
       "url": ""
     },
     {
-      "id": "calendar:zzz:5000164",
+      "id": "calendar:zzz:5000162",
       "game": "zzz",
-      "title": "Хроники «Хромой вороны»",
+      "title": "Расти, Кругляш, большой и маленький!",
       "desc": "",
-      "start": "2026-10-03T02:00:00.000Z",
+      "start": "2026-09-30T02:00:00.000Z",
       "end": "2026-10-18T19:59:59.000Z",
       "done": false,
       "source": "calendar",
