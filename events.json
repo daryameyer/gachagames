@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "updatedAt": "2026-10-07T06:09:33.239Z",
+  "updatedAt": "2026-10-07T13:35:22.285Z",
   "games": {
     "genshin": {
       "ok": true,
@@ -19,7 +19,7 @@
     },
     "wuwa": {
       "ok": true,
-      "count": 6,
+      "count": 8,
       "usedPrevious": false
     },
     "endfield": {
@@ -326,7 +326,7 @@
       "url": ""
     },
     {
-      "id": "activity:wuwa:5",
+      "id": "activity:wuwa:6",
       "game": "wuwa",
       "title": "Bountiful Crescendo",
       "desc": "Complete Simulated Realm and Tacet Field challenges and spend Crystal Waveplates to receive double rewards.",
@@ -348,12 +348,23 @@
       "url": ""
     },
     {
-      "id": "activity:wuwa:4",
+      "id": "activity:wuwa:5",
       "game": "wuwa",
       "title": "Wuthering Waves Event",
       "desc": "",
       "start": "2026-10-08T04:00:00.000Z",
       "end": "2026-10-26T03:59:59.000Z",
+      "done": false,
+      "source": "activity",
+      "url": ""
+    },
+    {
+      "id": "activity:wuwa:7",
+      "game": "wuwa",
+      "title": "Wuthering Waves Event",
+      "desc": "",
+      "start": "2026-10-15T10:00:00.000Z",
+      "end": "2026-11-01T09:59:59.000Z",
       "done": false,
       "source": "activity",
       "url": ""
@@ -414,7 +425,7 @@
       "url": ""
     },
     {
-      "id": "activity:wuwa:6",
+      "id": "activity:wuwa:8",
       "game": "wuwa",
       "title": "Wuthering Waves Event",
       "desc": "",
@@ -502,7 +513,7 @@
       "url": ""
     },
     {
-      "id": "activity:wuwa:9",
+      "id": "activity:wuwa:11",
       "game": "wuwa",
       "title": "Chord Cleansing",
       "desc": "Complete Tacet Discord challenges and spend Crystal Waveplates to receive double rewards.",
@@ -530,6 +541,17 @@
       "desc": "",
       "start": "2026-09-30T11:00:00.000Z",
       "end": "2026-11-11T11:59:59.000Z",
+      "done": false,
+      "source": "activity",
+      "url": ""
+    },
+    {
+      "id": "activity:wuwa:4",
+      "game": "wuwa",
+      "title": "Wuthering Waves Event",
+      "desc": "",
+      "start": "2026-09-30T11:00:00.000Z",
+      "end": "2026-11-11T23:59:59.000Z",
       "done": false,
       "source": "activity",
       "url": ""
