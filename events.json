@@ -1,10 +1,10 @@
 {
   "ok": true,
-  "updatedAt": "2026-10-11T13:04:07.218Z",
+  "updatedAt": "2026-10-11T22:06:37.900Z",
   "games": {
     "genshin": {
       "ok": true,
-      "count": 7,
+      "count": 6,
       "usedPrevious": false
     },
     "hsr": {
@@ -269,17 +269,6 @@
       "done": false,
       "source": "official",
       "url": "https://endfield.gryphline.com/ru-ru#calendar"
-    },
-    {
-      "id": "calendar:genshin:446",
-      "game": "genshin",
-      "title": "Среброкрылая птица на пути к луне",
-      "desc": "Получив письмо с приглашением от друга, вы с Паймон вернулись в долину Чэньюй. В порту Илун уже развернулось грандиозное празднество...",
-      "start": "2026-09-24T02:00:00.000Z",
-      "end": "2026-10-11T19:59:59.000Z",
-      "done": false,
-      "source": "calendar",
-      "url": ""
     },
     {
       "id": "calendar:zzz:5000161",
