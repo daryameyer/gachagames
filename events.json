@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "updatedAt": "2026-10-21T21:48:59.417Z",
+  "updatedAt": "2026-10-22T05:01:06.236Z",
   "games": {
     "genshin": {
       "ok": true,
@@ -19,7 +19,7 @@
     },
     "wuwa": {
       "ok": true,
-      "count": 8,
+      "count": 7,
       "usedPrevious": false
     },
     "endfield": {
@@ -269,17 +269,6 @@
       "done": false,
       "source": "official",
       "url": "https://endfield.gryphline.com/ru-ru#calendar"
-    },
-    {
-      "id": "activity:wuwa:6",
-      "game": "wuwa",
-      "title": "Bountiful Crescendo",
-      "desc": "Complete Simulated Realm and Tacet Field challenges and spend Crystal Waveplates to receive double rewards.",
-      "start": "2026-10-15T04:00:00.000Z",
-      "end": "2026-10-22T03:59:59.000Z",
-      "done": false,
-      "source": "activity",
-      "url": ""
     },
     {
       "id": "calendar:genshin:448",
