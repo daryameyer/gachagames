@@ -1,10 +1,10 @@
 {
   "ok": true,
-  "updatedAt": "2026-10-22T21:44:01.383Z",
+  "updatedAt": "2026-10-23T05:01:32.399Z",
   "games": {
     "genshin": {
       "ok": true,
-      "count": 8,
+      "count": 7,
       "usedPrevious": false
     },
     "hsr": {
@@ -269,17 +269,6 @@
       "done": false,
       "source": "official",
       "url": "https://endfield.gryphline.com/ru-ru#calendar"
-    },
-    {
-      "id": "calendar:genshin:448",
-      "game": "genshin",
-      "title": "Теория вероятной победы",
-      "desc": "На землях Детей Эха в Натлане эксперт по интерактивным свиткам Виже, элитная воительница Лилиуо и Вислава из Фатуи с помощью «предсказательного полигона» моделируют ход сражений, пытаясь создать модель для расчёта вероятности победы...",
-      "start": "2026-10-12T02:00:00.000Z",
-      "end": "2026-10-23T01:59:59.000Z",
-      "done": false,
-      "source": "calendar",
-      "url": ""
     },
     {
       "id": "calendar:hsr:284",
