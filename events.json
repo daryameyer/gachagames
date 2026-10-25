@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "updatedAt": "2026-10-24T20:57:24.959Z",
+  "updatedAt": "2026-10-25T04:53:45.515Z",
   "games": {
     "genshin": {
       "ok": true,
@@ -9,7 +9,7 @@
     },
     "hsr": {
       "ok": true,
-      "count": 8,
+      "count": 7,
       "usedPrevious": false
     },
     "zzz": {
@@ -269,17 +269,6 @@
       "done": false,
       "source": "official",
       "url": "https://endfield.gryphline.com/ru-ru#calendar"
-    },
-    {
-      "id": "calendar:hsr:284",
-      "game": "hsr",
-      "title": "Планарный раскол",
-      "desc": "Во время события пройдите Виртуальную вселенную или Расходящуюся вселенную, чтобы получить вдвое больше Планарных украшений.",
-      "start": "2026-10-12T03:00:00.000Z",
-      "end": "2026-10-25T02:59:59.000Z",
-      "done": false,
-      "source": "calendar",
-      "url": ""
     },
     {
       "id": "calendar:genshin:450",
