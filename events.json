@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "updatedAt": "2026-11-01T06:22:24.993Z",
+  "updatedAt": "2026-11-01T17:58:04.202Z",
   "games": {
     "genshin": {
       "ok": true,
@@ -19,7 +19,7 @@
     },
     "wuwa": {
       "ok": true,
-      "count": 6,
+      "count": 5,
       "usedPrevious": false
     },
     "endfield": {
@@ -269,17 +269,6 @@
       "done": false,
       "source": "official",
       "url": "https://endfield.gryphline.com/ru-ru#calendar"
-    },
-    {
-      "id": "activity:wuwa:7",
-      "game": "wuwa",
-      "title": "Wuthering Waves Event",
-      "desc": "",
-      "start": "2026-10-15T10:00:00.000Z",
-      "end": "2026-11-01T09:59:59.000Z",
-      "done": false,
-      "source": "activity",
-      "url": ""
     },
     {
       "id": "calendar:genshin:449",
