@@ -1,10 +1,10 @@
 {
   "ok": true,
-  "updatedAt": "2026-11-01T22:10:00.133Z",
+  "updatedAt": "2026-11-02T06:23:49.888Z",
   "games": {
     "genshin": {
       "ok": true,
-      "count": 5,
+      "count": 4,
       "usedPrevious": false
     },
     "hsr": {
@@ -269,17 +269,6 @@
       "done": false,
       "source": "official",
       "url": "https://endfield.gryphline.com/ru-ru#calendar"
-    },
-    {
-      "id": "activity:genshin:0",
-      "game": "genshin",
-      "title": "Долгий путь совершенства",
-      "desc": "Выполняйте ежедневные и еженедельные тренировочные цели, чтобы получать награды и прогресс события «Долгий путь совершенства».",
-      "start": "2026-08-10T04:00:00.000Z",
-      "end": "2026-11-02T03:59:59.000Z",
-      "done": false,
-      "source": "activity",
-      "url": ""
     },
     {
       "id": "calendar:genshin:447",
