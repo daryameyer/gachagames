@@ -1,10 +1,10 @@
 {
   "ok": true,
-  "updatedAt": "2026-11-02T06:23:49.888Z",
+  "updatedAt": "2026-11-02T21:46:34.091Z",
   "games": {
     "genshin": {
       "ok": true,
-      "count": 4,
+      "count": 3,
       "usedPrevious": false
     },
     "hsr": {
@@ -269,17 +269,6 @@
       "done": false,
       "source": "official",
       "url": "https://endfield.gryphline.com/ru-ru#calendar"
-    },
-    {
-      "id": "calendar:genshin:447",
-      "game": "genshin",
-      "title": "Мрачный натиск",
-      "desc": "Удивительная флуктуация артерий земли появилась вновь, на этот раз в Солёных землях Ли Юэ. Остановить её беспорядки можно, только пройдя испытание подземелья и победив сильных врагов. Конечно, там, где подстерегает опасность, сокрыты и необыкновенные сокровища...",
-      "start": "2026-09-30T02:00:00.000Z",
-      "end": "2026-11-02T19:59:59.000Z",
-      "done": false,
-      "source": "calendar",
-      "url": ""
     },
     {
       "id": "calendar:genshin:453",
