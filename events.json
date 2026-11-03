@@ -1,10 +1,10 @@
 {
   "ok": true,
-  "updatedAt": "2026-11-03T06:58:21.035Z",
+  "updatedAt": "2026-11-03T19:35:46.519Z",
   "games": {
     "genshin": {
       "ok": true,
-      "count": 3,
+      "count": 1,
       "usedPrevious": false
     },
     "hsr": {
@@ -269,28 +269,6 @@
       "done": false,
       "source": "official",
       "url": "https://endfield.gryphline.com/ru-ru#calendar"
-    },
-    {
-      "id": "calendar:genshin:453",
-      "game": "genshin",
-      "title": "В снегах закаляется сталь",
-      "desc": "",
-      "start": "2026-09-22T23:00:00.000Z",
-      "end": "2026-11-03T06:59:59.000Z",
-      "done": false,
-      "source": "calendar",
-      "url": ""
-    },
-    {
-      "id": "calendar:genshin:454",
-      "game": "genshin",
-      "title": "Настольная труппа: Канун приключений",
-      "desc": "",
-      "start": "2026-09-22T23:00:00.000Z",
-      "end": "2026-11-03T06:59:59.000Z",
-      "done": false,
-      "source": "calendar",
-      "url": ""
     },
     {
       "id": "calendar:genshin:451",
