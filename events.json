@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "updatedAt": "2026-11-09T22:29:26.890Z",
+  "updatedAt": "2026-11-10T07:28:36.731Z",
   "games": {
     "genshin": {
       "ok": true,
@@ -9,7 +9,7 @@
     },
     "hsr": {
       "ok": true,
-      "count": 7,
+      "count": 6,
       "usedPrevious": false
     },
     "zzz": {
@@ -269,17 +269,6 @@
       "done": false,
       "source": "official",
       "url": "https://endfield.gryphline.com/ru-ru#calendar"
-    },
-    {
-      "id": "calendar:hsr:287",
-      "game": "hsr",
-      "title": "Подарок кометы",
-      "desc": "",
-      "start": "2026-09-27T03:00:00.000Z",
-      "end": "2026-11-10T02:59:59.000Z",
-      "done": false,
-      "source": "calendar",
-      "url": ""
     },
     {
       "id": "calendar:hsr:285",
