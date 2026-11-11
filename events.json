@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "updatedAt": "2026-11-11T06:42:46.775Z",
+  "updatedAt": "2026-11-11T19:42:45.790Z",
   "games": {
     "genshin": {
       "ok": true,
@@ -19,7 +19,7 @@
     },
     "wuwa": {
       "ok": true,
-      "count": 5,
+      "count": 6,
       "usedPrevious": false
     },
     "endfield": {
@@ -315,18 +315,18 @@
       "url": ""
     },
     {
-      "id": "activity:wuwa:2",
+      "id": "activity:wuwa:3",
       "game": "wuwa",
       "title": "Wuthering Waves Event",
       "desc": "",
-      "start": "2026-11-26T04:00:00.000Z",
+      "start": "2026-11-19T04:00:00.000Z",
       "end": "2026-12-03T03:59:59.000Z",
       "done": false,
       "source": "activity",
       "url": ""
     },
     {
-      "id": "activity:wuwa:3",
+      "id": "activity:wuwa:4",
       "game": "wuwa",
       "title": "Bountiful Crescendo",
       "desc": "Complete Simulated Realm and Tacet Field challenges and spend Crystal Waveplates to receive double rewards.",
@@ -392,18 +392,18 @@
       "url": ""
     },
     {
-      "id": "activity:wuwa:5",
+      "id": "activity:wuwa:6",
       "game": "wuwa",
       "title": "Wuthering Waves Event",
       "desc": "",
-      "start": "2026-12-03T04:00:00.000Z",
+      "start": "2026-12-03T10:00:00.000Z",
       "end": "2026-12-17T03:59:59.000Z",
       "done": false,
       "source": "activity",
       "url": ""
     },
     {
-      "id": "activity:wuwa:0",
+      "id": "activity:wuwa:1",
       "game": "wuwa",
       "title": "Wuthering Waves Event",
       "desc": "",
@@ -414,12 +414,23 @@
       "url": ""
     },
     {
-      "id": "activity:wuwa:7",
+      "id": "activity:wuwa:8",
       "game": "wuwa",
       "title": "Chord Cleansing",
       "desc": "Complete Tacet Discord challenges and spend Crystal Waveplates to receive double rewards.",
-      "start": "2026-12-03T04:00:00.000Z",
+      "start": "2026-12-14T04:00:00.000Z",
       "end": "2026-12-21T03:59:59.000Z",
+      "done": false,
+      "source": "activity",
+      "url": ""
+    },
+    {
+      "id": "activity:wuwa:0",
+      "game": "wuwa",
+      "title": "Wuthering Waves Event",
+      "desc": "",
+      "start": "2026-11-12T11:00:00.000Z",
+      "end": "2026-12-21T11:59:59.000Z",
       "done": false,
       "source": "activity",
       "url": ""
