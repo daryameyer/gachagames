@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "updatedAt": "2026-11-27T21:26:51.263Z",
+  "updatedAt": "2026-11-28T08:01:35.227Z",
   "games": {
     "genshin": {
       "ok": true,
@@ -9,7 +9,7 @@
     },
     "hsr": {
       "ok": true,
-      "count": 9,
+      "count": 10,
       "usedPrevious": false
     },
     "zzz": {
@@ -378,6 +378,17 @@
       "end": "2026-12-07T02:59:59.000Z",
       "done": false,
       "source": "calendar",
+      "url": ""
+    },
+    {
+      "id": "activity:hsr:8",
+      "game": "hsr",
+      "title": "Планарный раскол",
+      "desc": "Во время события получайте вдвое больше Планарных украшений за прохождение Виртуальной вселенной.",
+      "start": "2026-11-23T04:00:00.000Z",
+      "end": "2026-12-07T03:59:59.000Z",
+      "done": false,
+      "source": "activity",
       "url": ""
     },
     {
